@@ -1,0 +1,7 @@
+-DDEBUG
+-std=c++14
+-I/usr/local/include/c++/5.2.0
+-I/usr/local/include/c++/5.2.0/x86_64-unknown-linux-gnu
+-I./
+-Wno-pragma-once-outside-header
+-Wextra -ftemplate-depth=1024
