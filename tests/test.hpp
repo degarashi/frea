@@ -175,22 +175,16 @@ namespace frea {
 				using value_t = typename vec_t::value_t;
 				constexpr static bool integral = std::is_integral<value_t>::value;
 				using array_t = Array<value_t, size>;
-			private:
-				using RFunc = std::function<value_t (const Range<value_t>&)>;
-				RFunc	_rdf;
 			public:
-				RVector():
-					_rdf(this->mt().template getUniformF<value_t>())
-				{}
-				auto& rdf() noexcept { return _rdf; }
-				auto makeRVec(const Range<value_t>& r=random::DefaultVecRange<value_t>) {
-					return random::GenVecRange<vec_t>(_rdf, r);
+				auto makeRVec(const Range<value_t>& r) {
+					return random::GenVec<vec_t>(this->mt().template getUniformF<value_t>(r));
 				}
-				auto makeRVecNZ(const value_t& th, const Range<value_t>& r=random::DefaultVecRange<value_t>) {
-					return random::GenVecCnd<vec_t>(_rdf,
+				auto makeRVecNZ(const value_t& th, const Range<value_t>& r) {
+					auto rd = this->mt().template getUniformF<value_t>(r);
+					return random::GenVecCnd<vec_t>(rd,
 							[th](const auto& v){
 								return !HasZero(v.m, th);
-							}, r);
+							});
 				}
 		};
 		template <class T, int M, int N>
@@ -240,8 +234,9 @@ namespace frea {
 				using mat_t = SMat_t<reg_t, dim_m, dim_n, align>;
 				using array_t = ArrayM<value_t, dim_m, dim_n>;
 			public:
-				auto makeRMat(const Range<value_t>& r=random::DefaultVecRange<value_t>) {
-					return random::GenMatRange<mat_t>(base_t::rdf(), r);
+				auto makeRMat(const Range<value_t>& r) {
+					auto rd = this->mt().template getUniformF<value_t>(r);
+					return random::GenMat<mat_t>(rd);
 				}
 		};
 

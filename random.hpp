@@ -32,9 +32,27 @@ namespace frea {
 			static Dist_Float<T> DetectDist();
 			template <class T>
 			using Dist_t = decltype(DetectDist<T>());
+		public:
 			template <class T>
-			using Rand_F = std::function<T (const Range<T>&)>;
-
+			class RObj {
+				private:
+					Random&			_rd;
+					const Range<T>	_range;
+				public:
+					RObj(Random& rd, const Range<T>& r):
+						_rd(rd),
+						_range(r)
+					{}
+					RObj(const RObj&) = default;
+					//! 実行時範囲指定
+					auto operator ()(const Range<T>& r) const {
+						return _rd.template getUniform<T>(r);
+					}
+					//! デフォルト範囲指定
+					auto operator ()() const {
+						return (*this)(_range);
+					}
+			};
 		public:
 			Random(MT_t mt) noexcept: _mt(std::move(mt)) {}
 			Random(const Random&) = delete;
@@ -64,15 +82,16 @@ namespace frea {
 			T getUniform(const Range<T>& range) {
 				return typename Dist_t<T>::uniform_t(range.from, range.to)(_mt);
 			}
-			//! 一様分布を返すファンクタを作成(実行時範囲指定)
-			template <class T>
-			auto getUniformF() noexcept {
-				return [this](const Range<T>& r){ return getUniform<T>(r); };
-			}
-			//! 一様分布を返すファンクタを作成(事前範囲指定)
+			//! 一様分布を返すファンクタを作成
 			template <class T>
 			auto getUniformF(const Range<T>& r) noexcept {
-				return [this, r](){ return getUniform<T>(r); };
+				return RObj<T>(*this, r);
+			}
+			//! 一様分布を返すファンクタを作成
+			template <class T>
+			auto getUniformF() noexcept {
+				constexpr auto R = Dist_t<T>::DefaultRange;
+				return RObj<T>(*this, R);
 			}
 			//! 指定範囲の一様分布(vmax)
 			template <class T>

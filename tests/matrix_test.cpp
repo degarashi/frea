@@ -27,8 +27,9 @@ namespace frea {
 			typename TestFixture::array_t raw(mat);
 			const auto t = this->makeRMat(range);
 			value_t s;
+			auto rd = this->mt().template getUniformF<value_t>(range);
 			do {
-				s = this->rdf()(range);
+				s = rd();
             } while(std::abs(s) < 1e-2);
 			#define DEF_TEST(num, op, target) \
 				case num: { \

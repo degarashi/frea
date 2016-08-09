@@ -12,12 +12,18 @@ namespace frea {
 				using mat_t = Mat_t<value_t, 2, 2, false>;
 				using deg_t = ::frea::Degree<T>;
 				using rad_t = ::frea::Radian<T>;
+				using Rd = decltype(std::declval<RandomMT>().template getUniformF<value_t>());
+				Rd	_rd;
+
 			public:
+				Angle():
+					_rd(mt().template getUniformF<value_t>({-1e3, 1e3}))
+				{}
 				T makeRF() {
-					return mt().template getUniform<T>({-1e3, 1e3});
+					return _rd();
 				}
 				Range<value_t> makeRange() {
-					return random::GenRange<value_t>(mt().template getUniformF<value_t>({-1e3, 1e3}));
+					return random::GenRange<value_t>(_rd);
 				}
 				rad_t makeRadian() {
 					return rad_t(makeRF());

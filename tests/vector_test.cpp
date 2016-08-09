@@ -16,10 +16,15 @@ namespace frea {
 		using Types = ToTestTypes_t<seq::TupleCat_t<FTypes_t, ITypes_t>>;
 		TYPED_TEST_CASE(Vector, Types);
 
+		template <class T>
+		constexpr Range<T> DefaultRange{-1e3, 1e3};
+
 		// 内部表現による演算結果の差異をチェック
 		TYPED_TEST(Vector, Register) {
+			using value_t = typename TestFixture::value_t;
 			auto& mt = this->mt();
-			auto vec = this->makeRVec();
+			constexpr auto range = DefaultRange<value_t>;
+			auto vec = this->makeRVec(range);
 			constexpr int size = decltype(vec)::size;
 			typename TestFixture::array_t	raw;
 			for(int i=0 ; i<size ; i++)
@@ -32,7 +37,6 @@ namespace frea {
 						ASSERT_FLOAT_EQ(raw.m[i], vec.m[i]);
 				}
 			};
-			using value_t = typename TestFixture::value_t;
 			const auto rdi = mt.template getUniformF<int>();
 			const auto t = this->makeRVecNZ(value_t(TestFixture::integral ? 1 : 1e-4), {-1e4, 1e4});
 			// ランダムで四則演算
@@ -64,14 +68,15 @@ namespace frea {
 		}
 		// 要素比較チェック
 		TYPED_TEST(Vector, Compare) {
-			const auto v0 = this->makeRVec(),
-						v1 = this->makeRVec();
+			using value_t = typename TestFixture::value_t;
+			constexpr auto range = DefaultRange<value_t>;
+			const auto v0 = this->makeRVec(range),
+						v1 = this->makeRVec(range);
 			// 自身と比較したら==はtrueになる
 			ASSERT_EQ(v0, v0);
 			// ==と!=は正反対の結果になる
 			ASSERT_NE(v0==v1, v0!=v1);
 
-			using value_t = typename TestFixture::value_t;
 			using vec_t = typename TestFixture::vec_t;
 			const auto randNumNZ = [this]{
 				auto ret = this->mt().template getUniform<value_t>();
@@ -92,8 +97,10 @@ namespace frea {
 		}
 		// 論理演算チェック
 		TYPED_TEST(Vector, Logical) {
+			using value_t = typename TestFixture::value_t;
 			using vec_t = typename TestFixture::vec_t;
-			const auto v0 = this->makeRVec();
+			constexpr auto range = DefaultRange<value_t>;
+			const auto v0 = this->makeRVec(range);
 			ASSERT_EQ(v0.asInternal(), v0);
 			// 自身とのAndは元と同じ
 			ASSERT_EQ(v0&v0, v0);
@@ -115,8 +122,10 @@ namespace frea {
 		}
 		// 四則演算のチェック
 		TYPED_TEST(Vector, Arithmetic) {
-			const auto v0 = this->makeRVec(),
-						v1 = this->makeRVec();
+			using value_t = typename TestFixture::value_t;
+			constexpr auto range = DefaultRange<value_t>;
+			const auto v0 = this->makeRVec(range),
+						v1 = this->makeRVec(range);
 			const auto check = [](auto v0, auto v1, const auto& op, const auto& ope) {
 				// 代入後の値チェック
 				auto tv0 = v0;
