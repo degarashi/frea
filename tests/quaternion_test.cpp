@@ -4,7 +4,7 @@
 
 namespace frea {
 	namespace test {
-		using Types = ::testing::Types<std::tuple<float,BConst<false>>>;//, std::tuple<double, BConst<false>>>;
+		using Types = ::testing::Types<std::tuple<float,BConst<true>>>;
 		template <class T>
 		class Quaternion : public Random {
 			public:
@@ -20,23 +20,31 @@ namespace frea {
 				using array_t = Array<value_t, 3>;
 				using array33_t = ArrayM<value_t, 3, 3>;
 			private:
-				std::function<value_t ()>	_rdf;
+				constexpr static Range<value_t> DefaultRange{-1e3, 1e3};
+				constexpr static Range<value_t> DefaultAngleRange{-Radian<value_t>::OneRotationAng/2, Radian<value_t>::OneRotationAng/2};
+				using RD = decltype(std::declval<Random>().mt().template getUniformF<value_t>(DefaultRange));
+				RD	_rd;
 
 			public:
 				Quaternion():
-					_rdf(mt().template getUniformF<value_t>({-1e3, 1e3}))
+					_rd(mt().template getUniformF<value_t>())
 				{}
 				value_t makeRF() {
-					return _rdf();
+					constexpr auto R = DefaultRange;
+					return mt().template getUniform<value_t>(R);
 				}
 				rad_t makeRadian() {
-					return rad_t(makeRF());
+					constexpr auto R = DefaultAngleRange;
+					return rad_t(mt().template getUniform<value_t>(R));
 				}
 				vec_t makeVec3() {
-					return random::GenVec<vec_t>(_rdf);
+					return random::GenVec<vec_t>(_rd);
+				}
+				vec_t makeDir() {
+					return random::GenDir<vec_t>(_rd);
 				}
 				quat_t makeRQuat() {
-					return random::GenQuat<quat_t>(_rdf);
+					return random::GenQuat<quat_t>(_rd);
 				}
 		};
 		TYPED_TEST_CASE(Quaternion, Types);
@@ -72,77 +80,72 @@ namespace frea {
 				EXPECT_LT(AbsMax(ar0 - ar1), 1e-2);
 			}
 		}
-		// TYPED_TEST(Quaternion, Multiply) {
-		// 	using This_t = std::decay_t<decltype(*this)>;
-		// 	using QT = typename This_t::QuatType;
-		// 	auto& rd = this->refRand();
-		// 	auto rdf = rd.template getUniformF<float>();
-		//
-		// 	// クォータニオンを合成した結果を行列のケースと比較
-		// 	for(int i=0 ; i<N_Iteration ; i++) {
-		// 		RadF ang[2] = {RadF::Random(rdf), RadF::Random(rdf)};
-		// 		Vec3 axis[2] = {Vec3::RandomDir(rdf), Vec3::RandomDir(rdf)};
-		// 		QT		q[3];
-		// 		AMat33	m[3];
-		// 		for(int i=0 ; i<2 ; i++) {
-		// 			q[i] = QT::Rotation(axis[i], ang[i]);
-		// 			m[i] = AMat33::RotationAxis(axis[i], ang[i]);
-		// 		}
-		// 		q[2] = q[1] * q[0];
-		// 		q[2].normalize();
-		// 		m[2] = m[0] * m[1];
-		// 		EXPECT_TRUE(Compare(q[2].asMat33(), m[2]));
-		// 		// operator >> は * と逆の意味
-		// 		q[2] = q[0] >> q[1];
-		// 		q[2].normalize();
-		// 		EXPECT_TRUE(Compare(q[2].asMat33(), m[2]));
-		// 	}
-		// }
-		// TYPED_TEST(Quaternion, Rotation) {
-		// 	using This_t = std::decay_t<decltype(*this)>;
-		// 	constexpr bool Align = This_t::Align;
-		// 	using QT = typename This_t::QuatType;
-		// 	auto& rd = this->refRand();
-		// 	auto rdf = rd.template getUniformF<float>();
-		//
-		// 	// getRight(), getUp(), getDir()が{1,0,0},{0,1,0},{0,0,1}を変換した結果と比較
-		// 	for(int i=0 ; i<N_Iteration ; i++) {
-		// 		RadF ang = RadF::Random(rdf);
-		// 		Vec3 axis = Vec3::RandomDir(rdf);
-		// 		QT q = QT::Rotation(axis, ang);
-		// 		auto m = q.asMat33();
-		//
-		// 		EXPECT_TRUE(EqULPs(VecT<3,Align>(Vec3{1,0,0}*m), q.getRight(), ThresholdULPs));
-		// 		EXPECT_TRUE(EqULPs(VecT<3,Align>(AVec3{0,1,0}*m), q.getUp(), ThresholdULPs));
-		// 		EXPECT_TRUE(EqULPs(VecT<3,Align>(AVec3{0,0,1}*m), q.getDir(), ThresholdULPs));
-		// 	}
-		// }
-		// TYPED_TEST(Quaternion, SLerp) {
-		// 	using This_t = std::decay_t<decltype(*this)>;
-		// 	using QT = typename This_t::QuatType;
-		// 	auto& rd = this->refRand();
-		//
-		// 	// クォータニオンの線形補間
-		// 	for(int i=0 ; i<N_Iteration ; i++) {
-		// 		const int div = 32;
-		// 		float tdiv = 1.f/div;
-		// 		auto axis = this->genRandDir();
-		// 		RadF ang = RadF::Random(rd.template getUniformF<float>());
-		// 		auto q0 = this->genRandQ();
-		// 		auto q1 = QT::Rotation(axis, ang);
-		// 		q1 = q0 >> q1;
-		// 		Mat33 m0 = q0.asMat33();
-		// 		for(int i=0 ; i<div ; i++) {
-		// 			float t = tdiv * i;
-		// 			Mat33 m1 = m0 * Mat33::RotationAxis(axis, ang*t);
-		// 			auto q2 = q0.slerp(q1, t);
-		//
-		// 			auto v = this->genRandDir();
-		// 			auto v0 = v * q2;
-		// 			auto v1 = v * m1;
-		// 			EXPECT_TRUE(EqULPs(v0, v1, ThresholdULPs_Quat));
-		// 		}
-		// 	}
-		// }
+		TYPED_TEST(Quaternion, Multiply) {
+			using quat_t = typename TestFixture::quat_t;
+			using vec_t = typename TestFixture::vec_t;
+			using mat3_t = typename TestFixture::mat3_t;
+			using rad_t = typename TestFixture::rad_t;
+			using array33_t = typename TestFixture::array33_t;
+
+			// クォータニオンを合成した結果を行列のケースと比較
+			const rad_t ang[2] = {this->makeRadian(), this->makeRadian()};
+			const vec_t axis[2] = {this->makeDir(), this->makeDir()};
+			quat_t	q[3];
+			mat3_t	m[3];
+			for(int i=0 ; i<2 ; i++) {
+				q[i] = quat_t::Rotation(axis[i], ang[i]);
+				m[i] = mat3_t::RotationAxis(axis[i], ang[i]);
+			}
+			q[2] = q[0] * q[1];
+			q[2].normalize();
+			m[2] = m[0] * m[1];
+			ASSERT_LT(AbsMax(array33_t(q[2].asMat33()) - m[2]), 1e-2);
+		}
+		TYPED_TEST(Quaternion, Rotation) {
+			using quat_t = typename TestFixture::quat_t;
+			using vec_t = typename TestFixture::vec_t;
+			using rad_t = typename TestFixture::rad_t;
+			using array_t = typename TestFixture::array_t;
+			using value_t = typename TestFixture::value_t;
+
+			// getRight(), getUp(), getDir()が{1,0,0},{0,1,0},{0,0,1}を変換した結果と比較
+			const rad_t ang(this->makeRadian());
+			const vec_t axis = this->makeDir();
+			const auto q = quat_t::Rotation(axis, ang);
+			const auto m = q.asMat33();
+
+			EXPECT_TRUE(ulps::Equal(array_t(vec_t(vec_t(1,0,0)*m)), array_t(q.getRight()), ThresholdULPs<value_t>));
+			EXPECT_TRUE(ulps::Equal(array_t(vec_t(vec_t(0,1,0)*m)), array_t(q.getUp()), ThresholdULPs<value_t>));
+			EXPECT_TRUE(ulps::Equal(array_t(vec_t(vec_t(0,0,1)*m)), array_t(q.getDir()), ThresholdULPs<value_t>));
+		}
+		//! クォータニオンの線形補間テスト
+		TYPED_TEST(Quaternion, SLerp) {
+			using vec_t = typename TestFixture::vec_t;
+			using quat_t = typename TestFixture::quat_t;
+			using rad_t = typename TestFixture::rad_t;
+			using value_t = typename TestFixture::value_t;
+			using mat3_t = typename TestFixture::mat3_t;
+			using array_t = typename TestFixture::array_t;
+			constexpr auto ThresholdULPs_Quat = ulps::Diff_C<value_t>(0.0, 5e-3);
+
+			const int div = 32;
+			const value_t tdiv = 1.0/div;
+			const auto axis = this->makeDir();
+			const rad_t ang(this->makeRadian());
+			const auto q0 = this->makeRQuat();
+			auto q1 = quat_t::Rotation(axis, ang);
+			q1 = q0 * q1;
+			const mat3_t m0 = q0.asMat33();
+			for(int i=0 ; i<div ; i++) {
+				value_t t = tdiv * i;
+				mat3_t m1 = m0 * mat3_t::RotationAxis(axis, ang*t);
+				auto q2 = q0.slerp(q1, t);
+
+				auto v = this->makeDir();
+				vec_t v0 = v * q2;
+				vec_t v1 = v * m1;
+				EXPECT_TRUE(ulps::Equal(array_t(v0), array_t(v1), ThresholdULPs_Quat));
+			}
+		}
 	}
 }

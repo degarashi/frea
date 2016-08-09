@@ -16,8 +16,9 @@ namespace frea {
 				 ENABLE_IF(is_quaternion<Q>{})>
 		auto operator * (const Q& q) const {
 			QuatT<typename Q::value_t, true> q0;
-			this->template store<true>((typename Q::value_t*)&q0, IConst<2>());
-			return (q * q0 * q.conjugation()).getVector();
+			this->template store<true>((typename Q::value_t*)&q0, IConst<3>());
+			q0.w = 0;
+			return (q.inversion() * q0 * q).getVector();
 		}
 		this_t cross(const this_t& w) const {
 			return base_t::I::Cross(base_t::m, w.m);

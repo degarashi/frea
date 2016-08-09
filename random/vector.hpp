@@ -44,12 +44,9 @@ namespace frea {
 		//! ランダムな方向ベクトル
 		template <class V, class RD>
 		auto GenDir(RD&& rd) {
-			using v_t = typename V::value_t;
-			return
-				GenVecLen<V>(
+			return GenVecLen<V>(
 					rd,
-					{-1e2, 1e2},
-					{-v_t(1), v_t(1)}
+					1.0
 				).normalization();
 		}
 	}

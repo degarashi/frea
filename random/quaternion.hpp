@@ -10,7 +10,7 @@ namespace frea {
 		//! ランダムなクォータニオン
 		template <class Q, class RD>
 		auto GenQuat(RD&& rd) {
-			return Q::Rotation(GenDir<typename Q::vec_t>(rd), Radian<typename Q::value_t>(rd));
+			return Q::Rotation(GenDir<typename Q::vec_t>(rd), Radian<typename Q::value_t>(rd()));
 		}
 		template <class EQ, class RD>
 		auto GenExpQuat(RD&& rd) {

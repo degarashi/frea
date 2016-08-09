@@ -241,7 +241,7 @@ namespace frea {
 		};
 
 		template <class T>
-		constexpr T ThresholdULPs;
+		constexpr T ThresholdULPs(0);
 		template <>
 		constexpr auto ThresholdULPs<float> = ulps::Diff_C<float>(0.f, 3e-4f);
 		template <>

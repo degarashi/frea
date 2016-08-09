@@ -1,4 +1,5 @@
 #pragma once
+#include "error.hpp"
 #include "meta/enable_if.hpp"
 #include "detect_type.hpp"
 #include "index_sequence.hpp"
@@ -84,21 +85,12 @@ namespace frea {
 				return *this op t.asInternal(); } \
 			spec_t operator op (const value_t& t) const& { \
 				return *this op wrap(t); } \
-			template <class T, ENABLE_IF(HasMethod_asInternal_t<T>{})> \
-			spec_t&& operator op (const T& t) && { \
-				return static_cast<spec_t&&>(std::move(*this op##= t.asInternal())); } \
-			template <class R2, class S2> \
-			spec_t&& operator op (const wrap<R2, size, S2>& w) && { \
-				return static_cast<spec_t&&>(std::move(*this op##= w)); } \
 			template <class R2, class S2> \
 			spec_t operator op (const wrap<R2, size, S2>& w) const& { \
 				return I::func(m, w.m); } \
 			template <class T> \
 			spec_t& operator op##= (const T& t) & { \
-				return static_cast<spec_t&>(*this = *this op t); } \
-			template <class T> \
-			spec_t&& operator op##= (const T& t) && { \
-				return static_cast<spec_t&&>(std::move(*this op##= t)); }
+				return static_cast<spec_t&>(*this = *this op t); }
 		DEF_OP(+, Add)
 		DEF_OP(-, Sub)
 		DEF_OP(*, Mul)
@@ -213,7 +205,7 @@ namespace frea {
 
 		// 各要素を足し合わせる
 		auto sumUp() const {
-			return I::SumUp(m);
+			return I::SumUp(maskH<size-1>());
 		}
 		// メモリへの書き出し
 		template <bool A, int N>
@@ -316,6 +308,15 @@ namespace frea{
 			sum += data[a_size-1] * t.data[a_size-1].maskH(IConst<wrap_t::capacity-size-(a_size-1)*wrap_t::capacity>());
 			return sum.sumUp();
 		}
+		auto sumUp() const {
+			auto sum = wrap_t::Zero();
+			for(int i=0 ; i<a_size-1 ; i++)
+				sum += data[i];
+			constexpr int Rem0 = N % wrap_t::capacity,
+						Rem = (Rem0==0) ? wrap_t::capacity : Rem0;
+			sum += data[a_size-1].template maskH<Rem-1>();
+			return sum.sumUp();
+		}
 
 		tup() = default;
 		explicit tup(const value_t& t) {
@@ -366,18 +367,9 @@ namespace frea{
 					ret.data[i] = this->data[i] op t.data[i]; \
 				return ret; \
 			} \
-			spec_t&& operator op (const tup& t) && { \
-				for(int i=0 ; i<a_size ; i++) \
-					this->data[i] op##= t.data[i]; \
-				return static_cast<spec_t&&>(*this); \
-			} \
 			template <class T> \
 			spec_t& operator op##= (const T& t) & { \
 				return static_cast<spec_t&>(*this = *this op t); \
-			} \
-			template <class T> \
-			spec_t&& operator op##= (const T& t) && { \
-				return static_cast<spec_t&&>(*this = *this op t); \
 			}
 		DEF_OP(+)
 		DEF_OP(-)

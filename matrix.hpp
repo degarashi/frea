@@ -126,16 +126,6 @@ namespace frea {
 					return ret; \
 				} \
 				template <class T> \
-				spec_t&& operator op (const T& t) && { \
-					*this op##= t; \
-					return static_cast<spec_t&&>(std::move(*this)); \
-				} \
-				template <class T> \
-				spec_t&& operator op##= (const T& t) && { \
-					*this op##= t; \
-					return static_cast<spec_t&&>(std::move(*this)); \
-				} \
-				template <class T> \
 				spec_t& operator op##= (const T& t) & { \
 					return static_cast<spec_t&>(*this = *this op t); \
 				}
@@ -267,10 +257,6 @@ namespace frea {
 	#define DEF_FUNC(name, nameC) \
 		void name() { \
 			*this = nameC(); \
-		} \
-		decltype(auto) nameC() && { \
-			name(); \
-			return std::move(*this); \
 		}
 
 	//! 正方行列のみのメンバ関数を定義

@@ -1,6 +1,7 @@
 #pragma once
 #include "matrix.hpp"
 #include "error.hpp"
+#include "compare.hpp"
 
 namespace frea {
 	template <class T, bool A>
@@ -37,9 +38,9 @@ namespace frea {
 				m.m[2][0], m.m[2][1], m.m[2][2]
 			);
 		}
-		static QuatT FromAxisF(const value_t& f11, const value_t& f12, const value_t& f13,
-								const value_t& f21, const value_t& f22, const value_t& f23,
-								const value_t& f31, const value_t& f32, const value_t& f33)
+		static QuatT FromAxisF(const value_t& f11, const value_t& f21, const value_t& f31,
+								const value_t& f12, const value_t& f22, const value_t& f32,
+								const value_t& f13, const value_t& f23, const value_t& f33)
 		{
 			// 最大成分を検索
 			const value_t elem[4] = {f11 - f22 - f33 + 1,
@@ -148,7 +149,7 @@ namespace frea {
 			if(rAxis.len_sq() < 1e-4)
 				return QuatT::Identity();
 			rAxis.normalize();
-			const value_t d = std::acos(Saturate(from.dot(to), 1.0));
+			const value_t d = std::acos(Saturate<value_t>(from.dot(to), 1.0));
 			return Rotation(rAxis, rad_t(d));
 		}
 		static QuatT SetLookAt(const Axis::e targetAxis, const Axis::e baseAxis, const vec_t& baseVec, const vec_t& at, const vec_t& pos) {
@@ -267,7 +268,7 @@ namespace frea {
 		QuatT rotation(const vec_t& axis, rad_t ang) const {
 			return Rotation(axis, ang) * *this;
 		}
-		const vec4_t& asVec4() const {
+		vec4_t asVec4() const {
 			return static_cast<const vec4_t&>(*this);
 		}
 		QuatT normalization() const {
@@ -284,8 +285,7 @@ namespace frea {
 				);
 		}
 		QuatT inversion() const {
-			conjugate();
-			*this *= 1 / len_sq();
+			return conjugation() / len_sq();
 		}
 		value_t len_sq() const {
 			return asVec4().len_sq();
@@ -294,7 +294,7 @@ namespace frea {
 			return std::sqrt(len_sq());
 		}
 		rad_t angle() const {
-			return std::acos(Saturate(this->w, 1.0))*2;
+			return std::acos(Saturate<value_t>(this->w, 1.0))*2;
 		}
 		const vec_t& getVector() const {
 			return reinterpret_cast<const vec_t&>(*this);
@@ -316,14 +316,8 @@ namespace frea {
 		bool operator != (const QuatT& q) const {
 			return !(this->operator == (q));
 		}
-		QuatT operator >> (const QuatT& q) const {
-			return q * *this;
-		}
-		QuatT& operator >>= (const QuatT& q) {
-			return *this = (q * *this);
-		}
 		QuatT slerp(const QuatT& q, const value_t& t) const {
-			const auto ac = Saturate(dot(q), 0.0, 1.0);
+			const auto ac = Saturate<value_t>(dot(q), 0.0, 1.0);
 			const auto theta = std::acos(ac),
 						S = std::sin(theta);
 			if(std::fabs(S) < 1e-4)
@@ -334,13 +328,13 @@ namespace frea {
 		}
 
 		#define ELEM00 (1-2*this->y*this->y-2*this->z*this->z)
-		#define ELEM01 (2*this->x*this->y+2*this->w*this->z)
-		#define ELEM02 (2*this->x*this->z-2*this->w*this->y)
-		#define ELEM10 (2*this->x*this->y-2*this->w*this->z)
+		#define ELEM10 (2*this->x*this->y+2*this->w*this->z)
+		#define ELEM20 (2*this->x*this->z-2*this->w*this->y)
+		#define ELEM01 (2*this->x*this->y-2*this->w*this->z)
 		#define ELEM11 (1-2*this->x*this->x-2*this->z*this->z)
-		#define ELEM12 (2*this->y*this->z+2*this->w*this->x)
-		#define ELEM20 (2*this->x*this->z+2*this->w*this->y)
-		#define ELEM21 (2*this->y*this->z-2*this->w*this->x)
+		#define ELEM21 (2*this->y*this->z+2*this->w*this->x)
+		#define ELEM02 (2*this->x*this->z+2*this->w*this->y)
+		#define ELEM12 (2*this->y*this->z-2*this->w*this->x)
 		#define ELEM22 (1-2*this->x*this->x-2*this->y*this->y)
 		//! 回転を行列表現した時のX軸
 		vec_t getXAxis() const {

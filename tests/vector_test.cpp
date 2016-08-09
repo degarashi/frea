@@ -5,7 +5,7 @@ namespace frea {
 	namespace test {
 		// operator -
 		// mask(LH), setAt+initAt+pickAt, makeEquality
-		// sumUp, dot, average, distance, normalize, length
+		// dot, average, distance, normalize, length
 		// saturation
 		// interpolation
 		// convert, convertI
@@ -19,6 +19,19 @@ namespace frea {
 		template <class T>
 		constexpr Range<T> DefaultRange{-1e3, 1e3};
 
+		TYPED_TEST(Vector, SumUp) {
+			using value_t = typename TestFixture::value_t;
+			using array_t = typename TestFixture::array_t;
+			constexpr auto range = DefaultRange<value_t>;
+			auto vec = this->makeRVec(range);
+			array_t ar(vec);
+
+			value_t sum0 = 0;
+			for(int i=0 ; i<array_t::size ; i++)
+				sum0+= ar[i];
+			value_t sum1 = (vec+0).sumUp();
+			ASSERT_TRUE(ulps::Equal(sum0, sum1, ThresholdULPs<value_t>));
+		}
 		// 内部表現による演算結果の差異をチェック
 		TYPED_TEST(Vector, Register) {
 			using value_t = typename TestFixture::value_t;

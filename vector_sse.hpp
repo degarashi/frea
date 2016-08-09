@@ -344,9 +344,12 @@ namespace frea {
 		static void Store(value_t* dst, const reg_t& t, std::false_type, IConst<1>) {
 			_mm_storeu_pd(dst, t);
 		}
-		static value_t SumUp(const reg_t&) {
-			D_Expect(false, "not implemented yet")
-			return 0;
+		static value_t SumUp(const reg_t& r) {
+			auto tr = _mm_shuffle_pd(r, r, 0b11);
+			tr = Add(tr, r);
+			value_t ret;
+			Store(&ret, tr, std::false_type(), IConst<1>());
+			return ret;
 		}
 
 		static reg_t Cast(const regI_t& t) {
