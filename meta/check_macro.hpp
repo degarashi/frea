@@ -20,6 +20,9 @@ namespace frea {
 	DEF_HasOp(Minus, -)
 	DEF_HasOp(Mul, *)
 	DEF_HasOp(Mod, %)
+	DEF_HasOp(And, &)
+	DEF_HasOp(Or, |)
+	DEF_HasOp(Xor, ^)
 	#undef DEF_HasOp
 }
 
@@ -33,7 +36,7 @@ namespace frea {
 	using HasMethod_##method##_t = decltype(HasMethod_##method<T>(nullptr));
 #define DEF_HASMETHOD(method) \
 	template <class T> \
-	std::true_type HasMethod_##method(decltype(&T::method) = &T::method); \
+	std::true_type HasMethod_##method(decltype(&T::method)); \
 	DEF_HASMETHOD_BASE(method)
 #define DEF_HASMETHOD_T(method) \
 	template <class T, class... Ts> \

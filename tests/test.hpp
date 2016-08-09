@@ -4,6 +4,7 @@
 #include "../random/vector.hpp"
 #include "../random/matrix.hpp"
 #include "../random/range.hpp"
+#include "../random/quaternion.hpp"
 #include "../ulps.hpp"
 #include "../meta/check_macro.hpp"
 #include <gtest/gtest.h>
@@ -76,28 +77,27 @@ namespace frea {
 								lower_size = decltype(LowerSize<T>(nullptr))::value;
 			T	m[size];
 
-			template <class V, class OP>
-			Array _op(const V& v, const OP& op, std::false_type) const {
-				Array ret;
-				for(int i=0 ; i<size ; i++)
-					ret[i] = op((*this)[i], v);
-				return ret;
-			}
-			template <class V, class OP>
-			Array _op(const V& v, const OP& op, std::true_type) const {
-				Array ret;
-				for(int i=0 ; i<size ; i++)
-					ret[i] = op((*this)[i], v[i]);
-				return ret;
-			}
 			#define DEF_OP(op) \
 				template <class V> \
 				Array& operator op##= (const V& r) { \
 					return *this = *this op r; \
 				} \
-				template <class V> \
+				template <class V, \
+						ENABLE_IF((HasIndex_t<V,int>{}))> \
 				Array operator op (const V& r) const { \
-					return _op(r, [](auto& d, auto& d2){ return d op d2; }, HasIndex_t<V,int>()); \
+					static_assert(V::size==size, ""); \
+					Array ret; \
+					for(int i=0 ; i<size ; i++) \
+						ret[i] = m[i] op r[i]; \
+					return ret; \
+				} \
+				template <class V, \
+						ENABLE_IF(!(HasIndex_t<V,int>{}))> \
+				Array operator op (const V& r) const { \
+					Array ret; \
+					for(int i=0 ; i<size ; i++) \
+						ret[i] = m[i] op r; \
+					return ret; \
 				}
 			DEF_OP(+)
 			DEF_OP(-)
@@ -107,25 +107,28 @@ namespace frea {
 			Array() = default;
 			template <class T2>
 			Array(const Array<T2,size>& a): m(a.m) {}
-			template <class V>
+			template <class V,
+					 ENABLE_IF((HasIndex_t<V,int>{}))>
 			Array(const V& v) {
 				*this = v;
 			}
-			template <class V>
+			template <class V,
+					 ENABLE_IF((HasIndex_t<V,int>{}))>
 			Array& operator = (const V& r) {
 				for(int i=0 ; i<size ; i++)
 					m[i] = r[i];
 				return *this;
 			}
 
-			T& operator [](const int n) {
+			T& operator [](const int n) noexcept {
 				return m[n];
 			}
-			const T& operator [](const int n) const {
+			const T& operator [](const int n) const noexcept {
 				return m[n];
 			}
 			template <class V>
 			bool operator < (const V& v) const {
+				static_assert(size==V::size, "");
 				return std::lexicographical_compare(
 							m, m+size,
 							v.m, v.m+size,
@@ -134,6 +137,7 @@ namespace frea {
 			}
 			template <class V>
 			bool near(const T& th, const V& v) const {
+				static_assert(size==V::size, "");
 				for(int i=0 ; i<size ; i++) {
 					if(std::abs(m[i] - v.m[i]) > th)
 						return false;

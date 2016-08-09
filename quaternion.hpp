@@ -122,7 +122,7 @@ namespace frea {
 			ang *= 0.5;
 			return QuatT(0, 0, std::sin(ang.get()), std::cos(ang.get()));
 		}
-		static QuatT Rotation(const vec_t& axis, rad_t ang) {
+		static QuatT Rotation(const vec_t& axis, const rad_t ang) {
 			const auto C = std::cos(ang.get()/2),
 						S = std::sin(ang.get()/2);
 			const vec_t taxis = axis * S;
@@ -297,7 +297,7 @@ namespace frea {
 			return std::acos(Saturate(this->w, 1.0))*2;
 		}
 		const vec_t& getVector() const {
-			return static_cast<const vec_t&>(*this);
+			return reinterpret_cast<const vec_t&>(*this);
 		}
 		vec_t getAxis() const {
 			auto s_theta = std::sqrt(1.0 - Square(this->w));

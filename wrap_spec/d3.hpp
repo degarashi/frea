@@ -11,6 +11,14 @@ namespace frea {
 		using this_t = wrap_spec;
 		using value_t = typename base_t::value_t;
 
+		using base_t::operator *;
+		template <class Q,
+				 ENABLE_IF(is_quaternion<Q>{})>
+		auto operator * (const Q& q) const {
+			QuatT<typename Q::value_t, true> q0;
+			this->template store<true>((typename Q::value_t*)&q0, IConst<2>());
+			return (q * q0 * q.conjugation()).getVector();
+		}
 		this_t cross(const this_t& w) const {
 			return base_t::I::Cross(base_t::m, w.m);
 		}

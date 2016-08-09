@@ -29,13 +29,13 @@ namespace frea {
 			value_t s;
 			do {
 				s = this->rdf()(range);
-			} while(std::abs(s) < 1e-4);
+            } while(std::abs(s) < 1e-2);
 			#define DEF_TEST(num, op, target) \
 				case num: { \
 					const decltype(raw) raw0 = raw op target; \
 					const decltype(mat) mat0 = mat op target; \
 					/* 結果がほぼ一致することを確認 */ \
-					ASSERT_LT(AbsMax(raw0 - mat0), 1e-3); \
+                    ASSERT_LT(AbsMax(raw0 - mat0), 1e-2); \
 					break; }
 
 			// ランダムで四則演算

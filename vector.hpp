@@ -4,6 +4,9 @@
 #include "index_sequence.hpp"
 #include <type_traits>
 #include <algorithm>
+#include "meta/check_macro.hpp"
+
+DEF_HASMETHOD(asInternal)
 
 #define SSE 2
 namespace frea {
@@ -76,10 +79,12 @@ namespace frea {
 		{}
 		// 各種演算定義
 		#define DEF_OP(op, func) \
-			template <class T> \
+			template <class T, ENABLE_IF(HasMethod_asInternal_t<T>{})> \
 			spec_t operator op (const T& t) const& { \
 				return *this op t.asInternal(); } \
-			template <class T> \
+			spec_t operator op (const value_t& t) const& { \
+				return *this op wrap(t); } \
+			template <class T, ENABLE_IF(HasMethod_asInternal_t<T>{})> \
 			spec_t&& operator op (const T& t) && { \
 				return static_cast<spec_t&&>(std::move(*this op##= t.asInternal())); } \
 			template <class R2, class S2> \
@@ -103,13 +108,10 @@ namespace frea {
 		DEF_OP(^, Xor)
 		#undef DEF_OP
 		// 左から行列にベクトルを掛ける
-		template <class VW, int M2, class S2>
-		spec_t operator * (const wrapM<VW, M2, S2>& w) const {
-			return w._pre_mul(static_cast<const spec_t&>(*this));
-		}
-		template <class VW, int M2, class S2>
-		spec_t& operator *= (const wrapM<VW, M2, S2>& w) const {
-			return static_cast<spec_t&>(*this = *this * w);
+		template <class M,
+				 ENABLE_IF(is_wrapM<M>{})>
+		spec_t operator * (const M& m) const {
+			return m._pre_mul(static_cast<const spec_t&>(*this));
 		}
 
 		bool operator == (const wrap& w) const {
@@ -352,6 +354,12 @@ namespace frea{
 			return !(this->operator == (t));
 		}
 		#define DEF_OP(op) \
+			spec_t operator op (const value_t& t) const& { \
+				spec_t ret; \
+				for(int i=0 ; i<a_size ; i++) \
+					ret.data[i] = this->data[i] op t; \
+				return ret; \
+			} \
 			spec_t operator op (const tup& t) const& { \
 				spec_t ret; \
 				for(int i=0 ; i<a_size ; i++) \
@@ -363,15 +371,13 @@ namespace frea{
 					this->data[i] op##= t.data[i]; \
 				return static_cast<spec_t&&>(*this); \
 			} \
-			spec_t& operator op##= (const tup& t) & { \
-				for(int i=0 ; i<a_size ; i++) \
-					this->data[i] op##= t.data[i]; \
-				return static_cast<spec_t&>(*this); \
+			template <class T> \
+			spec_t& operator op##= (const T& t) & { \
+				return static_cast<spec_t&>(*this = *this op t); \
 			} \
-			spec_t&& operator op##= (const tup& t) && { \
-				for(int i=0 ; i<a_size ; i++) \
-					this->data[i] op##= t.data[i]; \
-				return static_cast<spec_t&&>(*this); \
+			template <class T> \
+			spec_t&& operator op##= (const T& t) && { \
+				return static_cast<spec_t&&>(*this = *this op t); \
 			}
 		DEF_OP(+)
 		DEF_OP(-)
@@ -590,17 +596,17 @@ namespace frea {
 		template <int N2, bool A2=align>
 		using type_cn = VecT_spec<Wrap_t<reg_t, N2>, typename base_t::template type_cn<N2,A2>, N2>;
 
-		auto asInternal(std::false_type) const {
+		auto _asInternal(std::false_type) const {
 			return wrap_t(base_t::m, BConst<align>());
 		}
-		decltype(auto) asInternal(std::true_type) const noexcept {
+		decltype(auto) _asInternal(std::true_type) const noexcept {
 			return static_cast<const D&>(*this);
 		}
 		decltype(auto) asInternal() const {
-			return asInternal(std::is_same<base_t, wrap_t>());
+			return _asInternal(std::is_same<base_t, wrap_t>());
 		}
 		constexpr operator wrap_t() const {
-			return asInternal(std::is_same<base_t, wrap_t>());
+			return _asInternal(std::is_same<base_t, wrap_t>());
 		}
 		VecT() = default;
 		constexpr VecT(const base_t& b): base_t(b) {}
@@ -628,20 +634,13 @@ namespace frea {
 		// ------------------- アダプタ関数 -------------------
 		// 内部形式との演算子
 		#define DEF_OP(op) \
-			template <class W2, ENABLE_IF((is_wrap<W2>{} || IsTuple_t<W2>{}))> \
+			template <class W2> \
 			wrap_t operator op (const W2& w) const { \
 				return asInternal() op w; \
 			} \
-			template <class V2, ENABLE_IF((is_vector<V2>{}))> \
-			wrap_t operator op (const V2& v) const { \
-				return asInternal() op v.asInternal(); \
-			} \
-			wrap_t operator op (const value_t& v) const { \
-				return asInternal() op wrap_t(v); \
-			} \
 			template <class V> \
-			VecT& operator op##= (const V& v) { \
-				return *this = *this op v; \
+			spec_t& operator op##= (const V& v) { \
+				return static_cast<spec_t&>(*this = *this op v); \
 			}
 		DEF_OP(+)
 		DEF_OP(-)
@@ -651,15 +650,11 @@ namespace frea {
 		DEF_OP(|)
 		DEF_OP(^)
 		#undef DEF_OP
-		// 左から行列にベクトルを掛ける
-		template <class V,
-				 ENABLE_IF(is_matrix<V>{} || is_wrapM<V>{})>
-		auto operator * (const V& v) const {
-			return v._pre_mul(static_cast<const spec_t&>(*this));
-		}
 		auto dot(const wrap_t& w) const { return asInternal().dot(w); }
 		value_t len_sq() const { return asInternal().len_sq(); }
 		value_t length() const { return asInternal().length(); }
+		value_t normalize() { return asInternal().normalize(); }
+		spec_t normalization() const { return asInternal().normalization(); }
 
 		// ------------------- サイズ変換 -------------------
 		// 大きいサイズへの変換

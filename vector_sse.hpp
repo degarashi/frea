@@ -81,8 +81,12 @@ namespace frea {
 		static void Store(value_t* dst, const reg_t& t, std::true_type, IConst<3>) {
 			_mm_store_ps(dst, t);
 		}
-		static value_t SumUp(const reg_t&) {
-			return 0;
+		static value_t SumUp(const reg_t& r) {
+			auto tr = r;
+			SUMVEC(tr)
+			value_t tmp;
+			Store(&tmp, tr, std::false_type(), IConst<0>());
+			return tmp;
 		}
 		static reg_t Cast(const regI_t& t) {
 			return _mm_castsi128_ps(t);
@@ -251,8 +255,12 @@ namespace frea {
 		static void Store(value_t* dst, const reg_t& t, std::true_type, IConst<3>) {
 			_mm_store_si128(reinterpret_cast<reg_t*>(dst), t);
 		}
-		static value_t SumUp(const reg_t&) {
-			return 0;
+		static value_t SumUp(const reg_t& r) {
+			auto tr = r;
+			SUMVEC(tr)
+			value_t tmp;
+			Store(&tmp, tr, std::false_type(), IConst<0>());
+			return tmp;
 		}
 		static reg_t Cast(const regF_t& t) {
 			return _mm_castps_si128(t);
@@ -337,6 +345,7 @@ namespace frea {
 			_mm_storeu_pd(dst, t);
 		}
 		static value_t SumUp(const reg_t&) {
+			D_Expect(false, "not implemented yet")
 			return 0;
 		}
 

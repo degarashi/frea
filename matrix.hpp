@@ -104,10 +104,10 @@ namespace frea {
 					src += A ? vec_t::capacity : vec_t::size;
 				}
 			}
-			decltype(auto) asInternal() const noexcept { return *this; }
 
 			#define DEF_OP(op) \
-				template <class T> \
+				template <class T, \
+							ENABLE_IF((HasMethod_asInternal_t<T>{}))> \
 				spec_t operator op (const T& t) const { \
 					return *this op t.asInternal(); \
 				} \
@@ -311,7 +311,6 @@ namespace frea {
 		public:
 			using base_t::base_t;
 			wrapM_spec() = default;
-			decltype(auto) asInternal() const noexcept { return static_cast<const base_t&>(*this); }
 	
 			auto transposition() const& {
 				const auto idx = std::make_index_sequence<S>();

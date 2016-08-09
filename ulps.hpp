@@ -142,9 +142,9 @@ namespace frea {
 		}
 		//! IntのULPs (=絶対値)
 		template <class T,
-				  ENABLE_IF((!std::is_floating_point<T>{}))>
+				  ENABLE_IF((std::is_integral<T>{}))>
 		auto Diff(const T& v0, const T& v1) {
-			return abs(v0 - v1);
+			return Abs(v0 - v1);
 		}
 		//! ULPsの計算 (constexprバージョン)
 		template <class T>
@@ -152,28 +152,42 @@ namespace frea {
 			return inner::t_ULPs2(AsIntegral_C(v0), AsIntegral_C(v1));
 		}
 		//! ULPs(Units in the Last Place)の計算 (実行時バージョン)
-		template <class T,
-				class H = inner::ULPHelper<T>,
-				class I = typename H::Integral_t>
-		bool Equal(const T& v0, const T& v1, I maxUlps) {
+		template <
+			class T,
+			class I = typename inner::ULPHelper<T>::Integral_t,
+			ENABLE_IF(!(HasIndex_t<T,int>{}))
+		>
+		bool Equal(const T& v0, const T& v1, const I maxUlps) {
 			D_Expect(maxUlps >= 0, "ulps must not negative value")
 			const auto fnCmp = [maxUlps](const auto& v0, const auto& v1){ return Diff(v0,v1) <= maxUlps; };
 			return _EqFunc(v0, v1, fnCmp, decltype(GetWidthHeightT<T>())());
 		}
+		template <
+			class T,
+			class I = typename inner::ULPHelper<T>::Integral_t,
+			ENABLE_IF((HasIndex_t<T,int>{}))
+		>
+		bool Equal(const T& v0, const T& v1, const I maxUlps) {
+			for(int i=0 ; i<T::size ; i++) {
+				if(!Equal(v0[i], v1[i], maxUlps))
+					return false;
+			}
+			return true;
+		}
 		template <class T, class I>
-		bool NotEqual(const T& v0, const T& v1, I maxUlps) {
+		bool NotEqual(const T& v0, const T& v1, const I maxUlps) {
 			return !Equal(v0, v1, maxUlps);
 		}
 		// v0 <= v1 + thresholdUlps
 		template <class T,
 				class I = typename inner::ULPHelper<T>::Integral_t>
-		bool LessEqual(const T& v0, const T& v1, I thresholdUlps) {
+		bool LessEqual(const T& v0, const T& v1, const I thresholdUlps) {
 			return inner::CmpULPs(v0, v1, thresholdUlps, std::less_equal<>(), std::plus<>());
 		}
 		// v0 >= v1 - thresholdUlps
 		template <class T,
 				class I = typename inner::ULPHelper<T>::Integral_t>
-		bool GreaterEqual(const T& v0, const T& v1, I thresholdUlps) {
+		bool GreaterEqual(const T& v0, const T& v1, const I thresholdUlps) {
 			return inner::CmpULPs(v0, v1, thresholdUlps, std::greater_equal<>(), std::minus<>());
 		}
 		namespace inner {}
