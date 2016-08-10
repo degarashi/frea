@@ -263,9 +263,9 @@ namespace frea {
 		using base_t::base_t;
 	};
 }
-#include "wrap_spec/d2.hpp"
-#include "wrap_spec/d3.hpp"
-#include "wrap_spec/d4.hpp"
+#include "include/wrap_d2.hpp"
+#include "include/wrap_d3.hpp"
+#include "include/wrap_d4.hpp"
 namespace frea{
 	// レジスタが要素数を内包できればそれを、そうでなければTupleに収める
 	template <class R,
@@ -592,8 +592,8 @@ namespace frea{
 	template <int N, bool A, class T>
 	RVec_t<T,N> info_detect(T);
 }
-#include "vector_sse.hpp"
-#include "vector_raw.hpp"
+#include "include/sse.hpp"
+#include "include/raw.hpp"
 namespace frea {
 	template <class W, class D, class S>
 	struct VecT : D {
@@ -697,9 +697,9 @@ namespace frea {
 		constexpr VecT_spec(const base_t& b): base_t(b) {}
 	};
 }
-#include "vector_spec/d2.hpp"
-#include "vector_spec/d3.hpp"
-#include "vector_spec/d4.hpp"
+#include "include/vec_d2.hpp"
+#include "include/vec_d3.hpp"
+#include "include/vec_d4.hpp"
 namespace frea {
 	template <class R, int D, class S>
 	inline std::ostream& operator << (std::ostream& os, const wrap<R,D,S>&) {

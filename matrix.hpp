@@ -543,9 +543,9 @@ namespace frea {
 		using base_t::base_t;
 	};
 }
-#include "matrix_spec/d2.hpp"
-#include "matrix_spec/d3.hpp"
-#include "matrix_spec/d4.hpp"
+#include "include/mat_d2.hpp"
+#include "include/mat_d3.hpp"
+#include "include/mat_d4.hpp"
 namespace frea {
 	#if SSE >= 2
 		#define DEF_RM(n) \
