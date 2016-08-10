@@ -292,5 +292,13 @@ namespace frea {
 					std::tuple<BConst<false>>
 				>
 		>;
+		using QTypes_t = seq::ExpandTypes_t2<
+				std::tuple,
+				std::tuple<
+					std::tuple<float, double>,
+					seq::BoolSeq_t
+				>
+		>;
+		using QTypes = ToTestTypes_t<QTypes_t>;
 	}
 }
