@@ -268,8 +268,8 @@ namespace frea {
 		QuatT rotation(const vec_t& axis, rad_t ang) const {
 			return Rotation(axis, ang) * *this;
 		}
-		vec4_t asVec4() const {
-			return static_cast<const vec4_t&>(*this);
+		const vec4_t& asVec4() const {
+			return reinterpret_cast<const vec4_t&>(*this);
 		}
 		QuatT normalization() const {
 			const value_t rlen(1 / length());
