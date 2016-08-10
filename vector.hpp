@@ -494,17 +494,13 @@ namespace frea{
 		using type_cn = Data<T,N2,A2>;
 
 		Data() = default;
-		T& operator [](const int n) {
-			return base_t::m[n];
-		}
-		const T& operator [](const int n) const {
-			return base_t::m[n];
-		}
 		template <bool A2>
 		constexpr Data(const value_t* src, BConst<A2>) {
 			for(auto& dst : base_t::m)
 				dst = *src++;
 		}
+		const value_t& operator [](const int n) const noexcept { return this->m[n]; }
+		value_t& operator [](const int n) noexcept { return this->m[n]; }
 		//! 複数要素での初期化
 		template <class... Ts,
 				 ENABLE_IF((sizeof...(Ts)>1))>

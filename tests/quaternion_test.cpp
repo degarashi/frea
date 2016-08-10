@@ -60,7 +60,6 @@ namespace frea {
 			using mat3_t = typename TestFixture::mat3_t;
 			using value_t = typename TestFixture::value_t;
 			using quat_t = typename TestFixture::quat_t;
-			using array_t = typename TestFixture::array_t;
 			using array33_t = typename TestFixture::array33_t;
 			using vec_t = typename TestFixture::vec_t;
 
@@ -71,8 +70,8 @@ namespace frea {
 
 			// クォータニオンでベクトルを変換した結果が行列のそれと一致するか
 			auto v = this->makeVec3();
-			const array_t v0 = vec_t(v * q),
-							v1 = vec_t(v * m);
+			const auto v0 = vec_t(v * q),
+						v1 = vec_t(v * m);
 			EXPECT_TRUE(ulps::Equal(v0, v1, ThresholdULPs<value_t>));
 			const array33_t ar0(m);
 			// クォータニオンを行列に変換した結果が一致するか
@@ -112,7 +111,6 @@ namespace frea {
 			using quat_t = typename TestFixture::quat_t;
 			using vec_t = typename TestFixture::vec_t;
 			using rad_t = typename TestFixture::rad_t;
-			using array_t = typename TestFixture::array_t;
 			using value_t = typename TestFixture::value_t;
 
 			// getRight(), getUp(), getDir()が{1,0,0},{0,1,0},{0,0,1}を変換した結果と比較
@@ -121,9 +119,9 @@ namespace frea {
 			const auto q = quat_t::Rotation(axis, ang);
 			const auto m = q.asMat33();
 
-			EXPECT_TRUE(ulps::Equal(array_t(vec_t(vec_t(1,0,0)*m)), array_t(q.getRight()), ThresholdULPs<value_t>));
-			EXPECT_TRUE(ulps::Equal(array_t(vec_t(vec_t(0,1,0)*m)), array_t(q.getUp()), ThresholdULPs<value_t>));
-			EXPECT_TRUE(ulps::Equal(array_t(vec_t(vec_t(0,0,1)*m)), array_t(q.getDir()), ThresholdULPs<value_t>));
+			EXPECT_TRUE(ulps::Equal(vec_t(vec_t(1,0,0)*m), q.getRight(), ThresholdULPs<value_t>));
+			EXPECT_TRUE(ulps::Equal(vec_t(vec_t(0,1,0)*m), q.getUp(), ThresholdULPs<value_t>));
+			EXPECT_TRUE(ulps::Equal(vec_t(vec_t(0,0,1)*m), q.getDir(), ThresholdULPs<value_t>));
 		}
 		//! クォータニオンの線形補間テスト
 		TYPED_TEST(Quaternion, SLerp) {
@@ -132,7 +130,6 @@ namespace frea {
 			using rad_t = typename TestFixture::rad_t;
 			using value_t = typename TestFixture::value_t;
 			using mat3_t = typename TestFixture::mat3_t;
-			using array_t = typename TestFixture::array_t;
 			constexpr auto ThresholdULPs_Quat = ulps::Diff_C<value_t>(0.0, 5e-3);
 
 			const int div = 8;
@@ -149,9 +146,9 @@ namespace frea {
 				auto q2 = q0.slerp(q1, t);
 
 				auto v = this->makeDir();
-				vec_t v0 = v * q2;
-				vec_t v1 = v * m1;
-				EXPECT_TRUE(ulps::Equal(array_t(v0), array_t(v1), ThresholdULPs_Quat));
+				const vec_t v0 = v * q2;
+				const vec_t v1 = v * m1;
+				EXPECT_TRUE(ulps::Equal(v0, v1, ThresholdULPs_Quat));
 			}
 		}
 	}
