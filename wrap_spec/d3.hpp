@@ -16,7 +16,7 @@ namespace frea {
 				 ENABLE_IF(is_quaternion<Q>{})>
 		auto operator * (const Q& q) const {
 			QuatT<typename Q::value_t, true> q0;
-			this->template store<true>((typename Q::value_t*)&q0, IConst<3>());
+			this->template store<true>((typename Q::value_t*)&q0, IConst<2>());
 			q0.w = 0;
 			return (q.inversion() * q0 * q).getVector();
 		}
@@ -54,6 +54,21 @@ namespace frea {
 			const auto& nml = plane.getNormal();
 			const value_t d = plane.dot(*this);
 			*this += nml*-d*2;
+		}
+	};
+	template <class T>
+	struct tup_spec<T,3> : tup<T,3, tup_spec<T,3>> {
+		using base_t = tup<T,3, tup_spec<T,3>>;
+		using base_t::base_t;
+
+		using base_t::operator *;
+		template <class Q,
+				 ENABLE_IF(is_quaternion<Q>{})>
+		auto operator * (const Q& q) const {
+			QuatT<typename Q::value_t, true> q0;
+			this->template store<true>(reinterpret_cast<typename Q::value_t*>(&q0), IConst<2>());
+			q0.w = 0;
+			return (q.inversion() * q0 * q).getVector();
 		}
 	};
 }

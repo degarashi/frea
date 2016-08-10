@@ -302,10 +302,12 @@ namespace frea{
 
 		template <class T2>
 		auto dot(const T2& t) const {
-			auto sum = wrap_t::I::Zero();
+			auto sum = wrap_t::Zero();
 			for(int i=0 ; i<a_size-1 ; i++)
 				sum += data[i] * t.data[i];
-			sum += data[a_size-1] * t.data[a_size-1].maskH(IConst<wrap_t::capacity-size-(a_size-1)*wrap_t::capacity>());
+			constexpr int Rem0 = N % wrap_t::capacity,
+						Rem = (Rem0==0) ? wrap_t::capacity : Rem0;
+			sum += data[a_size-1] * t.data[a_size-1].template maskH<Rem-1>();
 			return sum.sumUp();
 		}
 		auto sumUp() const {
@@ -316,6 +318,20 @@ namespace frea{
 						Rem = (Rem0==0) ? wrap_t::capacity : Rem0;
 			sum += data[a_size-1].template maskH<Rem-1>();
 			return sum.sumUp();
+		}
+		auto len_sq() const {
+			return dot(*this);
+		}
+		auto length() const {
+			return std::sqrt(len_sq());
+		}
+		auto normalization() const {
+			return *this / length();
+		}
+		auto normalize() {
+			const auto len = length();
+			*this /= len;
+			return len;
 		}
 
 		tup() = default;
@@ -355,6 +371,9 @@ namespace frea{
 			return !(this->operator == (t));
 		}
 		#define DEF_OP(op) \
+			template <class T, ENABLE_IF(HasMethod_asInternal_t<T>{})> \
+			spec_t operator op (const T& t) const& { \
+				return *this op t.asInternal(); } \
 			spec_t operator op (const value_t& t) const& { \
 				spec_t ret; \
 				for(int i=0 ; i<a_size ; i++) \
@@ -379,6 +398,12 @@ namespace frea{
 		DEF_OP(|)
 		DEF_OP(^)
 		#undef DEF_OP
+		// 左から行列にベクトルを掛ける
+		template <class M,
+				 ENABLE_IF(is_wrapM<M>{})>
+		spec_t operator * (const M& m) const {
+			return m._pre_mul(static_cast<const spec_t&>(*this));
+		}
 
 		// 小さいサイズへの変換
 		template <int ToN,
@@ -415,13 +440,13 @@ namespace frea{
 		}
 		template <int N2>
 		void makeEquality() {
-			static_assert(N2<a_size, "");
+			static_assert(N2<size, "");
 			const auto val = this->data[N2/a_size].template pickAt<N2%a_size>();
 			const wrap_t tval(val);
 			for(auto& v: this->data)
 				v = tval;
 		}
-		static spec_t Zero() { return {0}; }
+		static spec_t Zero() { return spec_t(0); }
 	};
 	// Dataクラスに要素数固有の関数などを付加
 	template <class T, int N>

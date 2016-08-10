@@ -4,7 +4,14 @@
 
 namespace frea {
 	namespace test {
-		using Types = ::testing::Types<std::tuple<float,BConst<true>>>;
+		using QTypes_t = seq::ExpandTypes_t2<
+				std::tuple,
+				std::tuple<
+					std::tuple<float, double>,
+					seq::BoolSeq_t
+				>
+		>;
+		using QTypes = ToTestTypes_t<QTypes_t>;
 		template <class T>
 		class Quaternion : public Random {
 			public:
@@ -47,7 +54,7 @@ namespace frea {
 					return random::GenQuat<quat_t>(_rd);
 				}
 		};
-		TYPED_TEST_CASE(Quaternion, Types);
+		TYPED_TEST_CASE(Quaternion, QTypes);
 
 		TYPED_TEST(Quaternion, ConvertMatrix) {
 			using mat3_t = typename TestFixture::mat3_t;
@@ -128,7 +135,7 @@ namespace frea {
 			using array_t = typename TestFixture::array_t;
 			constexpr auto ThresholdULPs_Quat = ulps::Diff_C<value_t>(0.0, 5e-3);
 
-			const int div = 32;
+			const int div = 8;
 			const value_t tdiv = 1.0/div;
 			const auto axis = this->makeDir();
 			const rad_t ang(this->makeRadian());
