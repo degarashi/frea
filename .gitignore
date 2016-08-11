@@ -1,8 +1,3 @@
-CMakeFiles
-Makefile
-frea_test
 *.cbp
-*.cmake
 *.user
-CMakeCache.txt
 freatypes.pyc
