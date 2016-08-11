@@ -75,5 +75,17 @@ namespace frea {
 			}
 			#undef DEF_TEST
 		}
+		TYPED_TEST(Matrix, Transpose) {
+			using value_t = typename TestFixture::value_t;
+			using array_t = typename TestFixture::array_t;
+
+			constexpr auto range = Range<value_t>{-1e3, 1e3};
+			auto mat = this->makeRMat(range);
+			array_t raw(mat);
+
+			raw.transpose();
+			mat.transpose();
+			ASSERT_LT(AbsMax(raw - mat), Threshold<value_t>());
+		}
 	}
 }
