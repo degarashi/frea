@@ -120,7 +120,7 @@ namespace frea {
 				} \
 				spec_t operator op (const value_t& t) const { \
 					spec_t ret; \
-					vec_t tmp(t); \
+					const vec_t tmp(t); \
 					for(int i=0 ; i<dim_m ; i++) \
 						ret.v[i] = v[i] op tmp; \
 					return ret; \
@@ -145,8 +145,19 @@ namespace frea {
 					ret.v[i] = v[i] * tmp;
 				return ret;
 			}
+			template <class T = value_t,
+					 ENABLE_IF(std::is_floating_point<T>{})>
 			auto operator / (const value_t& t) const {
 				return *this * (1 / t);
+			}
+			template <class T = value_t,
+					 ENABLE_IF(std::is_integral<T>{})>
+			auto operator / (const value_t& t) const {
+				spec_t ret;
+				const vec_t tmp(t);
+				for(int i=0 ; i<dim_m ; i++)
+					ret.v[i] = v[i] / tmp;
+				return ret;
 			}
 			template <class VW2, int N2, class S2>
 			auto operator * (const wrapM<VW2,N2,S2>& m) const {
