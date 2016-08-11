@@ -63,6 +63,6 @@ namespace frea {
 		static this_t LookAtRH(const vec_t& pos, const vec_t& at, const vec_t& up);
 		static this_t LookDirRH(const vec_t& pos, const vec_t& at, const vec_t& up);
 		this_t transposition() const { return this->asInternal().transposition(); }
-		this_t transpose() { return this->asInternal().transpose(); }
+		void transpose() { *this = transposition(); }
 	};
 }

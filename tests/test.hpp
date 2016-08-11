@@ -72,86 +72,87 @@ namespace frea {
 		auto LowerSize(...) -> IConst<1>;
 
 		template <class T, int N>
-		struct Array {
-			constexpr static int size = N,
-								lower_size = decltype(LowerSize<T>(nullptr))::value;
-			T	m[size];
+		class Array {
+			public:
+				constexpr static int size = N,
+									lower_size = decltype(LowerSize<T>(nullptr))::value;
+				T	m[size];
 
-			#define DEF_OP(op) \
-				template <class V> \
-				Array& operator op##= (const V& r) { \
-					return *this = *this op r; \
-				} \
-				template <class V, \
-						ENABLE_IF((HasIndex_t<V,int>{}))> \
-				Array operator op (const V& r) const { \
-					static_assert(V::size==size, ""); \
-					Array ret; \
-					for(int i=0 ; i<size ; i++) \
-						ret[i] = m[i] op r[i]; \
-					return ret; \
-				} \
-				template <class V, \
-						ENABLE_IF(!(HasIndex_t<V,int>{}))> \
-				Array operator op (const V& r) const { \
-					Array ret; \
-					for(int i=0 ; i<size ; i++) \
-						ret[i] = m[i] op r; \
-					return ret; \
+				#define DEF_OP(op) \
+					template <class V> \
+					Array& operator op##= (const V& r) { \
+						return *this = *this op r; \
+					} \
+					template <class V, \
+							ENABLE_IF((HasIndex_t<V,int>{}))> \
+					Array operator op (const V& r) const { \
+						static_assert(V::size==size, ""); \
+						Array ret; \
+						for(int i=0 ; i<size ; i++) \
+							ret[i] = m[i] op r[i]; \
+						return ret; \
+					} \
+					template <class V, \
+							ENABLE_IF(!(HasIndex_t<V,int>{}))> \
+					Array operator op (const V& r) const { \
+						Array ret; \
+						for(int i=0 ; i<size ; i++) \
+							ret[i] = m[i] op r; \
+						return ret; \
+					}
+				DEF_OP(+)
+				DEF_OP(-)
+				DEF_OP(/)
+				DEF_OP(*)
+				#undef DEF_OP
+				Array() = default;
+				template <class T2>
+				Array(const Array<T2,size>& a): m(a.m) {}
+				template <class V,
+						 ENABLE_IF((HasIndex_t<V,int>{}))>
+				Array(const V& v) {
+					*this = v;
 				}
-			DEF_OP(+)
-			DEF_OP(-)
-			DEF_OP(/)
-			DEF_OP(*)
-			#undef DEF_OP
-			Array() = default;
-			template <class T2>
-			Array(const Array<T2,size>& a): m(a.m) {}
-			template <class V,
-					 ENABLE_IF((HasIndex_t<V,int>{}))>
-			Array(const V& v) {
-				*this = v;
-			}
-			template <class V,
-					 ENABLE_IF((HasIndex_t<V,int>{}))>
-			Array& operator = (const V& r) {
-				for(int i=0 ; i<size ; i++)
-					m[i] = r[i];
-				return *this;
-			}
+				template <class V,
+						 ENABLE_IF((HasIndex_t<V,int>{}))>
+				Array& operator = (const V& r) {
+					for(int i=0 ; i<size ; i++)
+						m[i] = r[i];
+					return *this;
+				}
 
-			T& operator [](const int n) noexcept {
-				return m[n];
-			}
-			const T& operator [](const int n) const noexcept {
-				return m[n];
-			}
-			template <class V>
-			bool operator < (const V& v) const {
-				static_assert(size==V::size, "");
-				return std::lexicographical_compare(
-							m, m+size,
-							v.m, v.m+size,
-							std::less<>()
-						);
-			}
-			template <class V>
-			bool near(const T& th, const V& v) const {
-				static_assert(size==V::size, "");
-				for(int i=0 ; i<size ; i++) {
-					if(std::abs(m[i] - v.m[i]) > th)
-						return false;
+				T& operator [](const int n) noexcept {
+					return m[n];
 				}
-				return true;
-			}
-			template <class V>
-			bool operator == (const V& v) const {
-				return near(T(0), v);
-			}
-			template <class V>
-			bool operator != (const V& v) const {
-				return !(operator ==(v));
-			}
+				const T& operator [](const int n) const noexcept {
+					return m[n];
+				}
+				template <class V>
+				bool operator < (const V& v) const {
+					static_assert(size==V::size, "");
+					return std::lexicographical_compare(
+								m, m+size,
+								v.m, v.m+size,
+								std::less<>()
+							);
+				}
+				template <class V>
+				bool near(const T& th, const V& v) const {
+					static_assert(size==V::size, "");
+					for(int i=0 ; i<size ; i++) {
+						if(std::abs(m[i] - v.m[i]) > th)
+							return false;
+					}
+					return true;
+				}
+				template <class V>
+				bool operator == (const V& v) const {
+					return near(T(0), v);
+				}
+				template <class V>
+				bool operator != (const V& v) const {
+					return !(operator ==(v));
+				}
 		};
 		class Random : public ::testing::Test {
 			private:
@@ -217,6 +218,13 @@ namespace frea {
 			template <class A2>
 			ArrayM& operator *= (const A2& m) {
 				return *this = *this * m;
+			}
+			void transpose() {
+				for(int i=0 ; i<base_t::size ; i++) {
+					for(int j=i+1 ; j<base_t::lower_size ; j++) {
+						std::swap((*this)[i][j], (*this)[j][i]);
+					}
+				}
 			}
 		};
 		/*!

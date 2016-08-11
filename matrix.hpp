@@ -277,13 +277,13 @@ namespace frea {
 			using base_t = wrapM<VW, S, wrapM_spec<VW,S,S>>;
 			using this_t = wrapM_spec;
 			// InfoにTranspose関数が用意されていればtrue
-			template <class I2,
+			template <class VW2,
 					 std::size_t... Idx,
 					 class B,
-					 class = decltype(I2::Transpose(std::declval<B>().v[Idx].m...))>
+					 class = decltype(VW2::I::Transpose(std::declval<B>().v[Idx].m...))>
 			static std::true_type hasmem(std::index_sequence<Idx...>);
 			// そうでなければfalse
-			template <class I2, class B>
+			template <class VW2, class B>
 			static std::false_type hasmem(...);
 			//! 効率の良い転置アルゴリズムが使用可能な場合はそれを使用
 			template <std::size_t... Idx>
@@ -296,10 +296,10 @@ namespace frea {
 			template <std::size_t... Idx>
 			auto _transposition(std::false_type, std::index_sequence<Idx...>) const {
 				typename base_t::value_t tmp[S][S];
-				auto dummy = [](auto...) {};
-				dummy((base_t::v[Idx].template store<false>(tmp[Idx], IConst<base_t::dim_n>()), 0)...);
+				const auto dummy = [](auto...) {};
+				dummy((base_t::v[Idx].template store<false>(tmp[Idx], IConst<base_t::dim_n-1>()), 0)...);
 				dummy(([&tmp](const int i){
-					for(int j=0 ; j<(base_t::dim_n-i) ; j++) {
+					for(int j=i+1 ; j<base_t::dim_n ; j++) {
 						std::swap(tmp[i][j], tmp[j][i]);
 					}
 				}(Idx), 0)...);
@@ -311,7 +311,7 @@ namespace frea {
 	
 			auto transposition() const& {
 				const auto idx = std::make_index_sequence<S>();
-				return _transposition(decltype(this->hasmem<VW::I, base_t>(idx))(), idx);
+				return _transposition(decltype(this->hasmem<VW, base_t>(idx))(), idx);
 			}
 			DEF_FUNC(transpose, transposition)
 	};
@@ -540,9 +540,10 @@ namespace frea {
 		using base_t::base_t;
 		using spec_t = S;
 		using value_t = typename V::value_t;
+		using this_t = MatT_dspec;
 
 		spec_t transposition() const { return this->asInternal().transposition(); }
-		spec_t transpose() { return this->asInternal().transpose(); }
+		void transpose() { *this = transposition(); }
 		value_t calcDeterminant() const;
 		bool inversion(base_t& dst) const;
 		bool inversion(base_t& dst, const value_t& det) const;
