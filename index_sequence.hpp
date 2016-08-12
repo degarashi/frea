@@ -207,8 +207,9 @@ namespace frea {
 		template <std::size_t Sum, class T0>
 		struct _Combi<Sum, T0> {
 			constexpr static std::size_t t0_size = std::tuple_size<T0>{},
-											size = t0_size;
-			using index = std::tuple<RepeatIndex_t<std::make_index_sequence<t0_size>, Sum/t0_size>>;
+											size = t0_size,
+											mod = (t0_size==0) ? 1 : Sum/t0_size;
+			using index = std::tuple<RepeatIndex_t<std::make_index_sequence<t0_size>, mod>>;
 		};
 		template <std::size_t Sum, class T0, class T1, class... Ts>
 		struct _Combi<Sum, T0,T1,Ts...> {
@@ -217,8 +218,9 @@ namespace frea {
 			using lower_index = typename lower::index;
 
 			constexpr static std::size_t t0_size = std::tuple_size<T0>{},
-										size = t0_size * lower_size;
-			using index = TupleCat_t<std::tuple<DuplIndex_t<std::make_index_sequence<t0_size>, Sum/t0_size>>, lower_index>;
+										size = t0_size * lower_size,
+										mod = (t0_size==0) ? 1 : Sum/t0_size;
+			using index = TupleCat_t<std::tuple<DuplIndex_t<std::make_index_sequence<t0_size>, mod>>, lower_index>;
 		};
 
 		template <std::size_t... N>
