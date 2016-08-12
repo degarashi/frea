@@ -3,7 +3,6 @@
 
 namespace frea {
 	namespace test {
-		using Types = ::testing::Types<float, double>;
 		template <class T>
 		class Angle : public Random {
 			protected:
@@ -32,6 +31,7 @@ namespace frea {
 					return deg_t(makeRF());
 				}
 		};
+		using Types = ToTestTypes_t<types::FElem_t>;
 		TYPED_TEST_CASE(Angle, Types);
 
 		// ループ毎にsingleした値と独自にwhileで求めた値を比べる

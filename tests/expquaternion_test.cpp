@@ -29,7 +29,7 @@ namespace frea {
 					return random::GenQuat<quat_t>(_rd);
 				}
 		};
-		TYPED_TEST_CASE(ExpQuaternion, QTypes);
+		TYPED_TEST_CASE(ExpQuaternion, types::QTypes);
 
 		TYPED_TEST(ExpQuaternion, QuaternionConvert) {
 			using eq_t = typename TestFixture::eq_t;

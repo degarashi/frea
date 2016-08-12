@@ -9,7 +9,7 @@ namespace frea {
 		using SqTypes_t = seq::ExpandTypes_t2<
 			SquareMat_t,
 			std::tuple<
-				std::tuple<__m128, __m128d, __m128i>,
+				types::Reg_t,
 				seq::Range_t<2,5>,
                 seq::BoolSeq_t
 			>

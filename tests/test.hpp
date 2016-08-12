@@ -272,41 +272,54 @@ namespace frea {
 		template <class T>
 		using ToTestTypes_t = decltype(ToTestTypes(std::declval<T>()));
 
-		// 整数ベクトル
-		using ITypes_t = seq::ExpandTypes_t2<
-				std::tuple,
-				std::tuple<
-					std::tuple<__m128i>,
-					seq::Range_t<2,5>,
-					seq::BoolSeq_t
-				>
-		>;
-		// 浮動小数点数ベクトル
-		using FTypes_t = seq::ExpandTypes_t2<
-				std::tuple,
-				std::tuple<
-					std::tuple<__m128, __m128d>,
-					seq::Range_t<2,5>,
-					seq::BoolSeq_t
-				>
+		namespace types {
+			using FElem_t = std::tuple<float, double>;
+			using IElem_t = std::tuple<int32_t>;
+			using Elem_t = seq::TupleCat_t<FElem_t, IElem_t>;
+
+			#if SSE>=2
+				using FReg_t = std::tuple<__m128, __m128d>;
+				using IReg_t = std::tuple<__m128i>;
+			#else
+				using FReg_t = std::tuple<>;
+				using IReg_t = std::tuple<>;
+			#endif
+			using Reg_t = seq::TupleCat_t<FReg_t, IReg_t>;
+
+			using Float_t = seq::TupleCat_t<Elem_t, Reg_t>;
+			using Int_t = seq::TupleCat_t<IElem_t, IReg_t>;
+			using Value_t = seq::TupleCat_t<Float_t, Int_t>;
+
+			template <class E>
+			using VectorRange_t = seq::ExpandTypes_t2<
+					std::tuple,
+					std::tuple<
+						E,
+						seq::Range_t<2,5>,
+						seq::BoolSeq_t
+					>
 			>;
-		// 各要素数固有の関数テスト用
-		template <int N>
-		using TypesD_t = seq::ExpandTypes_t2<
-				std::tuple,
-				std::tuple<
-					std::tuple<__m128, __m128d>,
-					std::tuple<IConst<N>>,
-					std::tuple<BConst<false>>
-				>
-		>;
-		using QTypes_t = seq::ExpandTypes_t2<
-				std::tuple,
-				std::tuple<
-					std::tuple<float, double>,
-					seq::BoolSeq_t
-				>
-		>;
-		using QTypes = ToTestTypes_t<QTypes_t>;
+
+			// 浮動小数点数ベクトル
+			// 各要素数固有の関数テスト用
+			template <class E, int N>
+			using VectorRangeD_t = seq::ExpandTypes_t2<
+					std::tuple,
+					std::tuple<
+						E,
+						std::tuple<IConst<N>>,
+						std::tuple<BConst<false>>
+					>
+			>;
+
+			using QTypes_t = seq::ExpandTypes_t2<
+					std::tuple,
+					std::tuple<
+						FElem_t,
+						seq::BoolSeq_t
+					>
+			>;
+			using QTypes = ToTestTypes_t<QTypes_t>;
+		}
 	}
 }

@@ -46,7 +46,7 @@ namespace frea {
 					return random::GenQuat<quat_t>(_rd);
 				}
 		};
-		TYPED_TEST_CASE(Quaternion, QTypes);
+		TYPED_TEST_CASE(Quaternion, types::QTypes);
 
 		TYPED_TEST(Quaternion, ConvertMatrix) {
 			using mat3_t = typename TestFixture::mat3_t;
