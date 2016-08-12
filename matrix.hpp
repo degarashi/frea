@@ -7,6 +7,17 @@ namespace frea {
 	template <class VW, int M>
 	using wrapM_t = wrapM_spec<VW, M, VW::size>;
 
+	struct NoInverseMatrix : std::runtime_error {
+		using std::runtime_error::runtime_error;
+	};
+
+	template <class T>
+	constexpr T Matrix_ZeroThreshold(1);
+	template <>
+	constexpr float Matrix_ZeroThreshold<float> = 1e-5f;
+	template <>
+	constexpr double Matrix_ZeroThreshold<double> = 1e-10;
+
 	// ベクトル演算レジスタクラスをM方向に束ねたもの
 	/*!
 		\tparam	VW		各行のベクトル型
@@ -270,12 +281,22 @@ namespace frea {
 			*this = nameC(); \
 		}
 
+	template <class R, int M, int N, bool A>
+	using SMat_t = MatT_spec<SVec_t<R, N, A>, M, N>;
+	template <class T, int M, int N>
+	using RMat_t = MatT_spec<RVec_t<T, N>, M, N>;
+	template <class T, int M, int N, bool A>
+	using Mat_t = MatT_spec<Vec_t<T, N, A>, M, N>;
+
 	//! 正方行列のみのメンバ関数を定義
 	template <class VW, int S>
 	class wrapM_spec<VW,S,S> : public wrapM<VW, S, wrapM_spec<VW,S,S>> {
 		private:
 			using base_t = wrapM<VW, S, wrapM_spec<VW,S,S>>;
 			using this_t = wrapM_spec;
+			using value_t = typename base_t::value_t;
+			using vec_t = typename base_t::vec_t;
+			using mat_t = Mat_t<value_t, base_t::dim_m, base_t::dim_n, true>;
 			// InfoにTranspose関数が用意されていればtrue
 			template <class VW2,
 					 std::size_t... Idx,
@@ -313,6 +334,11 @@ namespace frea {
 				const auto idx = std::make_index_sequence<S>();
 				return _transposition(decltype(this->hasmem<VW, base_t>(idx))(), idx);
 			}
+			// ----------- アダプタ関数群 -----------
+			value_t calcDeterminant() const { return mat_t(*this).calcDeterminant(); }
+			this_t inversion() const { return mat_t(*this).inversion(); }
+			this_t inversion(const value_t& det) const { return mat_t(*this).inversion(det); }
+			DEF_FUNC(inverse, inversion)
 			DEF_FUNC(transpose, transposition)
 	};
 	#undef DEF_FUNC
@@ -327,10 +353,9 @@ namespace frea {
 			constexpr static bool align = vec_t::align;
 			using column_t = typename vec_t::template type_cn<dim_m>;
 		private:
-			using VData = typename V::base_t;
-			void _init(VData*) {}
+			void _init(vec_t*) {}
 			template <class... Ts>
-			void _init(VData* dst, const VData& v, const Ts&... ts) {
+			void _init(vec_t* dst, const vec_t& v, const Ts&... ts) {
 				*dst = v;
 				_init(dst+1, ts...);
 			}
@@ -338,21 +363,21 @@ namespace frea {
 			void _initA(std::index_sequence<Idx...>, const value_t *src) {
 				static_assert(sizeof...(Idx) == dim_n, "");
 				for(int i=0 ; i<dim_m ; i++) {
-					m[i] = VData(src[Idx]...);
+					m[i] = vec_t(src[Idx]...);
 					src += dim_n;
 				}
 			}
 		public:
-			VData	m[dim_m];
+			vec_t	m[dim_m];
 			DataM() = default;
 
-			auto& operator [](const int n) {
+			vec_t& operator [](const int n) {
 				return m[n];
 			}
-			const auto& operator [](const int n) const {
+			const vec_t& operator [](const int n) const {
 				return m[n];
 			}
-			// VDataの配列[dim_m]で初期化
+			// vec_tの配列[dim_m]で初期化
 			template <class... Ts,
 					ENABLE_IF((sizeof...(Ts)==dim_m))>
 			DataM(const Ts&... ts) {
@@ -367,7 +392,7 @@ namespace frea {
 			}
 			// 全て同一のvalue_tで初期化
 			explicit DataM(const value_t& t0) {
-				VData tmp(t0);
+				vec_t tmp(t0);
 				for(auto& v : m)
 					v = tmp;
 			}
@@ -376,13 +401,6 @@ namespace frea {
 				w.store(m);
 			}
 	};
-
-	template <class R, int M, int N, bool A>
-	using SMat_t = MatT_spec<SVec_t<R, N, A>, M, N>;
-	template <class T, int M, int N>
-	using RMat_t = MatT_spec<RVec_t<T, N>, M, N>;
-	template <class T, int M, int N, bool A>
-	using Mat_t = MatT_spec<Vec_t<T, N, A>, M, N>;
 
 	#define AsI(t) wrap_t(reinterpret_cast<const value_t*>((t).m), BConst<align>())
 	template <class V, int M, class S>
@@ -402,8 +420,7 @@ namespace frea {
 		using column_t = typename V::template type_cn<dim_m>;
 		using vec_min = typename vec_t::template type_cn<dim_min>;
 		template <int M2, int N2>
-		using type_cn = Mat_t<typename vec_t::template type_cn<N2>, M2, N2,
-							vec_t::template type_cn<N2>::align>;
+		using type_cn = Mat_t<value_t, M2, N2, vec_t::template type_cn<N2>::align>;
 
 		MatT() = default;
 		constexpr MatT(const base_t& b): base_t(b) {}
@@ -413,25 +430,62 @@ namespace frea {
 		}
 
 		//! 指定した行と列を省いた物を出力
-		type_cn<dim_m-1, dim_n-1> cutRC(int row, int clm) const;
+		auto cutRC(const int row, const int clm) const {
+			type_cn<dim_m-1, dim_n-1>	ret;
+			constexpr int width = dim_n,
+						height = dim_m;
+			// 左上
+			for(int i=0 ; i<row ; i++) {
+				for(int j=0 ; j<clm ; j++)
+					ret.m[i][j] = this->m[i][j];
+			}
+			// 右上
+			for(int i=0 ; i<row ; i++) {
+				for(int j=clm+1 ; j<width ; j++)
+					ret.m[i][j-1] = this->m[i][j];
+			}
+			// 左下
+			for(int i=row+1 ; i<height ; i++) {
+				for(int j=0 ; j<clm ; j++)
+					ret.m[i-1][j] = this->m[i][j];
+			}
+			// 右下
+			for(int i=row+1 ; i<height ; i++) {
+				for(int j=clm+1 ; j<width ; j++)
+					ret.m[i-1][j-1] = this->m[i][j];
+			}
+			return ret;
+		}
 
-		//! 行列との積算 (右から掛ける)
-		/*! 列ベクトルとして扱う = ベクトルを転置して左から行ベクトルを掛ける */
-		vec_t operator * (const vec_t& v) const;
 		// ---------- < 行の基本操作 > ----------
 		//! 行を入れ替える
-		void rowSwap(int r0, int r1);
+		void rowSwap(const int r0, const int r1) {
+			std::swap(this->m[r0], this->m[r1]);
+		}
 		//! ある行を定数倍する
-		void rowMul(int r0, float s);
+		void rowMul(const int r0, const value_t& s) {
+			this->m[r0] *= s;
+		}
 		//! ある行を定数倍した物を別の行へ足す
-		void rowMulAdd(const int r0, const value_t& s, const int r1);
+		void rowMulAdd(const int r0, const value_t& s, const int r1) {
+			this->m[r1] += this->m[r0] * s;
+		}
 		// ---------- < 列の基本操作 > ----------
 		//! 列を入れ替える
-		void clmSwap(int c0, int c1);
+		void clmSwap(const int c0, const int c1) {
+			for(int i=0 ; i<dim_m ; i++)
+				std::swap(this->m[i][c0], this->m[i][c1]);
+		}
 		//! ある列を定数倍する
-		void clmMul(int c0, float s);
+		void clmMul(const int c0, const value_t& s) {
+			for(int i=0 ; i<dim_m ; i++)
+				this->m[i][c0] *= s;
+		}
 		//! ある列を定数倍した物を別の行へ足す
-		void clmMulAdd(int c0, float s, int c1);
+		void clmMulAdd(const int c0, const value_t& s, const int c1) {
+			for(int i=0 ; i<dim_m ; i++)
+				this->m[i][c1] += this->m[i][c0] * s;
+		}
 
 		//! ある行の要素が全てゼロか判定 (誤差=EPSILON込み)
 		bool isZeroRowEps(int n) const;
@@ -455,26 +509,26 @@ namespace frea {
 			return wrap_t::Diagonal(1);
 		}
 
-		template <int At>
-		const auto& getRow() const {
-			static_assert(At < dim_m, "invalid position");
-			return this->m[At];
+		const auto& getRow(const int at) const {
+			D_Expect(at < dim_m, "invalid position")
+			return this->m[at];
 		}
-		template <int At>
-		auto& getRow() {
-			static_assert(At < dim_m, "invalid position");
-			return this->m[At];
+		auto& getRow(const int at) {
+			D_Expect(at < dim_m, "invalid position")
+			return this->m[at];
 		}
-		// template <int At>
-		// column_t getColumn() const {
-		// 	static_assert(At < dim_n, "invalid position");
-		// 	return {this->m[Idx][At]...};
-		// }
-		// template <int At>
-		// void setColumn(const column_t& c) {
-		// 	static_assert(At < dim_n, "invalid position");
-		// 	dummy(((this->m[Idx][At] = c.data[At]), 0)...);
-		// }
+		column_t getColumn(const int at) const {
+			D_Expect(at < dim_n, "invalid position")
+			column_t ret;
+			for(int i=0 ; i<dim_m ; i++)
+				ret[i] = this->m[i][at];
+			return ret;
+		}
+		void setColumn(const int at, const column_t& c) {
+			D_Expect(at < dim_n, "invalid position")
+			for(int i=0 ; i<dim_m ; i++)
+				this->m[i][at] = c[i];
+		}
 
 		constexpr operator wrap_t() const {
 			return AsI(*this);
@@ -534,21 +588,76 @@ namespace frea {
 		using base_t = MatT<V,M,S>;
 		using base_t::base_t;
 	};
+	// 正方行列のみのメンバ関数を定義
 	template <class V, int N, class S>
-	struct MatT_dspec<V,N,N,S> : MatT<V,N,S> {
-		using base_t = MatT<V,N,S>;
-		using base_t::base_t;
-		using spec_t = S;
-		using value_t = typename V::value_t;
-		using this_t = MatT_dspec;
+	class MatT_dspec<V,N,N,S> : public MatT<V,N,S> {
+		public:
+			using base_t = MatT<V,N,S>;
+			using base_t::base_t;
+			using spec_t = S;
+			using value_t = typename V::value_t;
+			using this_t = MatT_dspec;
+		private:
+			value_t _calcDeterminant(IConst<2>) const {
+				// 公式で計算
+				const Mat_t<value_t, 2, 2, false> m(*this);
+				return m[0][0]*m[1][1] - m[0][1]*m[1][0];
+			}
+			template <int N2, ENABLE_IF((N2>2))>
+			value_t _calcDeterminant(IConst<N2>) const {
+				value_t res = 0,
+						s = 1;
+				// 部分行列を使って計算
+				for(int i=0 ; i<N2 ; i++) {
+					const auto mt = this->cutRC(0,i);
+					res += this->m[0][i] * mt.calcDeterminant() * s;
+					s *= -1;
+				}
+				return res;
+			}
+			spec_t  _inversion(const value_t& di, IConst<2>) const {
+				spec_t ret;
+				ret.m[0][0] = this->m[1][1] * di;
+				ret.m[1][0] = -this->m[1][0] * di;
+				ret.m[0][1] = -this->m[0][1] * di;
+				ret.m[1][1] = this->m[0][0] * di;
+				return ret;
+			}
+			template <int N2, ENABLE_IF((N2>2))>
+			spec_t _inversion(const value_t& di, IConst<N2>) const {
+				spec_t ret;
+				const value_t c_val[2] = {1,-1};
+				for(int i=0 ; i<base_t::dim_m ; i++) {
+					for(int j=0 ; j<base_t::dim_n ; j++) {
+						auto in_mat = this->cutRC(i,j);
+						const value_t in_di = in_mat.calcDeterminant();
+						ret.m[j][i] = c_val[(i+j)&1] * in_di * di;
+					}
+				}
+				return ret;
+			}
 
-		spec_t transposition() const { return this->asInternal().transposition(); }
-		void transpose() { *this = transposition(); }
-		value_t calcDeterminant() const;
-		bool inversion(base_t& dst) const;
-		bool inversion(base_t& dst, const value_t& det) const;
-		bool invert();
+		public:
+			value_t calcDeterminant() const {
+				return _calcDeterminant(IConst<base_t::dim_m>());
+			}
+			spec_t inversion() const {
+				return inversion(calcDeterminant());
+			}
+			spec_t inversion(const value_t& det) const {
+				if(std::abs(det) < Matrix_ZeroThreshold<value_t>)
+					throw NoInverseMatrix("");
+				return _inversion(1/det, IConst<base_t::dim_m>());
+			}
+			void invert() {
+				*this = inversion();
+			}
+
+			// -------- アダプタ関数群(wrapM) --------
+			spec_t transposition() const { return this->asInternal().transposition(); }
+			void transpose() { *this = transposition(); }
 	};
+
 	template <class V, int M, int N>
 	struct MatT_spec : MatT_dspec<V,M,N, MatT_spec<V,M,N>> {
 		using base_t = MatT_dspec<V,M,N, MatT_spec<V,M,N>>;

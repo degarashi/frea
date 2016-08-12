@@ -11,6 +11,12 @@
 
 namespace frea {
 	namespace test {
+		//! デバッガでチェックしやすいように要素を等差数列で初期化
+		template <class T, std::size_t... Idx>
+		T ArithmeticSequence(std::index_sequence<Idx...>) {
+			return T(static_cast<typename T::value_t>(Idx)...);
+		}
+
 		template <class T, class TV>
 		bool HasZero(const T& t, const TV& th) {
 			for(auto& tm : t) {
@@ -292,32 +298,45 @@ namespace frea {
 
 			template <class E>
 			using VectorRange_t = seq::ExpandTypes_t2<
-					std::tuple,
-					std::tuple<
-						E,
-						seq::Range_t<2,5>,
-						seq::BoolSeq_t
-					>
+				std::tuple,
+				std::tuple<
+					E,
+					seq::Range_t<2,5>,
+					seq::BoolSeq_t
+				>
 			>;
 
 			// 浮動小数点数ベクトル
 			// 各要素数固有の関数テスト用
 			template <class E, int N>
 			using VectorRangeD_t = seq::ExpandTypes_t2<
-					std::tuple,
-					std::tuple<
-						E,
-						std::tuple<IConst<N>>,
-						std::tuple<BConst<false>>
-					>
+				std::tuple,
+				std::tuple<
+					E,
+					std::tuple<IConst<N>>,
+					std::tuple<BConst<false>>
+				>
+			>;
+
+			template <class R, class S, class A>
+			using SquareMat_t = std::tuple<R, S, S, A>;
+			template <class E, int M, int N>
+			using MatrixRange_t = seq::ExpandTypes_t2<
+				std::tuple,
+				std::tuple<
+					E,
+					seq::Range_t<2,M>,
+					seq::Range_t<2,N>,
+					seq::BoolSeq_t
+				>
 			>;
 
 			using QTypes_t = seq::ExpandTypes_t2<
-					std::tuple,
-					std::tuple<
-						FElem_t,
-						seq::BoolSeq_t
-					>
+				std::tuple,
+				std::tuple<
+					FElem_t,
+					seq::BoolSeq_t
+				>
 			>;
 			using QTypes = ToTestTypes_t<QTypes_t>;
 		}
