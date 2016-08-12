@@ -169,10 +169,10 @@ namespace frea {
 		template <class T>
 		class RVector : public Random {
 			public:
-				using reg_t = std::tuple_element_t<0,T>;
+				using elem_t = std::tuple_element_t<0,T>;
 				constexpr static int size = std::tuple_element_t<1,T>::value;
 				constexpr static bool align = std::tuple_element_t<2,T>::value;
-				using vec_t = SVec_t<reg_t, size, align>;
+				using vec_t = Vec_t<elem_t, size, align>;
 				using value_t = typename vec_t::value_t;
 				constexpr static bool integral = std::is_integral<value_t>::value;
 				using array_t = Array<value_t, size>;
@@ -236,10 +236,10 @@ namespace frea {
 				using base_t = RVector<seq::StripAt_t<T,1>>;
 				constexpr static int dim_m = std::tuple_element_t<1,T>::value,
 									dim_n = std::tuple_element_t<2,T>::value;
-				using reg_t = typename base_t::reg_t;
 				using value_t = typename base_t::value_t;
 				constexpr static auto align = base_t::align;
-				using mat_t = SMat_t<reg_t, dim_m, dim_n, align>;
+				using elem_t = typename base_t::elem_t;
+				using mat_t = Mat_t<elem_t, dim_m, dim_n, align>;
 				using array_t = ArrayM<value_t, dim_m, dim_n>;
 			public:
 				auto makeRMat(const Range<value_t>& r) {

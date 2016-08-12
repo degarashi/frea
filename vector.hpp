@@ -9,7 +9,6 @@
 
 DEF_HASMETHOD(asInternal)
 
-#define SSE 2
 namespace frea {
 	//! 演算レジスタに関する情報
 	template <class R>

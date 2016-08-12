@@ -378,11 +378,13 @@ namespace frea {
 			return ret;
 		}
 	};
-	template <int N, bool A>
-	SVec_t<__m128, N, A> info_detect(float);
-	template <int N, bool A>
-	SVec_t<__m128d, N, A> info_detect(double);
-	template <int N, bool A>
-	SVec_t<__m128i, N, A> info_detect(int32_t);
+	template <int N, bool A> SVec_t<__m128, N, A> info_detect(float);
+	template <int N, bool A> SVec_t<__m128, N, A> info_detect(__m128);
+
+	template <int N, bool A> SVec_t<__m128d, N, A> info_detect(double);
+	template <int N, bool A> SVec_t<__m128d, N, A> info_detect(__m128d);
+
+	template <int N, bool A> SVec_t<__m128i, N, A> info_detect(int32_t);
+	template <int N, bool A> SVec_t<__m128i, N, A> info_detect(__m128i);
 }
 #endif
