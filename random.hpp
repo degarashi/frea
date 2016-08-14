@@ -77,6 +77,13 @@ namespace frea {
 				constexpr auto R = Dist_t<T>::DefaultRange;
 				return getUniform<T>(R);
 			}
+			//! 一様分布
+			/*! 数値として取り得る値の範囲 */
+			template <class T>
+			T getUniformNR() {
+				constexpr auto R = Dist_t<T>::NumericRange;
+				return getUniform<T>(R);
+			}
 			//! 指定範囲の一様分布(in range)
 			template <class T>
 			T getUniform(const Range<T>& range) {
