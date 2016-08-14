@@ -3,6 +3,7 @@
 #include "error.hpp"
 #include "meta/size.hpp"
 #include "meta/enable_if.hpp"
+#include "meta/check_macro.hpp"
 #include "compare.hpp"
 
 namespace frea {
@@ -137,19 +138,24 @@ namespace frea {
 		//! FloatのULPs
 		template <class T,
 				  ENABLE_IF((std::is_floating_point<T>{}))>
-		auto Diff(const T& v0, const T& v1) {
+		constexpr auto Diff(const T& v0, const T& v1) {
 			return inner::t_ULPs(v0,v1);
 		}
 		//! IntのULPs (=絶対値)
 		template <class T,
 				  ENABLE_IF((std::is_integral<T>{}))>
-		auto Diff(const T& v0, const T& v1) {
+		constexpr auto Diff(const T& v0, const T& v1) {
 			return Abs(v0 - v1);
 		}
 		//! ULPsの計算 (constexprバージョン)
-		template <class T>
+		template <class T, ENABLE_IF(std::is_floating_point<T>{})>
 		constexpr auto Diff_C(const T& v0, const T& v1) {
 			return inner::t_ULPs2(AsIntegral_C(v0), AsIntegral_C(v1));
+		}
+		//! ULPsの計算 (constexprバージョン)
+		template <class T, ENABLE_IF(std::is_integral<T>{})>
+		constexpr auto Diff_C(const T& v0, const T& v1) {
+			return Diff(v0, v1);
 		}
 		//! ULPs(Units in the Last Place)の計算 (実行時バージョン)
 		template <
