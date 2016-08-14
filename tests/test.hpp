@@ -179,6 +179,9 @@ namespace frea {
 				constexpr static bool integral = std::is_integral<value_t>::value;
 				using array_t = Array<value_t, size>;
 			public:
+				auto makeRVec() {
+					return random::GenVec<vec_t>(this->mt().template getUniformF<value_t>());
+				}
 				auto makeRVec(const Range<value_t>& r) {
 					return random::GenVec<vec_t>(this->mt().template getUniformF<value_t>(r));
 				}

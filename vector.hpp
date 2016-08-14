@@ -188,10 +188,10 @@ namespace frea {
 			return dot(*this);
 		}
 		bool isNaN() const {
-			return I::IsNaN(m);
+			return I::IsNaN(maskH<size-1>());
 		}
 		bool isOutstanding() const {
-			return I::IsOutstanding(m);
+			return I::IsOutstanding(maskH<size-1>());
 		}
 		spec_t saturation(const value_t& vMin, const value_t& vMax) const {
 			auto tm = I::Max(m, I::Set1(vMin));
@@ -331,6 +331,24 @@ namespace frea{
 			const auto len = length();
 			*this /= len;
 			return len;
+		}
+		bool isNaN() const {
+			for(int i=0 ; i<a_size-1 ; i++) {
+				if(data[i].isNaN())
+					return true;
+			}
+			constexpr int Rem0 = N % wrap_t::capacity,
+						Rem = (Rem0==0) ? wrap_t::capacity : Rem0;
+			return data[a_size-1].template maskH<Rem-1>().isNaN();
+		}
+		bool isOutstanding() const {
+			for(int i=0 ; i<a_size-1 ; i++) {
+				if(data[i].isOutstanding())
+					return true;
+			}
+			constexpr int Rem0 = N % wrap_t::capacity,
+						Rem = (Rem0==0) ? wrap_t::capacity : Rem0;
+			return data[a_size-1].template maskH<Rem-1>().isOutstanding();
 		}
 
 		tup() = default;
@@ -667,6 +685,8 @@ namespace frea {
 		value_t length() const { return asInternal().length(); }
 		value_t normalize() { return asInternal().normalize(); }
 		spec_t normalization() const { return asInternal().normalization(); }
+		bool isNaN() const { return asInternal().isNaN(); }
+		bool isOutstanding() const { return asInternal().isOutstanding(); }
 
 		// ------------------- サイズ変換 -------------------
 		// 大きいサイズへの変換

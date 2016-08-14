@@ -121,31 +121,21 @@ namespace frea {
 			t0 = _mm_and_ps(t0, _mm_shuffle_ps(t0, t0, _MM_SHUFFLE(0,1,2,3)));
 			return _mm_cvttss_si32(t0) != 0;
 		}
+		static reg_t _NaNChk(const reg_t& r0) {
+			const auto res = Or(_mm_cmple_ps(r0, Zero()),
+							_mm_cmpgt_ps(r0, Zero()));
+			return _mm_andnot_ps(res, One());
+		}
 		static bool IsNaN(const reg_t& r0) {
-			auto r_zero = Zero();
-			auto res = Or(_mm_cmple_ps(r0, r_zero),
-							_mm_cmpgt_ps(r0, r_zero));
-			res = _mm_andnot_ps(res, One());
-			SUMVEC(res)
-			value_t f;
-			_mm_store_ss(&f, res);
-			return f != 0;
+			const auto res = _NaNChk(r0);
+			return SumUp(res) != 0;
 		}
 		static bool IsOutstanding(const reg_t& r) {
-			const auto f = std::numeric_limits<value_t>::infinity();
-			auto r_inf = _mm_load1_ps(&f);
 			auto r0 = And(r, AbsMask());
-			auto r1 = Or(_mm_cmple_ps(r0, Zero()),
-						_mm_cmpgt_ps(r0, Zero()));
+			const auto r_inf = And(Set1(std::numeric_limits<value_t>::infinity()), AbsMask());
 			r0 = _mm_cmpeq_ps(r0, r_inf);
-
-			r1 = _mm_andnot_ps(r1, One());
-			r0 = Or(r0, r1);
-			SUMVEC(r0)
-
-			value_t fv;
-			_mm_store_ss(&fv, r0);
-			return fv != 0;
+			r0 = Or(r0, _NaNChk(r));
+			return SumUp(r0) != 0;
 		}
 		static value_t Reciprocal(const value_t& v) {
 			const reg_t r = Reciprocal(Set1(v));
@@ -304,6 +294,12 @@ namespace frea {
 			Store(&ret, t2, BConst<false>(), IConst<1>());
 			return ret;
 		}
+		static bool IsNaN(const reg_t&) {
+			return false;
+		}
+		static bool IsOutstanding(const reg_t&) {
+			return false;
+		}
 	};
 	template <>
 	struct info<__m128d> {
@@ -326,6 +322,11 @@ namespace frea {
 							LoadU = &_mm_loadu_pd;
 
 		#define AsReg(w,z,y,x)	_mm_castsi128_pd(_mm_set_epi32(w,z,y,x))
+		static auto AbsMask() {
+			constexpr uint32_t m7f = 0x7fffffff,
+								mff = 0xffffffff;
+			return AsReg(m7f, mff, m7f, mff);
+		}
 		static auto One() { return AsReg(-1,-1,-1,-1); }
 		static auto MaskH(IConst<0>) { return AsReg(0,0,-1,-1); }
 		static auto MaskH(IConst<1>) { return AsReg(-1,-1,-1,-1); }
@@ -376,6 +377,26 @@ namespace frea {
 			value_t ret;
 			Store(&ret, t2, BConst<false>(), IConst<1>());
 			return ret;
+		}
+		static bool IsNaN(const reg_t& r0) {
+			auto r_zero = Zero();
+			auto res = Or(_mm_cmple_pd(r0, r_zero),
+							_mm_cmpgt_pd(r0, r_zero));
+			res = _mm_andnot_pd(res, One());
+			const value_t f = SumUp(res);
+			return f != 0;
+		}
+		static bool IsOutstanding(const reg_t& r) {
+			const auto f = std::numeric_limits<value_t>::infinity();
+			auto r_inf = _mm_load1_pd(&f);
+			auto r0 = And(r, AbsMask());
+			auto r1 = Or(_mm_cmple_pd(r0, Zero()),
+						_mm_cmpgt_pd(r0, Zero()));
+			r0 = _mm_cmpeq_pd(r0, r_inf);
+
+			r1 = _mm_andnot_pd(r1, One());
+			r0 = Or(r0, r1);
+			return SumUp(r0) != 0;
 		}
 	};
 	template <int N, bool A> SVec_t<__m128, N, A> info_detect(float);

@@ -2,8 +2,6 @@
 
 namespace frea {
 	namespace test {
-		// isNaN, Outstanding
-
 		// 浮動小数点数ベクトルテストケース
 		template <class T>
 		using FloatVector = RVector<T>;
@@ -34,6 +32,35 @@ namespace frea {
 			// 乗算して同じ数で除算すれば大体元と同じになる
 			const vec_t v1 = this->makeRVecNZ(1e-4, range);
 			ASSERT_LT(DiffSum(v0.m, vec_t(v0*v1/v1).m), threshold);
+		}
+
+		// isNaN, Outstandingのチェック
+		TYPED_TEST(FloatVector, InvalidValue) {
+			using value_t = typename TestFixture::value_t;
+			using vec_t = typename TestFixture::vec_t;
+			using VL = std::numeric_limits<value_t>;
+			vec_t qn = this->makeRVec(),
+				sn = this->makeRVec(),
+				inf = this->makeRVec();
+			auto& mt = this->mt();
+			ASSERT_FALSE(qn.isNaN());
+			ASSERT_FALSE(qn.isOutstanding());
+			ASSERT_FALSE(sn.isNaN());
+			ASSERT_FALSE(sn.isOutstanding());
+			ASSERT_FALSE(inf.isNaN());
+			ASSERT_FALSE(inf.isOutstanding());
+
+			const int idx = mt.template getUniform<int>({0,vec_t::size-1});
+			qn[idx] = VL::quiet_NaN();
+			sn[idx] = VL::signaling_NaN();
+			inf[idx] = VL::infinity();
+
+			ASSERT_TRUE(qn.isNaN());
+			ASSERT_TRUE(qn.isOutstanding());
+			ASSERT_TRUE(sn.isNaN());
+			ASSERT_TRUE(sn.isOutstanding());
+			ASSERT_FALSE(inf.isNaN());
+			ASSERT_TRUE(inf.isOutstanding());
 		}
 	}
 }
