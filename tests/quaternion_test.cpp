@@ -64,18 +64,19 @@ namespace frea {
 			auto v = this->makeVec3();
 			const auto v0 = vec_t(v * q),
 						v1 = vec_t(v * m);
-			EXPECT_TRUE(ulps::Equal(v0, v1, ThresholdULPs<value_t>));
+			constexpr auto Th = ulps::Diff_C<value_t>(0, Threshold<value_t>(1<<5, 0));
+            EXPECT_TRUE(ulps::Equal(v0, v1, Th));
 			const array33_t ar0(m);
 			// クォータニオンを行列に変換した結果が一致するか
 			{
 				const array33_t ar1(q.asMat33());
-				EXPECT_LT(AbsMax(ar0 - ar1), 1e-2);
+				EXPECT_LT(AbsMax(ar0 - ar1), Th);
 			}
 			// Matrix -> Quaternion -> Matrix の順で変換して前と後で一致するか
 			q = quat_t::FromMat(m);
 			{
 				const array33_t ar1(q.asMat33());
-				EXPECT_LT(AbsMax(ar0 - ar1), 1e-2);
+				EXPECT_LT(AbsMax(ar0 - ar1), Th);
 			}
 		}
 		TYPED_TEST(Quaternion, Multiply) {
@@ -111,9 +112,10 @@ namespace frea {
 			const auto q = quat_t::Rotation(axis, ang);
 			const auto m = q.asMat33();
 
-			EXPECT_TRUE(ulps::Equal(vec_t(vec_t(1,0,0)*m), q.getRight(), ThresholdULPs<value_t>));
-			EXPECT_TRUE(ulps::Equal(vec_t(vec_t(0,1,0)*m), q.getUp(), ThresholdULPs<value_t>));
-			EXPECT_TRUE(ulps::Equal(vec_t(vec_t(0,0,1)*m), q.getDir(), ThresholdULPs<value_t>));
+			constexpr auto Th = ulps::Diff_C<value_t>(0, 1<<5);
+			EXPECT_TRUE(ulps::Equal(vec_t(vec_t(1,0,0)*m), q.getRight(), Th));
+			EXPECT_TRUE(ulps::Equal(vec_t(vec_t(0,1,0)*m), q.getUp(), Th));
+			EXPECT_TRUE(ulps::Equal(vec_t(vec_t(0,0,1)*m), q.getDir(), Th));
 		}
 		//! クォータニオンの線形補間テスト
 		TYPED_TEST(Quaternion, SLerp) {
@@ -122,7 +124,6 @@ namespace frea {
 			using rad_t = typename TestFixture::rad_t;
 			using value_t = typename TestFixture::value_t;
 			using mat3_t = typename TestFixture::mat3_t;
-			constexpr auto ThresholdULPs_Quat = ulps::Diff_C<value_t>(0.0, 5e-3);
 
 			const int div = 8;
 			const value_t tdiv = 1.0/div;
@@ -140,7 +141,9 @@ namespace frea {
 				auto v = this->makeDir();
 				const vec_t v0 = v * q2;
 				const vec_t v1 = v * m1;
-				EXPECT_TRUE(ulps::Equal(v0, v1, ThresholdULPs_Quat));
+
+				constexpr auto Th = ulps::Diff_C<value_t>(0, Threshold<value_t>(1<<5, 0));
+				EXPECT_TRUE(ulps::Equal(v0, v1,  Th));
 			}
 		}
 	}

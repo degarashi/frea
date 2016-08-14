@@ -47,20 +47,16 @@ namespace frea {
 			_Fill(dst, rdf, nullptr);
 		}
 
-		template <class T, class OP>
-		auto _Op(const T& t, const OP&, ...) {
+		template <class T, class OP, ENABLE_IF(!(HasIndex_t<T,int>{}))>
+		auto Op(const T& t, const OP&) {
 			return t;
 		}
-		template <class T, class OP>
-		auto _Op(const T& t, const OP& op, std::decay_t<decltype(std::declval<T>()[0])>*) {
-			auto ret = _Op(t.m[0], op, nullptr);
-			for(int i=0 ; i<int(countof(t.m)) ; i++)
-				ret = op(ret, _Op(t.m[i], op, nullptr));
-			return ret;
-		}
-		template <class T, class OP>
+		template <class T, class OP, ENABLE_IF((HasIndex_t<T,int>{}))>
 		auto Op(const T& t, const OP& op) {
-			return _Op(t, op, nullptr);
+			auto ret = Op(t.m[0], op);
+			for(int i=0 ; i<int(countof(t.m)) ; i++)
+				ret = op(ret, Op(t.m[i], op));
+			return ret;
 		}
 
 		template <class T>
@@ -254,19 +250,18 @@ namespace frea {
 				}
 		};
 
+		template <class T, ENABLE_IF(std::is_floating_point<T>{})>
+		constexpr T Threshold(const T& fr, const T&) noexcept {
+			return std::numeric_limits<T>::epsilon()*fr;
+		}
+		template <class T, ENABLE_IF(std::is_integral<T>{})>
+		constexpr T Threshold(const T&, const T& ia) noexcept {
+			return ia;
+		}
 		template <class T>
-		constexpr T ThresholdULPs(0);
-		template <>
-		constexpr auto ThresholdULPs<float> = ulps::Diff_C<float>(0.f, 3e-4f);
-		template <>
-		constexpr auto ThresholdULPs<double> = ulps::Diff_C<double>(0.f, 3e-4);
-
-		template <class T>
-		constexpr T RangeV;
-		template <>
-		constexpr auto RangeV<float> = 1e4f;
-		template <>
-		constexpr auto RangeV<double> = 1e16;
+		constexpr bool IsZero(const T& val, const T& th) noexcept {
+			return std::abs(val) < th;
+		}
 
 		template <class... Ts0, class... Ts1>
 		auto ConcatTypes(::testing::Types<Ts0...>, ::testing::Types<Ts1...>) -> ::testing::Types<Ts0..., Ts1...>;

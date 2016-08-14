@@ -3,26 +3,6 @@
 
 namespace frea {
 	namespace test {
-		namespace {
-			template <class T, ENABLE_IF(std::is_floating_point<T>{})>
-			bool IsZero(const T& t) {
-				return t < 1e-2;
-			}
-			template <class T, ENABLE_IF(std::is_floating_point<T>{})>
-			constexpr auto Threshold() -> T{
-				return 1e-2;
-			}
-
-			template <class T, ENABLE_IF(std::is_integral<T>{})>
-			bool IsZero(const T& t) {
-				return t==0;
-			}
-			template <class T, ENABLE_IF(std::is_integral<T>{})>
-			constexpr auto Threshold() -> T{
-				return 2;
-			}
-		}
-
 		template <class T>
 		using Matrix = RMatrix<T>;
 		using Types_t = types::MatrixRange_t<types::Reg_t, 3, 3>;
@@ -34,6 +14,9 @@ namespace frea {
 			using value_t = typename TestFixture::value_t;
 			using array_t = typename TestFixture::array_t;
 
+			// 逆数を掛けることで除算としていたりx86の場合内部精度がvalue_tと違うかも知れないのである程度のマージンを設ける
+			constexpr auto Th = Threshold<value_t>(1<<8, 2);	// 除算以外
+			constexpr auto ThD = Threshold<value_t>(1<<16, 2);	// 除算
 			constexpr auto range = Range<value_t>{-1e3, 1e3};
 			auto mat = this->makeRMat(range);
 			const array_t raw(mat);
@@ -42,54 +25,30 @@ namespace frea {
 			auto rd = this->mt().template getUniformF<value_t>(range);
 			do {
 				s = rd();
-            } while(IsZero(std::abs(s)));
-			#define DEF_TEST(num, op, target) \
+			} while(IsZero(s, Th));
+			#define DEF_TEST(num, op, target, th) \
 				case num: { \
 					const decltype(raw) raw0 = raw op target; \
 					const decltype(mat) mat0 = mat op target; \
 					/* 結果がほぼ一致することを確認 */ \
-                    ASSERT_LT(AbsMax(raw0 - mat0), Threshold<value_t>()); \
+					ASSERT_LT(AbsMax(raw0 - mat0), th); \
 					break; }
 
 			// ランダムで四則演算
-			switch(this->mt().template getUniform<int>({0,6})) {
-				DEF_TEST(0, +, s)		// スカラとの和
-				DEF_TEST(1, -, s)		// スカラとの差
-				DEF_TEST(2, *, s)		// スカラとの積
-				DEF_TEST(3, /, s)		// スカラとの除
-				DEF_TEST(4, +, t)		// 行列との和
-				DEF_TEST(5, -, t)		// 行列との差
-				DEF_TEST(6, *, t)		// 行列との積
+			switch(this->mt().template getUniform<int>({3,3})) {
+				DEF_TEST(0, +, s, Th)		// スカラとの和
+				DEF_TEST(1, -, s, Th)		// スカラとの差
+				DEF_TEST(2, *, s, Th)		// スカラとの積
+				DEF_TEST(3, /, s, ThD)		// スカラとの除
+				DEF_TEST(4, +, t, Th)		// 行列との和
+				DEF_TEST(5, -, t, Th)		// 行列との差
+				DEF_TEST(6, *, t, Th)		// 行列との積
 				default:
 					__assume(false)
 			}
 			#undef DEF_TEST
 		}
 
-		template <class T>
-		using SMatrix = RMatrix<T>;
-		using SqTypes_t = seq::ExpandTypes_t2<
-			types::SquareMat_t,
-			std::tuple<
-				types::Reg_t,
-				seq::Range_t<2,5>,
-				std::tuple<BConst<false>>
-			>
-		>;
-		using SqTypes = ToTestTypes_t<SqTypes_t>;
-		TYPED_TEST_CASE(SMatrix, SqTypes);
-		TYPED_TEST(SMatrix, Transpose) {
-			using value_t = typename TestFixture::value_t;
-			using array_t = typename TestFixture::array_t;
-
-			constexpr auto range = Range<value_t>{-1e3, 1e3};
-			auto mat = this->makeRMat(range);
-			array_t raw(mat);
-
-			raw.transpose();
-			mat.transpose();
-			ASSERT_LT(AbsMax(raw - mat), Threshold<value_t>());
-		}
 
 		template <class T>
 		using FSMatrix = RMatrix<T>;

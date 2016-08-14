@@ -12,8 +12,8 @@ namespace frea {
 
 		TYPED_TEST(FloatVector, MulDiv) {
 			using value_t = typename TestFixture::value_t;
-			constexpr auto threshold = ThresholdULPs<value_t>;
-			constexpr value_t rangev = RangeV<value_t>;
+			constexpr auto threshold = Threshold<value_t>(1<<14, 0);
+			constexpr value_t rangev = 1e3;
 			const Range<value_t> range = {-rangev, rangev};
 			const auto v0 = this->makeRVec(range);
 			const int n = this->mt().template getUniform<int>({1,8});

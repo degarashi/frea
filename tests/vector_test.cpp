@@ -23,14 +23,15 @@ namespace frea {
 			using value_t = typename TestFixture::value_t;
 			using array_t = typename TestFixture::array_t;
 			constexpr auto range = DefaultRange<value_t>;
-			auto vec = this->makeRVec(range);
-			array_t ar(vec);
+			const auto vec = this->makeRVec(range);
+			const array_t ar(vec);
 
 			value_t sum0 = 0;
 			for(int i=0 ; i<array_t::size ; i++)
-				sum0+= ar[i];
-			value_t sum1 = (vec+0).sumUp();
-			ASSERT_TRUE(ulps::Equal(sum0, sum1, ThresholdULPs<value_t>));
+				sum0 += ar[i];
+			const value_t sum1 = (vec+0).sumUp();
+			constexpr auto Th = ulps::Diff_C<value_t>(0, Threshold<value_t>(1<<5, 0));
+			ASSERT_TRUE(ulps::Equal(sum0, sum1, Th));
 		}
 		// 内部表現による演算結果の差異をチェック
 		TYPED_TEST(Vector, Register) {

@@ -12,7 +12,7 @@ namespace frea {
 		TYPED_TEST(IntVector, MulDiv) {
 			using value_t = typename TestFixture::value_t;
 			using Lim = std::numeric_limits<value_t>;
-			const Range<value_t> range = {Lim::lowest()/512, Lim::max()/512};
+			const Range<value_t> range = {Lim::lowest()/2048, Lim::max()/2048};
 			const auto v0 = this->makeRVec(range);
 			const int n = this->mt().template getUniform<int>({1,8});
 			auto mul = v0 * n;
