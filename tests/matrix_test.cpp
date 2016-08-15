@@ -35,7 +35,7 @@ namespace frea {
 					break; }
 
 			// ランダムで四則演算
-			switch(this->mt().template getUniform<int>({3,3})) {
+			switch(this->mt().template getUniform<int>({0,6})) {
 				DEF_TEST(0, +, s, Th)		// スカラとの和
 				DEF_TEST(1, -, s, Th)		// スカラとの差
 				DEF_TEST(2, *, s, Th)		// スカラとの積
