@@ -318,13 +318,22 @@ namespace frea {
 
 			template <class R, class S, class A>
 			using SquareMat_t = std::tuple<R, S, S, A>;
-			template <class E, int M, int N>
+			template <class E, int S0, int S1>
+			using SMatrixRange_t = seq::ExpandTypes_t2<
+				SquareMat_t,
+				std::tuple<
+					E,
+					seq::Range_t<S0,S1>,
+					seq::BoolSeq_t
+				>
+			>;
+			template <class E, int M0, int M1, int N0, int N1>
 			using MatrixRange_t = seq::ExpandTypes_t2<
 				std::tuple,
 				std::tuple<
 					E,
-					seq::Range_t<2,M>,
-					seq::Range_t<2,N>,
+					seq::Range_t<M0,M1>,
+					seq::Range_t<N0,N1>,
 					seq::BoolSeq_t
 				>
 			>;

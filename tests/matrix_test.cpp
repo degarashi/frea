@@ -5,7 +5,7 @@ namespace frea {
 	namespace test {
 		template <class T>
 		using Matrix = RMatrix<T>;
-		using Types_t = types::MatrixRange_t<types::Reg_t, 3, 3>;
+		using Types_t = types::MatrixRange_t<types::Reg_t, 3,5, 3,5>;
 		using Types = ToTestTypes_t<Types_t>;
 		TYPED_TEST_CASE(Matrix, Types);
 
@@ -47,49 +47,6 @@ namespace frea {
 					__assume(false)
 			}
 			#undef DEF_TEST
-		}
-
-
-		template <class T>
-		using FSMatrix = RMatrix<T>;
-		using FSTypes_t = seq::ExpandTypes_t2<
-			types::SquareMat_t,
-			std::tuple<
-				types::FReg_t,
-				seq::Range_t<2,5>,
-				seq::BoolSeq_t
-			>
-		>;
-		using FSTypes = ToTestTypes_t<FSTypes_t>;
-		TYPED_TEST_CASE(FSMatrix, FSTypes);
-		namespace {
-			template <class M>
-			bool IsNormalMatrix(const M& m, const typename M::value_t& th) {
-				for(int i=0 ; i<M::dim_m ; i++) {
-					for(int j=0 ; j<M::dim_n ; j++) {
-						const typename M::value_t val = std::abs(m[i][j] - ((i==j) ? 1 : 0));
-						if(val >= th)
-							return false;
-					}
-				}
-				return true;
-			}
-		}
-		TYPED_TEST(FSMatrix, Inverse) {
-			using value_t = typename TestFixture::value_t;
-			using mat_t = typename TestFixture::mat_t;
-
-			constexpr auto range = Range<value_t>{-1e2, 1e2};
-			const auto mat = this->makeRMat(range);
-			try {
-				const auto mati = mat.inversion();
-				const mat_t m0(mat*mati),
-							m1(mati*mat);
-				ASSERT_TRUE(IsNormalMatrix(m0, 1e-2));
-				ASSERT_TRUE(IsNormalMatrix(m1, 1e-2));
-			} catch(const NoInverseMatrix&) {
-				// 逆行列が存在しない場合は何もチェックしない
-			}
 		}
 	}
 }
