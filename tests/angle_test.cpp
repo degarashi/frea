@@ -36,7 +36,6 @@ namespace frea {
 
 		// ループ毎にsingleした値と独自にwhileで求めた値を比べる
 		TYPED_TEST(Angle, Single) {
-			constexpr auto ThULPs = ulps::Diff_C(TypeParam(1.0), TypeParam(0.001));
 			constexpr auto onerotation = AngleInfo<Degree_t>::one_rotation<TypeParam>;
 			auto angle = this->makeRF();
 			typename TestFixture::deg_t degf(angle);
@@ -51,7 +50,7 @@ namespace frea {
 						val -= onerotation;
 					while(val < 0)
 						val += onerotation;
-					EXPECT_TRUE(ulps::Equal(tmp_degf.get(), val, ThULPs));
+					EXPECT_NEAR(tmp_degf.get(), val, Threshold<TypeParam>(0.5, 0));
 				}
 
 				auto a = this->makeRF();
@@ -66,7 +65,7 @@ namespace frea {
 			a0.semicircle();
 			a1.semicircle();
 			a1.single();
-			ASSERT_LT(AngleDiff(a0, a1).get(), 1e-3);
+			ASSERT_LT(AngleDiff(a0, a1).get(), Threshold<TypeParam>(0.6,0));
 		}
 		TYPED_TEST(Angle, Range) {
 			using deg_t = typename TestFixture::deg_t;
@@ -84,12 +83,11 @@ namespace frea {
 			EXPECT_EQ(degf.get(), val);
 		}
 		TYPED_TEST(Angle, Degree_Radian_Degree) {
-			constexpr auto ThULPs = ulps::Diff_C(TypeParam(1000.0), TypeParam(0.1));
 			// Degree -> Radian -> Degree で値の比較
 			const Degree<TypeParam> degf(this->makeRF());
 			const auto radf = degf.template convert<Radian_t>();
 			const auto degf2 = radf.template convert<Degree_t>();
-			EXPECT_TRUE(ulps::Equal(degf.get(), degf2.get(), ThULPs));
+			EXPECT_NEAR(degf.get(), degf2.get(), Threshold<TypeParam>(0.6, 0));
 		}
 		TYPED_TEST(Angle, Degree_Radian_Convert) {
 			const auto deg = this->makeRF();
@@ -97,7 +95,7 @@ namespace frea {
 			const Radian<TypeParam> radf(degf);
 			const auto r0 = degf.get() / AngleInfo<Degree_t>::one_rotation<TypeParam>;
 			const auto r1 = radf.get() / AngleInfo<Radian_t>::one_rotation<TypeParam>;
-			EXPECT_NEAR(r0, r1, TypeParam(1e-4));
+			EXPECT_NEAR(r0, r1, Threshold<TypeParam>(0.6, 0));
 		}
 		TYPED_TEST(Angle, Arithmetic) {
 			using deg_t = typename TestFixture::deg_t;
@@ -127,17 +125,18 @@ namespace frea {
 			// Lerp係数が0ならang0と等しい
 			tmp = AngleLerp(ang0, ang1, 0.0);
 			tmp.single();
-			EXPECT_NEAR(ang0.get(), tmp.get(), 1e-4);
+			constexpr auto Th = Threshold<TypeParam>(0.5, 0);
+			EXPECT_NEAR(ang0.get(), tmp.get(), Th);
 			// Lerp係数が1ならang1と等しい
 			tmp = AngleLerp(ang0, ang1, 1.0);
 			tmp.single();
-			EXPECT_NEAR(ang1.get(), tmp.get(), 1e-4);
+			EXPECT_NEAR(ang1.get(), tmp.get(), Th);
 			// Lerp係数を0.5で2回かければ0.75でやったのと(ほぼ)同じになる
 			tmp = AngleLerp(ang0, ang1, .5);
 			tmp = AngleLerp(tmp, ang1, .5);
 			tmp2 = AngleLerp(ang0, ang1, .75);
 			tmp.single(); tmp2.single();
-			EXPECT_NEAR(tmp.get(), tmp2.get(), 1e-4);
+			EXPECT_NEAR(tmp.get(), tmp2.get(), Th);
 		}
 		TYPED_TEST(Angle, Move) {
 			using value_t = typename TestFixture::value_t;
@@ -159,11 +158,12 @@ namespace frea {
 				return std::abs(AngleLerpValueDiff(tmp.get(), ang1.get(), oa));
 			};
 			tmp = AngleMove(tmp, ang1, diff3);
-			EXPECT_FALSE(fnDiff() < 1e-3);
+			constexpr auto Th = Threshold<TypeParam>(0.6, 0);
+			EXPECT_FALSE(fnDiff() < Th);
 			tmp = AngleMove(tmp, ang1, diff3);
-			EXPECT_FALSE(fnDiff() < 1e-3);
+			EXPECT_FALSE(fnDiff() < Th);
 			tmp = AngleMove(tmp, ang1, diff3);
-			EXPECT_TRUE(fnDiff() < 1e-3);
+			EXPECT_TRUE(fnDiff() < Th);
 		}
 		TYPED_TEST(Angle, AngleValue) {
 			using deg_t = typename TestFixture::deg_t;
@@ -173,14 +173,15 @@ namespace frea {
 			// VectorFromAngleで計算したものと行列で計算したものとはほぼ一致する
 			const vec_t v0 = VectorFromAngle(ang),
 						v1 = vec_t(0,1) * mat_t::Rotation(ang);
-			EXPECT_NEAR(v0.x, v1.x, 1e-4);
-			EXPECT_NEAR(v0.y, v1.y, 1e-4);
+			constexpr auto Th = Threshold<TypeParam>(0.6, 0);
+			EXPECT_NEAR(v0.x, v1.x, Th);
+			EXPECT_NEAR(v0.y, v1.y, Th);
 
 			// AngleValueにかければ元の角度が出る
 			deg_t ang1 = AngleValue(v0);
 			ang.single();
 			ang1.single();
-			EXPECT_LT(AngleDiff(ang, ang1).get(), 5e-2);
+			EXPECT_LT(AngleDiff(ang, ang1).get(), Threshold<TypeParam>(0.9, 0));
 		}
 	}
 }

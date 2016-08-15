@@ -64,8 +64,8 @@ namespace frea {
 			auto v = this->makeVec3();
 			const auto v0 = vec_t(v * q),
 						v1 = vec_t(v * m);
-			constexpr auto Th = ulps::Diff_C<value_t>(0, Threshold<value_t>(1<<5, 0));
-            EXPECT_TRUE(ulps::Equal(v0, v1, Th));
+			constexpr auto Th = Threshold<value_t>(0.3, 0);
+            EXPECT_LT(AbsMax(vec_t(v0-v1)), Th);
 			const array33_t ar0(m);
 			// クォータニオンを行列に変換した結果が一致するか
 			{
@@ -84,6 +84,7 @@ namespace frea {
 			using vec_t = typename TestFixture::vec_t;
 			using mat3_t = typename TestFixture::mat3_t;
 			using rad_t = typename TestFixture::rad_t;
+			using value_t = typename TestFixture::value_t;
 			using array33_t = typename TestFixture::array33_t;
 
 			// クォータニオンを合成した結果を行列のケースと比較
@@ -98,7 +99,7 @@ namespace frea {
 			q[2] = q[0] * q[1];
 			q[2].normalize();
 			m[2] = m[0] * m[1];
-			ASSERT_LT(AbsMax(array33_t(q[2].asMat33()) - m[2]), 1e-2);
+			ASSERT_LT(AbsMax(array33_t(q[2].asMat33()) - m[2]), Threshold<value_t>(0.8,0));
 		}
 		TYPED_TEST(Quaternion, Rotation) {
 			using quat_t = typename TestFixture::quat_t;
@@ -112,10 +113,10 @@ namespace frea {
 			const auto q = quat_t::Rotation(axis, ang);
 			const auto m = q.asMat33();
 
-			constexpr auto Th = ulps::Diff_C<value_t>(0, 1<<5);
-			EXPECT_TRUE(ulps::Equal(vec_t(vec_t(1,0,0)*m), q.getRight(), Th));
-			EXPECT_TRUE(ulps::Equal(vec_t(vec_t(0,1,0)*m), q.getUp(), Th));
-			EXPECT_TRUE(ulps::Equal(vec_t(vec_t(0,0,1)*m), q.getDir(), Th));
+			constexpr auto Th = Threshold<value_t>(0.1, 0);
+			EXPECT_LT(AbsMax(vec_t(vec_t(1,0,0)*m - q.getRight())), Th);
+			EXPECT_LT(AbsMax(vec_t(vec_t(0,1,0)*m - q.getUp())), Th);
+			EXPECT_LT(AbsMax(vec_t(vec_t(0,0,1)*m - q.getDir())), Th);
 		}
 		//! クォータニオンの線形補間テスト
 		TYPED_TEST(Quaternion, SLerp) {
@@ -142,8 +143,8 @@ namespace frea {
 				const vec_t v0 = v * q2;
 				const vec_t v1 = v * m1;
 
-				constexpr auto Th = ulps::Diff_C<value_t>(0, Threshold<value_t>(1<<5, 0));
-				EXPECT_TRUE(ulps::Equal(v0, v1,  Th));
+				constexpr auto Th = Threshold<value_t>(0.9, 0);
+				EXPECT_LT(AbsMax(vec_t(v0 - v1)), Th);
 			}
 		}
 	}

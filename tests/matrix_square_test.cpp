@@ -26,7 +26,8 @@ namespace frea {
 
 			raw.transpose();
 			mat.transpose();
-			ASSERT_LE(AbsMax(raw - mat), Threshold<value_t>(1<<5,0));
+			constexpr auto Th = Threshold<value_t>(0.1, 0);
+			ASSERT_LE(AbsMax(raw - mat), Th);
 
 			// (AB)t と (B)t(A)tの結果は同じ
 			mat = this->makeRMat(range);
@@ -35,7 +36,7 @@ namespace frea {
 			mat.transpose();
 			mat2.transpose();
 			const mat_t result1 = mat2 * mat;
-			ASSERT_LE(AbsMax(mat_t(result0 - result1)), Threshold<value_t>(1<<5,0));
+			ASSERT_LE(AbsMax(mat_t(result0 - result1)), Th);
 		}
 	}
 }

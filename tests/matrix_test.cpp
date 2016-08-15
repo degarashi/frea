@@ -15,8 +15,8 @@ namespace frea {
 			using array_t = typename TestFixture::array_t;
 
 			// 逆数を掛けることで除算としていたりx86の場合内部精度がvalue_tと違うかも知れないのである程度のマージンを設ける
-			constexpr auto Th = Threshold<value_t>(1<<8, 2);	// 除算以外
-			constexpr auto ThD = Threshold<value_t>(1<<16, 2);	// 除算
+			constexpr auto Th = Threshold<value_t>(0.1, 2);		// 除算以外
+			constexpr auto ThD = Threshold<value_t>(0.8, 2);	// 除算
 			constexpr auto range = Range<value_t>{-1e3, 1e3};
 			auto mat = this->makeRMat(range);
 			const array_t raw(mat);

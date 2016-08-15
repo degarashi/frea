@@ -5,8 +5,8 @@
 #include "../random/matrix.hpp"
 #include "../random/range.hpp"
 #include "../random/quaternion.hpp"
-#include "../ulps.hpp"
 #include "../meta/check_macro.hpp"
+#include "../ieee754.hpp"
 #include <gtest/gtest.h>
 
 namespace frea {
@@ -53,9 +53,9 @@ namespace frea {
 		}
 		template <class T, class OP, ENABLE_IF((HasIndex_t<T,int>{}))>
 		auto Op(const T& t, const OP& op) {
-			auto ret = Op(t.m[0], op);
-			for(int i=0 ; i<int(countof(t.m)) ; i++)
-				ret = op(ret, Op(t.m[i], op));
+			auto ret = Op(t[0], op);
+			for(int i=0 ; i<int(T::size) ; i++)
+				ret = op(ret, Op(t[i], op));
 			return ret;
 		}
 
@@ -254,13 +254,13 @@ namespace frea {
 		};
 
 		template <class T, ENABLE_IF(std::is_floating_point<T>{})>
-		constexpr T Threshold(const T& fr, const T&) noexcept {
-			return std::numeric_limits<T>::epsilon()*fr;
+		constexpr T Threshold(const double fr, const T&) noexcept {
+			constexpr auto FB = IEEE754<T>::FracBits;
+			const auto r = int64_t(1) << static_cast<int>(FB*fr);
+			return std::numeric_limits<T>::epsilon()*r;
 		}
 		template <class T, ENABLE_IF(std::is_integral<T>{})>
-		constexpr T Threshold(const T&, const T& ia) noexcept {
-			return ia;
-		}
+		constexpr T Threshold(const double, const T& ia) noexcept { return ia; }
 		template <class T>
 		constexpr bool IsZero(const T& val, const T& th) noexcept {
 			return std::abs(val) < th;

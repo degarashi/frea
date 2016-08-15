@@ -47,9 +47,9 @@ namespace frea {
 			const vec_t v1 = v0 * q0,
 						v2 = v0 * q1,
 						v3 = v0 * q2;
-			constexpr value_t Threshold = 8e-2;
-			EXPECT_LT(AbsMax(vec_t(v1-v2)), Threshold);
-			EXPECT_LT(AbsMax(vec_t(v1-v3)), Threshold);
+            constexpr value_t Th = Threshold<value_t>(0.9, 0);
+			EXPECT_LT(AbsMax(vec_t(v1-v2)), Th);
+			EXPECT_LT(AbsMax(vec_t(v1-v3)), Th);
 		}
 		TYPED_TEST(ExpQuaternion, Lerp) {
 			using eq_t = typename TestFixture::eq_t;
@@ -75,7 +75,7 @@ namespace frea {
 				eq11 = q1;
 			}
 
-			constexpr value_t Threshold = 0.4;
+			constexpr value_t Th = Threshold<value_t>(0.9, 0);
 			constexpr int NDiv = 8;
 			value_t err_sum = 0;
 			const auto v0 = this->makeDir();
@@ -90,10 +90,10 @@ namespace frea {
 
 				const auto diff = v2-v1;
 				err_sum += diff.dot(diff);
-				EXPECT_LT(err_sum/(i+1), Threshold);
+				EXPECT_LT(err_sum/(i+1), Th);
 			}
 			err_sum /= NDiv+1;
-			EXPECT_LT(err_sum, Threshold);
+			EXPECT_LT(err_sum, Th);
 		}
 	}
 }

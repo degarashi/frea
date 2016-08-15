@@ -30,8 +30,8 @@ namespace frea {
 			for(int i=0 ; i<array_t::size ; i++)
 				sum0 += ar[i];
 			const value_t sum1 = (vec+0).sumUp();
-			constexpr auto Th = ulps::Diff_C<value_t>(0, Threshold<value_t>(1<<5, 0));
-			ASSERT_TRUE(ulps::Equal(sum0, sum1, Th));
+			constexpr auto Th = Threshold<value_t>(0.4, 0);
+			ASSERT_LE(sum0-sum1, Th);
 		}
 		// 内部表現による演算結果の差異をチェック
 		TYPED_TEST(Vector, Register) {
@@ -174,7 +174,7 @@ namespace frea {
 			DEF_TEST(-)
 			DEF_TEST(*)
 			// Divideの場合は0除算を避ける
-			if(!HasZero(v1.m, (TestFixture::integral ? 1: 1e-3f))) {
+			if(!HasZero(v1.m, Threshold<value_t>(0.4, 1))) {
 				DEF_TEST(/)
 			}
 			#undef DEF_TEST
