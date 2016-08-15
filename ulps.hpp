@@ -5,6 +5,7 @@
 #include "meta/enable_if.hpp"
 #include "meta/check_macro.hpp"
 #include "compare.hpp"
+#include "ieee754.hpp"
 
 namespace frea {
 	namespace ulps {
@@ -13,27 +14,8 @@ namespace frea {
 		constexpr T Abs(T i0) {
 			return (i0<0) ? -i0 : i0;
 		}
-		namespace { namespace inner {
-			template <class T>
-			struct ULPHelper;
-			template <>
-			struct ULPHelper<float> {
-				using Integral_t = int32_t;
-				constexpr static int ExpBits = 8,
-									FracBits = 23,
-									ExpZero = 127;
-			};
-			template <>
-			struct ULPHelper<double> {
-				using Integral_t = int64_t;
-				constexpr static int ExpBits = 11,
-									FracBits = 52,
-									ExpZero = 1023;
-			};
-		}}
-
 		template <class T,
-				class Int = typename inner::ULPHelper<T>::Integral_t>
+				class Int = typename IEEE754<T>::Integral_t>
 		Int AsIntegral(const T& v0) {
 			return *reinterpret_cast<const Int*>(&v0);
 		}
@@ -51,7 +33,7 @@ namespace frea {
 				return i1 - i0;
 			}
 			template <class T,
-						class I = typename ULPHelper<T>::Integral_t,
+						class I = typename IEEE754<T>::Integral_t,
 						ENABLE_IF((std::is_floating_point<T>{}
 									&& std::is_integral<I>{}
 									&& std::is_signed<I>{}
@@ -78,9 +60,9 @@ namespace frea {
 		/*! NaNやInf, -Inf, Denormalizedな値は対応しない
 			実行時に読み替えたい場合はreinterpret_castを使う */
 		template <class T,
-				  class Int=typename inner::ULPHelper<T>::Integral_t>
+				  class Int=typename IEEE754<T>::Integral_t>
 		constexpr Int AsIntegral_C(T v0) {
-			using Helper = inner::ULPHelper<T>;
+			using Helper = IEEE754<T>;
 			if(v0 == 0)
 				return 0;
 			// 符号部
@@ -120,7 +102,7 @@ namespace frea {
 		template <class T,
 				  ENABLE_IF((std::is_floating_point<T>{}))>
 		auto Move(const T& f, const int m) {
-			using Int = typename inner::ULPHelper<T>::Integral_t;
+			using Int = typename IEEE754<T>::Integral_t;
 			auto v = *reinterpret_cast<const Int*>(&f);
 			v += m;
 			return *reinterpret_cast<const T*>(&v);
@@ -160,7 +142,7 @@ namespace frea {
 		//! ULPs(Units in the Last Place)の計算 (実行時バージョン)
 		template <
 			class T,
-			class I = typename inner::ULPHelper<T>::Integral_t,
+			class I = typename IEEE754<T>::Integral_t,
 			ENABLE_IF(!(HasIndex_t<T,int>{}))
 		>
 		bool Equal(const T& v0, const T& v1, const I maxUlps) {
@@ -170,7 +152,7 @@ namespace frea {
 		}
 		template <
 			class T,
-			class I = typename inner::ULPHelper<T>::Integral_t,
+			class I = typename IEEE754<T>::Integral_t,
 			ENABLE_IF((HasIndex_t<T,int>{}))
 		>
 		bool Equal(const T& v0, const T& v1, const I maxUlps) {
@@ -186,13 +168,13 @@ namespace frea {
 		}
 		// v0 <= v1 + thresholdUlps
 		template <class T,
-				class I = typename inner::ULPHelper<T>::Integral_t>
+				class I = typename IEEE754<T>::Integral_t>
 		bool LessEqual(const T& v0, const T& v1, const I thresholdUlps) {
 			return inner::CmpULPs(v0, v1, thresholdUlps, std::less_equal<>(), std::plus<>());
 		}
 		// v0 >= v1 - thresholdUlps
 		template <class T,
-				class I = typename inner::ULPHelper<T>::Integral_t>
+				class I = typename IEEE754<T>::Integral_t>
 		bool GreaterEqual(const T& v0, const T& v1, const I thresholdUlps) {
 			return inner::CmpULPs(v0, v1, thresholdUlps, std::greater_equal<>(), std::minus<>());
 		}
