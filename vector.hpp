@@ -502,6 +502,14 @@ namespace frea{
 		template <int N2, bool A2=align>
 		using type_cn = Data<T,N2,A2>;
 
+		// --- iterator interface ---
+		value_t* begin() { return this->m; }
+		value_t* end() { return this->m+N; }
+		const value_t* begin() const { return this->m; }
+		const value_t* end() const { return this->m+N; }
+		const value_t* cbegin() const { return this->m; }
+		const value_t* cend() const { return this->m+N; }
+
 		Data() = default;
 		template <bool A2>
 		constexpr Data(const value_t* src, BConst<A2>) {

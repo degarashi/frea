@@ -343,6 +343,48 @@ namespace frea {
 	};
 	#undef DEF_FUNC
 
+	template <bool C, class T>
+	using ConstIf = std::conditional_t<C, std::add_const_t<T>, T>;
+
+	template <class D, bool C>
+	class ItrM :
+		public std::iterator<
+			std::input_iterator_tag,
+			ConstIf<C, typename D::value_t>
+		>
+	{
+		private:
+			using base_t = std::iterator<std::input_iterator_tag, ConstIf<C, typename D::value_t>>;
+			D&		_target;
+			int		_cursor;
+			constexpr static int dim_m = D::dim_m;
+		public:
+			ItrM(D& t, const int cur):
+				_target(t),
+				_cursor(cur)
+			{}
+			typename base_t::reference operator * () const {
+				return _target.m[_cursor/dim_m][_cursor%dim_m];
+			}
+			ItrM& operator ++ () {
+				++_cursor;
+				return *this;
+			}
+			ItrM operator ++ (int) {
+				const int cur = _cursor++;
+				return ItrM(_target, cur);
+			}
+			typename base_t::pointer operator -> () const {
+				return &(*this);
+			}
+			bool operator == (const ItrM& itr) const {
+				return _cursor == itr._cursor;
+			}
+			bool operator != (const ItrM& itr) const {
+				return _cursor != itr._cursor;
+			}
+	};
+
 	template <class V, int M>
 	class DataM {
 		public:
@@ -370,6 +412,14 @@ namespace frea {
 		public:
 			vec_t	m[dim_m];
 			DataM() = default;
+
+			// --- iterator interface ---
+			auto begin() { return ItrM<DataM, false>(*this, 0); }
+			auto end() { return ItrM<DataM, false>(*this, dim_m); }
+			auto begin() const { return ItrM<DataM, true>(*this, 0); }
+			auto end() const { return ItrM<DataM, true>(*this, dim_m); }
+			auto cbegin() const { return ItrM<DataM, true>(*this, 0); }
+			auto cend() const { return ItrM<DataM, true>(*this, dim_m); }
 
 			vec_t& operator [](const int n) {
 				return m[n];

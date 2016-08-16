@@ -107,6 +107,13 @@ namespace frea {
 				DEF_OP(/)
 				DEF_OP(*)
 				#undef DEF_OP
+
+				// --- iterator interface ---
+				T* begin() { return m; }
+				T* end() { return m+size; }
+				const T* cbegin() const { return m; }
+				const T* cend() const { return m+size; }
+
 				Array() = default;
 				template <class T2>
 				Array(const Array<T2,size>& a): m(a.m) {}
