@@ -6,6 +6,7 @@
 #include <type_traits>
 #include <algorithm>
 #include "meta/check_macro.hpp"
+#include "operators.hpp"
 
 DEF_HASMETHOD(asInternal)
 
@@ -20,7 +21,8 @@ namespace frea {
 		\tparam S	本来の型
 	*/
 	template <class R, int D, class S>
-	struct wrap {
+	struct wrap : op::Operator<S> {
+		using op_t = op::Operator<S>;
 		using spec_t = S;
 		using reg_t = R;
 		using I = info<R>;
@@ -87,9 +89,7 @@ namespace frea {
 			template <class R2, class S2> \
 			spec_t operator op (const wrap<R2, size, S2>& w) const& { \
 				return I::func(m, w.m); } \
-			template <class T> \
-			spec_t& operator op##= (const T& t) & { \
-				return static_cast<spec_t&>(*this = *this op t); }
+			using op_t::operator op;
 		DEF_OP(+, Add)
 		DEF_OP(-, Sub)
 		DEF_OP(*, Mul)
@@ -101,17 +101,13 @@ namespace frea {
 		// 左から行列にベクトルを掛ける
 		template <class M,
 				 ENABLE_IF(is_wrapM<M>{})>
-		spec_t operator * (const M& m) const {
+		spec_t operator * (const M& m) const& {
 			return m._pre_mul(static_cast<const spec_t&>(*this));
 		}
 
 		bool operator == (const wrap& w) const {
 			return I::Equal(maskH<size-1>(), w.maskH<size-1>());
 		}
-		bool operator != (const wrap& w) const {
-			return !(this->operator ==(w));
-		}
-
 		// 上位要素をマスク(=0)する
 		template <int N>
 		spec_t maskH() const {
@@ -285,7 +281,8 @@ namespace frea{
 		\tparam S 元のクラス
 	*/
 	template <class W, int N, class S>
-	struct tup {
+	struct tup : op::Operator<S> {
+		using op_t = op::Operator<S>;
 		using wrap_t = W;
 		using spec_t = S;
 		using value_t = typename wrap_t::value_t;
@@ -384,9 +381,6 @@ namespace frea{
 						Rem = (Rem0==0) ? wrap_t::capacity : Rem0;
 			return this->data[a_size-1].template maskH<Rem-1>() == t.data[a_size-1].template maskH<Rem-1>();
 		}
-		bool operator != (const tup& t) const {
-			return !(this->operator == (t));
-		}
 		#define DEF_OP(op) \
 			template <class T, ENABLE_IF(HasMethod_asInternal_t<T>{})> \
 			spec_t operator op (const T& t) const& { \
@@ -403,10 +397,7 @@ namespace frea{
 					ret.data[i] = this->data[i] op t.data[i]; \
 				return ret; \
 			} \
-			template <class T> \
-			spec_t& operator op##= (const T& t) & { \
-				return static_cast<spec_t&>(*this = *this op t); \
-			}
+			using op_t::operator op;
 		DEF_OP(+)
 		DEF_OP(-)
 		DEF_OP(*)
@@ -418,7 +409,7 @@ namespace frea{
 		// 左から行列にベクトルを掛ける
 		template <class M,
 				 ENABLE_IF(is_wrapM<M>{})>
-		spec_t operator * (const M& m) const {
+		spec_t operator * (const M& m) const& {
 			return m._pre_mul(static_cast<const spec_t&>(*this));
 		}
 
@@ -490,6 +481,7 @@ namespace frea{
 
 	static struct Set_t{} TagSet;
 	static struct Mask_t{} TagMask;
+
 	// メモリ上でのデータ表現
 	/*!
 		\tparam T
@@ -561,7 +553,7 @@ namespace frea{
 				 ENABLE_IF(S<8)>
 		static int32_t ToInt(IConst<S>);
 		template <int S,
-				 ENABLE_IF(S>=8)>
+				 ENABLE_IF(S==8)>
 		static int64_t ToInt(IConst<S>);
 		template <class Typ>
 		using ToInt_t = decltype(ToInt(IConst<sizeof(Typ)>()));
@@ -573,10 +565,6 @@ namespace frea{
 				for(int i=0 ; i<size ; i++) \
 					ret.m[i] = base_t::m[i] op d.m[i]; \
 				return ret; \
-			} \
-			template <class T2> \
-			Data& operator op##= (const T2& d) { \
-				return *this = *this op d; \
 			}
 		DEF_OP(+)
 		DEF_OP(-)
@@ -591,10 +579,6 @@ namespace frea{
 				for(int i=0 ; i<size ; i++) \
 					ret.m[i] = ToInt_t<T>(base_t::m[i]) op ToInt_t<T2>(d.m[i]); \
 				return ret; \
-			} \
-			template <class T2> \
-			Data& operator op##= (const T2& d) { \
-				return *this = *this op d; \
 			}
 		DEF_OP(&)
 		DEF_OP(|)
@@ -613,7 +597,8 @@ namespace frea{
 #include "include/raw.hpp"
 namespace frea {
 	template <class W, class D, class S>
-	struct VecT : D {
+	struct VecT : D, op::Operator<S> {
+		using op_t = op::Operator<S>;
 		using spec_t = S;
 		using base_t = D;
 		using base_t::base_t;
@@ -658,20 +643,14 @@ namespace frea {
 		bool operator == (const wrap_t& v) const noexcept {
 			return asInternal() == v;
 		}
-		bool operator != (const wrap_t& v) const noexcept {
-			return !(*this == v);
-		}
 		// ------------------- アダプタ関数 -------------------
 		// 内部形式との演算子
 		#define DEF_OP(op) \
 			template <class W2> \
-			wrap_t operator op (const W2& w) const { \
+			wrap_t operator op (const W2& w) const& { \
 				return asInternal() op w; \
 			} \
-			template <class V> \
-			spec_t& operator op##= (const V& v) { \
-				return static_cast<spec_t&>(*this = *this op v); \
-			}
+			using op_t::operator op;
 		DEF_OP(+)
 		DEF_OP(-)
 		DEF_OP(*)
