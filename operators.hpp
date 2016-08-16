@@ -3,20 +3,21 @@
 
 namespace frea {
 	namespace op {
-		#define NOEXCEPT(e) //noexcept(noexcept((Self&)std::declval<Self>() e (T&)std::declval<T>()))
-		#define NOEXCEPT_R(e) //noexcept(noexcept(std::declval<Self>() e std::declval<T>()))
+		#define _NOEXCEPT(e) noexcept((Self&)std::declval<Self>() e (T&)std::declval<T>())
+		#define NOEXCEPT(e) noexcept(_NOEXCEPT(e))
+		#define NOEXCEPT_2(e, e2) noexcept(_NOEXCEPT(e) && _NOEXCEPT(e2))
 		#define DEF_OP(op) \
 			template <class T> \
-			auto& operator op##= (const T& t) & NOEXCEPT(op##=) { \
+			auto& operator op##= (const T& t) & NOEXCEPT(op) { \
 				auto& self = static_cast<Self&>(*this); \
 				return self = self op t; \
 			} \
 			template <class T> \
-			auto&& operator op##= (const T& t) && NOEXCEPT_R(op##=) { \
+			auto&& operator op##= (const T& t) && NOEXCEPT(op##=) { \
 				return std::move(*this op##= t); \
 			} \
 			template <class T> \
-			auto&& operator op (const T& t) && NOEXCEPT_R(op) { \
+			auto&& operator op (const T& t) && NOEXCEPT(op##=) { \
 				return std::move(static_cast<Self&>(*this) op##= t); \
 			}
 		template <class Self>
@@ -41,27 +42,29 @@ namespace frea {
 		template <class Self>
 		struct Compare {
 			template <class T>
-			bool operator != (const T& t) const NOEXCEPT(!=) {
+			bool operator != (const T& t) const NOEXCEPT(==) {
 				const auto& self = static_cast<const Self&>(*this);
 				return !(self == t);
 			}
 			template <class T>
-			bool operator > (const T& t) const NOEXCEPT(>) {
+			bool operator > (const T& t) const NOEXCEPT_2(<, ==) {
 				const auto& self = static_cast<const Self&>(*this);
 				return !(self < t || self == t);
 			}
 			template <class T>
-			bool operator >= (const T& t) const NOEXCEPT(>=) {
+			bool operator >= (const T& t) const NOEXCEPT(<) {
 				const auto& self = static_cast<const Self&>(*this);
 				return !(self < t);
 			}
 			template <class T>
-			bool operator <= (const T& t) const NOEXCEPT(<=) {
+			bool operator <= (const T& t) const NOEXCEPT(<) {
 				const auto& self = static_cast<const Self&>(*this);
 				return (self < t) || (self == t);
 			}
 		};
+		#undef _NOEXCEPT
 		#undef NOEXCEPT
+		#undef NOEXCEPT_2
 		template <class Self>
 		struct Operator : Arithmetic<Self>, Logical<Self>, Compare<Self> {};
 	}
