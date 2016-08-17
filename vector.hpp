@@ -716,14 +716,14 @@ namespace frea {
 	template <int N2,
 			 ENABLE_IF_I((N2>VecT<W,D,S>::size))>
 	auto VecT<W,D,S>::convert() const {
-		return type_cn<N2>(asInternal().m);
+		return type_cn<N2>(asInternal().template convert<N2>());
 	}
 	template <class W, class D, class S>
 	template <int N2,
 			 int Pos,
 			 ENABLE_IF_I((N2>VecT<W,D,S>::size))>
 	auto VecT<W,D,S>::convertI(const value_t& vi) const {
-		return type_cn<N2>(asInternal().template convertI<N2,Pos>(vi).m);
+		return type_cn<N2>(asInternal().template convertI<N2,Pos>(vi));
 	}
 	template <class W, class D, class S>
 	template <int N2,
