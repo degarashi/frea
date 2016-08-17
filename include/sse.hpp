@@ -194,6 +194,12 @@ namespace frea {
 		static reg_t Load(const value_t* i) {
 			return _mm_set_epi32(i[3],i[2],i[1],i[0]);
 		}
+		static reg_t Min(reg_t m0, reg_t m1) {
+			return _Proc<&_mm_cmplt_epi32>(m0, m1);
+		}
+		static reg_t Max(reg_t m0, reg_t m1) {
+			return _Proc<&_mm_cmpgt_epi32>(m0, m1);
+		}
 		constexpr static auto Add = &_mm_add_epi32,
 								Sub = &_mm_sub_epi32,
 								And = &_mm_and_si128,
@@ -215,6 +221,15 @@ namespace frea {
 		static auto PickAt(IConst<2>) { return AsReg(0,-1,0,0); }
 		static auto PickAt(IConst<3>) { return AsReg(-1,0,0,0); }
 		#undef AsReg
+
+		template <__m128i (*Cmp)(reg_t, reg_t)>
+		static reg_t _Proc(reg_t m0, reg_t m1) {
+			auto mask = Cmp(m0, m1);
+			m0 = And(m0, mask);
+			mask = Xor(mask, One());
+			m1 = And(m1, mask);
+			return Or(m0, m1);
+		}
 
 		template <bool A, int N>
 		static void Store(value_t*, const reg_t&, BConst<A>, IConst<N>) {}
@@ -314,7 +329,9 @@ namespace frea {
 								Div = &_mm_div_pd,
 								And = &_mm_and_pd,
 								Or = &_mm_or_pd,
-								Xor = &_mm_xor_pd;
+								Xor = &_mm_xor_pd,
+								Min = &_mm_min_pd,
+								Max = &_mm_max_pd;
 		constexpr static auto Set1 = &_mm_set1_pd;
 		constexpr static auto Set = &_mm_set_pd;
 		constexpr static auto Zero = &_mm_setzero_pd;
