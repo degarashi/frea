@@ -17,14 +17,12 @@ namespace frea {
 			template <class T>
 			struct Dist_Int {
 				using uniform_t = std::uniform_int_distribution<T>;
-				constexpr static Range<T> DefaultRange{Lim<T>::lowest(), Lim<T>::max()},
-												NumericRange = DefaultRange;
+				constexpr static Range<T> NumericRange{Lim<T>::lowest(), Lim<T>::max()};
 			};
 			template <class T>
 			struct Dist_Float  {
 				using uniform_t = std::uniform_real_distribution<T>;
-				constexpr static Range<T> DefaultRange{T(0), T(1)},
-												NumericRange{Lim<T>::lowest()/2, Lim<T>::max()/2};
+				constexpr static Range<T> NumericRange{Lim<T>::lowest()/2, Lim<T>::max()/2};
 			};
 			template <class T, ENABLE_IF((std::is_integral<T>{}))>
 			static Dist_Int<T> DetectDist();
@@ -70,17 +68,9 @@ namespace frea {
 				return _mt;
 			}
 			//! 一様分布
-			/*! floating-pointの場合は0から1の乱数
-				integerの場合は範囲指定なしnumeric_limits<T>::min() -> max()の乱数 */
+			/*! 範囲がnumeric_limits<T>::lowest() -> max()の乱数 */
 			template <class T>
 			T getUniform() {
-				constexpr auto R = Dist_t<T>::DefaultRange;
-				return getUniform<T>(R);
-			}
-			//! 一様分布
-			/*! 数値として取り得る値の範囲 */
-			template <class T>
-			T getUniformNR() {
 				constexpr auto R = Dist_t<T>::NumericRange;
 				return getUniform<T>(R);
 			}
@@ -97,7 +87,7 @@ namespace frea {
 			//! 一様分布を返すファンクタを作成
 			template <class T>
 			auto getUniformF() noexcept {
-				constexpr auto R = Dist_t<T>::DefaultRange;
+				constexpr auto R = Dist_t<T>::NumericRange;
 				return RObj<T>(*this, R);
 			}
 			//! 指定範囲の一様分布(vmax)
