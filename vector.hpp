@@ -14,6 +14,19 @@ namespace frea {
 	//! 演算レジスタに関する情報
 	template <class R>
 	struct info;
+
+	// レジスタが要素数を内包できればそれを、そうでなければTupleに収める
+	template <class R,
+			 int N,
+			 ENABLE_IF((info<R>::capacity < N))>
+	auto DetectTup(const R&, IConst<N>) -> tup_spec<wrap_spec<R,info<R>::capacity>, N>;
+	template <class R,
+			 int N,
+			 ENABLE_IF((info<R>::capacity >= N))>
+	auto DetectTup(const R&, IConst<N>) -> wrap_spec<R,N>;
+	template <class R, int N>
+	using Wrap_t = decltype(DetectTup(std::declval<R>(), IConst<N>()));
+
 	//! 演算レジスタラッパー
 	/*!
 		\tparam R	レジスタ型
@@ -33,13 +46,14 @@ namespace frea {
 		//! 演算レジスタが格納できる要素数
 		constexpr static int capacity = I::capacity;
 		template <int D2>
-		using type_cn = wrap_spec<reg_t, D2>;
+		using type_cn = Wrap_t<reg_t, D2>;
 		template <class R2>
 		using reg_cn = wrap_spec<R2, size>;
 
+		using Chk_Dummy = std::enable_if_t<(D <= capacity)>*;
+
 		reg_t	 m;
 		wrap() = default;
-
 		decltype(auto) asInternal() const noexcept { return *this; }
 		operator const reg_t& () const noexcept { return m; }
 		wrap(const reg_t& r): m(r) {}
@@ -111,32 +125,37 @@ namespace frea {
 		// 上位要素をマスク(=0)する
 		template <int N>
 		spec_t maskH() const {
+			static_assert(N<size, "");
 			return I::And(m, I::MaskH(IConst<N>()));
 		}
 		// 下位要素をマスク(=0)する
 		template <int N>
 		spec_t maskL() const {
+			static_assert(N<size, "");
 			return I::And(m, I::Xor(I::MaskH(IConst<N>()), I::One()));
 		}
+
 		// 指定要素に任意の値をセット(他はいじらない)
 		template <int N>
 		void setAt(const value_t& v) {
+			static_assert(N<size, "");
 			const auto mask = I::PickAt(IConst<N>());
 			const auto maskInv = I::Xor(I::One(), mask);
 			m = I::Or(I::And(m, maskInv), I::And(mask, I::Set1(v)));
 		}
+
 		// 指定要素へ引数の値をセット
 		template <int N>
 		void initAt(const value_t& v) {
 			m = I::And(I::PickAt(IConst<N>()), I::Set1(v));
 		}
 		// 指定要素の取得
-		template <int N>
+		template <int N, ENABLE_IF((N<size))>
 		auto pickAt() const {
 			return I::template Pick<N>(m);
 		}
 		// 指定要素で他の要素を埋める
-		template <int N>
+		template <int N, ENABLE_IF((N<size))>
 		void makeEquality() {
 			m = I::Set1(I::template Pick<N>(m));
 		}
@@ -144,7 +163,7 @@ namespace frea {
 			return (*this*w).sumUp();
 		}
 		value_t average() const {
-			return sumUp() * I::Reciprocal1(size);
+			return sumUp() / size;
 		}
 		value_t distance(const wrap& w) const {
 			return std::sqrt(dist_sq(w));
@@ -156,13 +175,13 @@ namespace frea {
 		spec_t getMin(const wrap& w) const {
 			return I::Min(m, w.m);
 		}
-		void selectMin(const wrap& w) const {
+		void selectMin(const wrap& w) {
 			*this = getMin(w);
 		}
 		spec_t getMax(const wrap& w) const {
 			return I::Max(m, w.m);
 		}
-		void selectMax(const wrap& w) const {
+		void selectMax(const wrap& w) {
 			*this = getMax(w);
 		}
 
@@ -205,6 +224,7 @@ namespace frea {
 		// メモリへの書き出し
 		template <bool A, int N>
 		void store(value_t* dst, IConst<N>) const {
+			static_assert(N<capacity, "");
 			I::Store(dst, m, BConst<A>(), IConst<N>());
 		}
 		// レジスタ型の読み替え
@@ -237,6 +257,7 @@ namespace frea {
 				 int Pos,
 				 ENABLE_IF((ToN>size))>
 		auto convertI(const value_t& v) const {
+			static_assert(Pos<ToN, "");
 			auto ret = convert<ToN>();
 			// 指定位置の要素に値をセット
 			if(Pos >= size)
@@ -262,18 +283,6 @@ namespace frea {
 #include "include/wrap_d3.hpp"
 #include "include/wrap_d4.hpp"
 namespace frea{
-	// レジスタが要素数を内包できればそれを、そうでなければTupleに収める
-	template <class R,
-			 int N,
-			 ENABLE_IF((info<R>::capacity < N))>
-	auto DetectTup(const R&, IConst<N>) -> tup_spec<wrap_spec<R,info<R>::capacity>, N>;
-	template <class R,
-			 int N,
-			 ENABLE_IF((info<R>::capacity >= N))>
-	auto DetectTup(const R&, IConst<N>) -> wrap_spec<R,N>;
-	template <class R, int N>
-	using Wrap_t = decltype(DetectTup(std::declval<R>(), IConst<N>()));
-
 	//! 要素が1レジスタでは収まりきらない場合に配列化
 	/*!
 		\tparam W wrapクラス
@@ -291,32 +300,70 @@ namespace frea{
 							a_size = (size-1)/wrap_t::capacity+1,
 							capacity = wrap_t::capacity * a_size;
 		constexpr static bool is_integral = wrap_t::is_integral;
+		constexpr static int Rem0 = N % wrap_t::capacity,
+							Rem = (Rem0==0) ? wrap_t::capacity : Rem0;
+
+		auto getMaskedTail() const {
+			return data[a_size-1].template maskH<Rem-1>();
+		}
+		auto& getTail() {
+			return data[a_size-1];
+		}
+		const auto& getTail() const {
+			return data[a_size-1];
+		}
+
 		wrap_t		data[a_size];
 
 		template <int D2>
 		using type_cn = Wrap_t<reg_t, D2>;
 
-		template <class T2>
-		auto dot(const T2& t) const {
+		auto dot(const tup& t) const {
 			auto sum = wrap_t::Zero();
 			for(int i=0 ; i<a_size-1 ; i++)
 				sum += data[i] * t.data[i];
-			constexpr int Rem0 = N % wrap_t::capacity,
-						Rem = (Rem0==0) ? wrap_t::capacity : Rem0;
-			sum += data[a_size-1] * t.data[a_size-1].template maskH<Rem-1>();
+			sum += getTail() * t.getMaskedTail();
 			return sum.sumUp();
+		}
+		auto average() const {
+			return sumUp() / size;
 		}
 		auto sumUp() const {
 			auto sum = wrap_t::Zero();
 			for(int i=0 ; i<a_size-1 ; i++)
 				sum += data[i];
-			constexpr int Rem0 = N % wrap_t::capacity,
-						Rem = (Rem0==0) ? wrap_t::capacity : Rem0;
-			sum += data[a_size-1].template maskH<Rem-1>();
+			sum += getMaskedTail();
 			return sum.sumUp();
+		}
+		auto distance(const tup& t) const {
+			return std::sqrt(dist_sq(t));
+		}
+		auto dist_sq(const tup& t) const {
+			const auto tmp = t - *this;
+			return tmp.len_sq();
 		}
 		auto len_sq() const {
 			return dot(*this);
+		}
+		spec_t getMin(const tup& t) const {
+			spec_t ret;
+			for(int i=0 ; i<a_size ; i++)
+				ret.data[i] = data[i].getMin(t.data[i]);
+			return ret;
+		}
+		void selectMin(const tup& t) {
+			for(int i=0 ; i<a_size ; i++)
+				data[i].selectMin(t.data[i]);
+		}
+		spec_t getMax(const tup& t) const {
+			spec_t ret;
+			for(int i=0 ; i<a_size ; i++)
+				ret.data[i] = data[i].getMax(t.data[i]);
+			return ret;
+		}
+		void selectMax(const tup& t) {
+			for(int i=0 ; i<a_size ; i++)
+				data[i].selectMax(t.data[i]);
 		}
 		auto length() const {
 			return std::sqrt(len_sq());
@@ -329,23 +376,34 @@ namespace frea{
 			*this /= len;
 			return len;
 		}
+		spec_t saturation(const value_t& vMin, const value_t& vMax) const {
+			spec_t ret;
+			for(int i=0 ; i<a_size ; i++)
+				ret.data[i] = data[i].saturation(vMin, vMax);
+			return ret;
+		}
+		spec_t l_intp(const tup& w, const value_t& r) const {
+			spec_t ret;
+			for(int i=0 ; i<a_size ; i++)
+				ret.data[i] = data[i].l_intp(w.data[i], r);
+			return ret;
+		}
 		bool isNaN() const {
 			for(int i=0 ; i<a_size-1 ; i++) {
 				if(data[i].isNaN())
 					return true;
 			}
-			constexpr int Rem0 = N % wrap_t::capacity,
-						Rem = (Rem0==0) ? wrap_t::capacity : Rem0;
-			return data[a_size-1].template maskH<Rem-1>().isNaN();
+			return getMaskedTail().isNaN();
 		}
 		bool isOutstanding() const {
 			for(int i=0 ; i<a_size-1 ; i++) {
 				if(data[i].isOutstanding())
 					return true;
 			}
-			constexpr int Rem0 = N % wrap_t::capacity,
-						Rem = (Rem0==0) ? wrap_t::capacity : Rem0;
-			return data[a_size-1].template maskH<Rem-1>().isOutstanding();
+			return getMaskedTail().isOutstanding();
+		}
+		spec_t operator - () const {
+			return *this * spec_t(-1);
 		}
 
 		tup() = default;
@@ -361,6 +419,18 @@ namespace frea{
 				src += wrap_t::capacity;
 			}
 		}
+		// 他wrap or tuple形式からの変換
+		template <class W2, ENABLE_IF(is_wrap<W2>{} || IsTuple_t<W2>{})>
+		explicit tup(const W2& w) {
+			// 一度メモリへ展開
+			alignas(16) value_t tmp[W2::capacity];
+			w.template store<true>(tmp, IConst<W2::size-1>());
+			const auto* src = tmp;
+			for(auto& d : this->data) {
+				d = wrap_t(src, std::true_type());
+				src += wrap_t::capacity;
+			}
+		}
 		// メモリへの書き出し
 		template <bool A>
 		void store(value_t* dst, IConst<N-1>) const {
@@ -368,18 +438,14 @@ namespace frea{
 				this->data[i].template store<A>(dst, IConst<wrap_t::capacity-1>());
 				dst += wrap_t::capacity;
 			}
-			constexpr int Rem0 = N % wrap_t::capacity,
-						Rem = (Rem0==0) ? wrap_t::capacity : Rem0;
-			this->data[a_size-1].template store<A>(dst, IConst<Rem-1>());
+			getTail().template store<A>(dst, IConst<Rem-1>());
 		}
 		bool operator == (const tup& t) const {
 			for(int i=0 ; i<a_size-1 ; i++) {
 				if(this->data[i] != t.data[i])
 					return false;
 			}
-			constexpr int Rem0 = N % wrap_t::capacity,
-						Rem = (Rem0==0) ? wrap_t::capacity : Rem0;
-			return this->data[a_size-1].template maskH<Rem-1>() == t.data[a_size-1].template maskH<Rem-1>();
+			return getMaskedTail() == t.getMaskedTail();
 		}
 		#define DEF_OP(op) \
 			template <class T, ENABLE_IF(HasMethod_asInternal_t<T>{})> \
@@ -448,11 +514,50 @@ namespace frea{
 		}
 		template <int N2>
 		void makeEquality() {
-			static_assert(N2<size, "");
-			const auto val = this->data[N2/a_size].template pickAt<N2%a_size>();
+			const auto val = pickAt<N2>();
 			const wrap_t tval(val);
 			for(auto& v: this->data)
 				v = tval;
+		}
+		template <int Pos>
+		auto pickAt() const {
+			static_assert(Pos<size, "");
+			return this->data[Pos/a_size].template pickAt<Pos%a_size>();
+		}
+		template <int Pos>
+		void initAt(const value_t& val) {
+			const auto zero = wrap_t::Zero();
+			for(auto& a : this->data)
+				a = zero;
+			this->data[Pos/a_size].template initAt<Pos>(val);
+		}
+		template <int Pos>
+		spec_t maskH() const {
+			spec_t ret(*this);
+			constexpr auto From = Pos / wrap_t::capacity,
+							Mod = Pos % wrap_t::capacity;
+			const auto zero = wrap_t::Zero();
+			for(int i=From+1 ; i<a_size ; i++)
+				ret.data[i] = zero;
+			ret.data[From].template maskH<Mod>();
+			return ret;
+		}
+		template <int Pos>
+		spec_t maskL() const {
+			spec_t ret(*this);
+			constexpr auto From = Pos / wrap_t::capacity,
+							Mod = Pos % wrap_t::capacity;
+			const auto zero = wrap_t::Zero();
+			for(int i=From-1 ; i>=0 ; i--)
+				ret.data[i] = zero;
+			ret.data[From].template maskL<Mod>();
+			return ret;
+		}
+		template <int Pos>
+		void setAt(const value_t& val) {
+			constexpr auto At = Pos / wrap_t::capacity,
+							Mod = Pos % wrap_t::capacity;
+			this->data[At].template setAt<Mod>(val);
 		}
 		static spec_t Zero() { return spec_t(0); }
 	};
@@ -668,12 +773,29 @@ namespace frea {
 		DEF_OP(^)
 		#undef DEF_OP
 		auto dot(const wrap_t& w) const { return asInternal().dot(w); }
-		value_t len_sq() const { return asInternal().len_sq(); }
-		value_t length() const { return asInternal().length(); }
-		value_t normalize() { return asInternal().normalize(); }
+		value_t average() const { return asInternal().average(); }
+		value_t distance(const wrap_t& p) const { return asInternal().distance(p); }
+		value_t dist_sq(const wrap_t& p) const { return asInternal().dist_sq(p); }
+		auto getMin(const wrap_t& p) const { return asInternal().getMin(p); }
+		void selectMin(const wrap_t& p) { *this = asInternal().selectMin(p); }
+		auto getMax(const wrap_t& p) const { return asInternal().getMax(p); }
+		void selectMax(const wrap_t& p) { *this = asInternal().selectMax(p); }
+
+		spec_t operator - () const { return -asInternal(); }
+		value_t normalize() {
+			auto tmp = asInternal();
+			const value_t ret = tmp.normalize();
+			*this = tmp;
+			return ret;
+		}
 		spec_t normalization() const { return asInternal().normalization(); }
+		value_t length() const { return asInternal().length(); }
+		value_t len_sq() const { return asInternal().len_sq(); }
 		bool isNaN() const { return asInternal().isNaN(); }
 		bool isOutstanding() const { return asInternal().isOutstanding(); }
+
+		auto saturation(const value_t& vMin, const value_t& vMax) const { return asInternal().saturation(vMin, vMax); }
+		auto l_intp(const wrap_t& w, const value_t& r) const { return asInternal().l_intp(w, r); }
 
 		// ------------------- サイズ変換 -------------------
 		// 大きいサイズへの変換
