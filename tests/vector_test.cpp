@@ -282,6 +282,32 @@ namespace frea {
 			const value_t res2 = vi.dot(v1);
 			ASSERT_NEAR(-res2, res0, ThInv);
 		}
+		TYPED_TEST(Vector, MinMax) {
+			using value_t = typename TestFixture::value_t;
+			using vec_t = typename TestFixture::vec_t;
+			using array_t = typename TestFixture::array_t;
+			constexpr auto range = DefaultRange<value_t>;
+			const vec_t v = this->makeRVec(range),
+						vt = this->makeRVec(range);
+			const vec_t vMin = v.getMin(vt),
+						vMax = v.getMax(vt);
+			array_t aMin,
+					aMax;
+			for(int i=0 ; i<vec_t::size ; i++) {
+				aMin[i] = std::min(vt[i], v[i]);
+				aMax[i] = std::max(vt[i], v[i]);
+			}
+			constexpr auto Th = Threshold<value_t>(0.1, 0);
+			ASSERT_LE(AbsMax(aMin - vMin), Th);
+			ASSERT_LE(AbsMax(aMax - vMax), Th);
+
+			auto vMin0 = v,
+				 vMax0 = v;
+			vMin0.selectMin(vt);
+			vMax0.selectMax(vt);
+			ASSERT_LE(AbsMax(aMin - vMin0), Th);
+			ASSERT_LE(AbsMax(aMax - vMax0), Th);
+		}
 		TYPED_TEST(Vector, SumUp) {
 			using value_t = typename TestFixture::value_t;
 			using array_t = typename TestFixture::array_t;
