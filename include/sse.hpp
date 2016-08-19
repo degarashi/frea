@@ -60,8 +60,6 @@ namespace frea {
 			_mm_store_ss(&ret, t2);
 			return ret;
 		}
-		template <bool A, int N>
-		static void Store(value_t*, const reg_t&, BConst<A>, IConst<N>) {}
 		template <bool A>
 		static void Store(value_t* dst, const reg_t& t, BConst<A>, IConst<0>) {
 			_mm_store_ss(dst, t);
@@ -231,8 +229,6 @@ namespace frea {
 			return Or(m0, m1);
 		}
 
-		template <bool A, int N>
-		static void Store(value_t*, const reg_t&, BConst<A>, IConst<N>) {}
 		template <bool A>
 		static void Store(value_t* dst, const reg_t& t, BConst<A>, IConst<0>) {
 			alignas(16) value_t tmp[capacity];
@@ -350,8 +346,6 @@ namespace frea {
 		static auto PickAt(IConst<0>) { return AsReg(0,0,-1,-1); }
 		static auto PickAt(IConst<1>) { return AsReg(-1,-1,0,0); }
 		#undef AsReg
-		template <bool A, int N>
-		static void Store(value_t*, const reg_t&, BConst<A>, IConst<N>) {}
 		template <bool A>
 		static void Store(value_t* dst, const reg_t& t, BConst<A>, IConst<0>) {
 			_mm_store_sd(dst, t);

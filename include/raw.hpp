@@ -73,6 +73,7 @@ namespace frea {
 		static value_t Pick(const reg_t& t) { return t.m[Pos]; }
 		template <bool A2, int N2>
 		static void Store(value_t* dst, const reg_t& t, BConst<A2>, IConst<N2>) {
+			static_assert(N2<=N, "");
 			for(int i=0 ; i<N2+1 ; i++)
 				*dst++ = t.m[i];
 		}
