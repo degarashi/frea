@@ -111,6 +111,8 @@ namespace frea {
 				// --- iterator interface ---
 				T* begin() { return m; }
 				T* end() { return m+size; }
+				const T* begin() const { return m; }
+				const T* end() const { return m+size; }
 				const T* cbegin() const { return m; }
 				const T* cend() const { return m+size; }
 
