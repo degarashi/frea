@@ -777,9 +777,17 @@ namespace frea {
 		value_t distance(const wrap_t& p) const { return asInternal().distance(p); }
 		value_t dist_sq(const wrap_t& p) const { return asInternal().dist_sq(p); }
 		auto getMin(const wrap_t& p) const { return asInternal().getMin(p); }
-		void selectMin(const wrap_t& p) { *this = asInternal().selectMin(p); }
+		void selectMin(const wrap_t& p) {
+			auto tmp = asInternal();
+			tmp.selectMin(p);
+			*this = tmp;
+		}
 		auto getMax(const wrap_t& p) const { return asInternal().getMax(p); }
-		void selectMax(const wrap_t& p) { *this = asInternal().selectMax(p); }
+		void selectMax(const wrap_t& p) {
+			auto tmp = asInternal();
+			tmp.selectMax(p);
+			*this = tmp;
+		}
 
 		spec_t operator - () const { return -asInternal(); }
 		value_t normalize() {
