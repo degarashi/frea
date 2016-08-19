@@ -8,12 +8,62 @@ namespace frea {
 		using FTypes = ToTestTypes_t<types::VectorRange_t<types::FReg_t>>;
 		TYPED_TEST_CASE(FloatVector, FTypes);
 
+		namespace {
+			template <class T>
+			constexpr Range<T> DefaultRange{-1e3, 1e3};
+		}
+		TYPED_TEST(FloatVector, Distance) {
+			using vec_t = typename TestFixture::vec_t;
+			using array_t = typename TestFixture::array_t;
+			using value_t = typename TestFixture::value_t;
+			const Range<value_t> range{-1e2, 1e2};
+			const auto v0 = this->makeRVec(range),
+						v1 = this->makeRVec(range);
+			const array_t a0(v0),
+							a1(v1);
+			value_t sum = 0;
+			for(int i=0 ; i<vec_t::size ; i++)
+				sum += Square(std::abs(a0[i] - a1[i]));
+			constexpr auto Th = Threshold<value_t>(0.8,0);
+			ASSERT_NEAR(sum, v0.dist_sq(v1), Th);
+			sum = std::sqrt(sum);
+			ASSERT_NEAR(sum, v0.distance(v1), Th);
+		}
+		TYPED_TEST(FloatVector, Normalize) {
+			using vec_t = typename TestFixture::vec_t;
+			using value_t = typename TestFixture::value_t;
+
+			vec_t vec = this->makeRVec(DefaultRange<value_t>);
+			auto iv = vec.asInternal();
+			iv.normalize();
+			vec.normalize();
+
+			constexpr auto Th = Threshold<value_t>(0.1,0);
+			ASSERT_LE(AbsMax(vec_t(iv-vec)), Th);
+			ASSERT_NEAR(vec.length(), value_t(1.0), Th);
+		}
+		TYPED_TEST(FloatVector, Interpolation) {
+			using vec_t = typename TestFixture::vec_t;
+			using value_t = typename TestFixture::value_t;
+			using array_t = typename TestFixture::array_t;
+
+			const vec_t v0 = this->makeRVec(DefaultRange<value_t>),
+						v1 = this->makeRVec(DefaultRange<value_t>);
+			const array_t a0(v0),
+						a1(v1);
+			const value_t t = this->mt().template getUniform<value_t>({0,1});
+			const vec_t v2 = v0.l_intp(v1, t),
+						v3 = v0.asInternal().l_intp(v1, t);
+			const array_t a2 = a0 + (a1 - a0) * t;
+
+			constexpr auto Th = Threshold<value_t>(0.7,0);
+			ASSERT_LT(AbsMax(vec_t(v3 - v2)), Th);
+			ASSERT_LT(AbsMax(a2 - v2), Th);
+		}
 		TYPED_TEST(FloatVector, MulDiv) {
 			using value_t = typename TestFixture::value_t;
 			constexpr auto threshold = Threshold<value_t>(0.7, 0);
-			constexpr value_t rangev = 1e3;
-			const Range<value_t> range = {-rangev, rangev};
-			const auto v0 = this->makeRVec(range);
+			const auto v0 = this->makeRVec(DefaultRange<value_t>);
 			const int n = this->mt().template getUniform<int>({1,8});
 			auto mul = v0 * n;
 			auto sum = v0;
@@ -30,7 +80,7 @@ namespace frea {
 			// 自身との除算は1
 			ASSERT_EQ(vec_t(v0/v0), vec_t(1));
 			// 乗算して同じ数で除算すれば大体元と同じになる
-			const vec_t v1 = this->makeRVecNZ(1e-4, range);
+			const vec_t v1 = this->makeRVecNZ(1e-4, DefaultRange<value_t>);
 			ASSERT_LT(DiffSum(v0.m, vec_t(v0*v1/v1).m), threshold);
 		}
 
