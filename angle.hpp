@@ -79,6 +79,9 @@ namespace frea {
 
 		public:
 			constexpr static value_t OneRotationAng = AngleInfo<tag_type>::template one_rotation<value_t>;
+			constexpr static Range<value_t> OneRotationRange = {0, OneRotationAng},
+											HalfRotationRange = {-OneRotationAng/2, OneRotationAng/2};
+
 			Angle() = default;
 			//! 他タイプの角度で角度指定
 			template <class TAG2, class V2>
