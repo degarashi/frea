@@ -23,7 +23,7 @@ namespace frea {
 					_rd(mt().template getUniformF<value_t>())
 				{}
 				vec_t makeDir() {
-					return random::GenDir<vec_t>(_rd);
+					return random::GenVecUnit<vec_t>(_rd);
 				}
 				quat_t makeRQuat() {
 					return random::GenQuat<quat_t>(_rd);
@@ -75,7 +75,7 @@ namespace frea {
 				eq11 = q1;
 			}
 
-			constexpr value_t Th = Threshold<value_t>(0.9, 0);
+			constexpr value_t Th = Threshold<value_t>(1.0, 0);
 			constexpr int NDiv = 8;
 			value_t err_sum = 0;
 			const auto v0 = this->makeDir();

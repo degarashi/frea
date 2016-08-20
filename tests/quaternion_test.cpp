@@ -1,6 +1,7 @@
 #include "test.hpp"
 #include "../quaternion.hpp"
 #include "../matrix.hpp"
+#include "../random/angle.hpp"
 
 namespace frea {
 	namespace test {
@@ -26,26 +27,27 @@ namespace frea {
 
 			public:
 				Quaternion():
-					_rd(mt().template getUniformF<value_t>())
+					_rd(mt().template getUniformF<value_t>(DefaultRange))
 				{}
 				value_t makeRF() {
-					constexpr auto R = DefaultRange;
-					return mt().template getUniform<value_t>(R);
+					return _rd();
 				}
 				rad_t makeRadian() {
-					constexpr auto R = DefaultAngleRange;
-					return rad_t(mt().template getUniform<value_t>(R));
+					return random::GenHalfAngle<rad_t>(_rd);
 				}
 				vec_t makeVec3() {
 					return random::GenVec<vec_t>(_rd);
 				}
 				vec_t makeDir() {
-					return random::GenDir<vec_t>(_rd);
+					return random::GenVecUnit<vec_t>(_rd);
 				}
 				quat_t makeRQuat() {
 					return random::GenQuat<quat_t>(_rd);
 				}
 		};
+		template <class T>
+		constexpr Range<typename Quaternion<T>::value_t> Quaternion<T>::DefaultRange;
+
 		TYPED_TEST_CASE(Quaternion, types::QTypes);
 
 		TYPED_TEST(Quaternion, ConvertMatrix) {
@@ -56,7 +58,7 @@ namespace frea {
 			using vec_t = typename TestFixture::vec_t;
 
 			const auto ang = this->makeRadian();
-			const auto axis = this->makeVec3().normalization();
+			const auto axis = this->makeDir();
 			auto q = quat_t::Rotation(axis, ang);
 			const auto m = mat3_t::RotationAxis(axis, ang);
 
@@ -64,7 +66,7 @@ namespace frea {
 			auto v = this->makeVec3();
 			const auto v0 = vec_t(v * q),
 						v1 = vec_t(v * m);
-			constexpr auto Th = Threshold<value_t>(0.3, 0);
+			constexpr auto Th = Threshold<value_t>(0.7, 0);
             EXPECT_LT(AbsMax(vec_t(v0-v1)), Th);
 			const array33_t ar0(m);
 			// クォータニオンを行列に変換した結果が一致するか
@@ -135,11 +137,11 @@ namespace frea {
 			q1 = q0 * q1;
 			const mat3_t m0 = q0.asMat33();
 			for(int i=0 ; i<div ; i++) {
-				value_t t = tdiv * i;
-				mat3_t m1 = m0 * mat3_t::RotationAxis(axis, ang*t);
-				auto q2 = q0.slerp(q1, t);
+				const value_t t = tdiv * i;
+				const mat3_t m1 = m0 * mat3_t::RotationAxis(axis, ang*t);
+				const auto q2 = q0.slerp(q1, t);
 
-				auto v = this->makeDir();
+				const auto v = this->makeDir();
 				const vec_t v0 = v * q2;
 				const vec_t v1 = v * m1;
 

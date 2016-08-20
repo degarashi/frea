@@ -124,6 +124,7 @@ namespace frea {
 			return QuatT(0, 0, std::sin(ang.get()), std::cos(ang.get()));
 		}
 		static QuatT Rotation(const vec_t& axis, const rad_t ang) {
+			D_Expect(std::abs(ang.get()) < rad_t::OneRotationAng, "invalid angle range")
 			const auto C = std::cos(ang.get()/2),
 						S = std::sin(ang.get()/2);
 			const vec_t taxis = axis * S;

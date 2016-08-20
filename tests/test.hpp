@@ -196,10 +196,12 @@ namespace frea {
 				}
 				auto makeRVecNZ(const value_t& th, const Range<value_t>& r) {
 					auto rd = this->mt().template getUniformF<value_t>(r);
-					return random::GenVecCnd<vec_t>(rd,
-							[th](const auto& v){
-								return !HasZero(v.m, th);
-							});
+					auto ret = random::GenVec<vec_t>(rd);
+					for(auto& v : ret) {
+						if(std::abs(v) < th)
+							v += th*2;
+					}
+					return ret;
 				}
 		};
 		template <class T, int M, int N>

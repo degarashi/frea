@@ -1,8 +1,8 @@
 #pragma once
-#include "../error.hpp"
-#include "../angle.hpp"
-#include "../quaternion.hpp"
+#include "angle.hpp"
 #include "vector.hpp"
+#include "../error.hpp"
+#include "../quaternion.hpp"
 
 namespace frea {
 	namespace random {
@@ -10,7 +10,7 @@ namespace frea {
 		//! ランダムなクォータニオン
 		template <class Q, class RD>
 		auto GenQuat(RD&& rd) {
-			return Q::Rotation(GenDir<typename Q::vec_t>(rd), Radian<typename Q::value_t>(rd()));
+			return Q::Rotation(GenVecUnit<typename Q::vec_t>(rd), GenHalfAngle<Radian<typename Q::value_t>>(rd));
 		}
 		template <class EQ, class RD>
 		auto GenExpQuat(RD&& rd) {
