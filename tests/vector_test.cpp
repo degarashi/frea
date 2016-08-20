@@ -59,12 +59,12 @@ namespace frea {
 				static void _Proc(const V& src, const CB0& cb0, const CB1& cb1) {
 					using value_t = typename V::value_t;
 					Array<value_t, To> ar = {};
-					cb0(ar);
 					using Cmp = Arithmetic<V::size, To>;
-					for(int i=0 ; i<Cmp::less ; i++)
-						ar[i] = src[i];
 					for(int i=V::size ; i<To ; i++)
 						ar[i] = 0;
+					cb0(ar);
+					for(int i=0 ; i<Cmp::less ; i++)
+						ar[i] = src[i];
 
 					using vec2_t = typename V::template type_cn<To>;
 					const vec2_t v0(cb1(src)),

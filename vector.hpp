@@ -498,18 +498,21 @@ namespace frea{
 			tup_spec<wrap_t, ToN> ret;
 			for(int i=0 ; i<a_size ; i++)
 				ret.data[i] = this->data[i];
-			constexpr int Rem0 = N % wrap_t::capacity;
-			ret.data[decltype(ret)::a_size] = ret.data[decltype(ret)::a_size].template maskH<Rem0>();
-			for(int i=a_size ; i<decltype(ret)::a_size ; i++)
-				ret.data[i] = wrap_t::I::Zero();
+			ret.data[a_size-1] = getMaskedTail();
+			const auto zero = wrap_t::I::Zero();
+			constexpr auto AS = decltype(ret)::a_size;
+			for(int i=a_size ; i<AS ; i++)
+				ret.data[i] = zero;
 			return ret;
 		}
 		template <int ToN,
 				 int Pos,
 				 ENABLE_IF((ToN>size))>
 		auto convertI(const value_t& vi) const {
+			static_assert(Pos<ToN, "");
 			auto ret = convert<ToN>();
-			ret.data[Pos/wrap_t::capacity].template setAt<Pos % wrap_t::capacity>(vi);
+			if(Pos >= size)
+				ret.data[Pos/wrap_t::capacity].template setAt<Pos % wrap_t::capacity>(vi);
 			return ret;
 		}
 		template <int N2>
@@ -539,7 +542,7 @@ namespace frea{
 			const auto zero = wrap_t::Zero();
 			for(int i=From+1 ; i<a_size ; i++)
 				ret.data[i] = zero;
-			ret.data[From].template maskH<Mod>();
+			ret.data[From] = this->data[From].template maskH<Mod>();
 			return ret;
 		}
 		template <int Pos>
@@ -550,7 +553,7 @@ namespace frea{
 			const auto zero = wrap_t::Zero();
 			for(int i=From-1 ; i>=0 ; i--)
 				ret.data[i] = zero;
-			ret.data[From].template maskL<Mod>();
+			ret.data[From] = this->data[From].template maskL<Mod>();
 			return ret;
 		}
 		template <int Pos>
