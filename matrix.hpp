@@ -29,7 +29,8 @@ namespace frea {
 		public:
 			constexpr static bool is_integral = VW::is_integral;
 			constexpr static int dim_m = M,
-								dim_n = VW::size;
+								dim_n = VW::size,
+								bit_width = VW::bit_width;
 			using spec_t = S;
 			using vec_t = VW;
 			using value_t = typename vec_t::value_t;
@@ -110,7 +111,7 @@ namespace frea {
 			wrapM() = default;
 			template <bool A>
 			wrapM(const value_t* src, BConst<A>) {
-				for(int i=0 ; i<dim_n ; i++) {
+				for(int i=0 ; i<dim_m ; i++) {
 					v[i] = vec_t(src, BConst<A>());
 					src += A ? vec_t::capacity : vec_t::size;
 				}
@@ -270,8 +271,8 @@ namespace frea {
 	};
 
 	template <class VW, int M, int N>
-	struct wrapM_spec : wrapM<VW, N, wrapM_spec<VW,M,N>> {
-		using base_t = wrapM<VW, N, wrapM_spec<VW,M,N>>;
+	struct wrapM_spec : wrapM<VW, M, wrapM_spec<VW,M,N>> {
+		using base_t = wrapM<VW, M, wrapM_spec<VW,M,N>>;
 		using base_t::base_t;
 
 		wrapM_spec() = default;
@@ -391,8 +392,10 @@ namespace frea {
 			using value_t = typename V::value_t;
 			using vec_t = V;
 			constexpr static int dim_m = M,
-								dim_n = vec_t::size;
-			constexpr static bool align = vec_t::align;
+								dim_n = vec_t::size,
+								bit_width = vec_t::bit_width;
+			constexpr static bool align = vec_t::align,
+								is_integral = vec_t::is_integral;
 			using column_t = typename vec_t::template type_cn<dim_m>;
 		private:
 			void _init(vec_t*) {}
