@@ -44,7 +44,8 @@ namespace frea {
 		//! 格納する予定の要素数
 		constexpr static int size = D;
 		//! 演算レジスタが格納できる要素数
-		constexpr static int capacity = I::capacity;
+		constexpr static int capacity = I::capacity,
+							bit_width = sizeof(value_t)*8;
 		template <int D2>
 		using type_cn = Wrap_t<reg_t, D2>;
 		template <class R2>
@@ -297,11 +298,13 @@ namespace frea{
 		using value_t = typename wrap_t::value_t;
 		using reg_t = typename wrap_t::reg_t;
 		constexpr static int size = N,
-							a_size = (size-1)/wrap_t::capacity+1,
-							capacity = wrap_t::capacity * a_size;
+							w_capacity = wrap_t::capacity,
+							a_size = (size-1)/w_capacity+1,
+							capacity = w_capacity * a_size,
+							bit_width = sizeof(value_t)*8;
 		constexpr static bool is_integral = wrap_t::is_integral;
-		constexpr static int Rem0 = N % wrap_t::capacity,
-							Rem = (Rem0==0) ? wrap_t::capacity : Rem0;
+		constexpr static int Rem0 = N % w_capacity,
+							Rem = (Rem0==0) ? w_capacity : Rem0;
 
 		auto getMaskedTail() const {
 			return data[a_size-1].template maskH<Rem-1>();
@@ -416,7 +419,7 @@ namespace frea{
 		tup(const value_t* src, BConst<A>) {
 			for(auto& d : this->data) {
 				d = wrap_t(src, BConst<A>());
-				src += wrap_t::capacity;
+				src += w_capacity;
 			}
 		}
 		// 他wrap or tuple形式からの変換
@@ -428,15 +431,15 @@ namespace frea{
 			const auto* src = tmp;
 			for(auto& d : this->data) {
 				d = wrap_t(src, std::true_type());
-				src += wrap_t::capacity;
+				src += w_capacity;
 			}
 		}
 		// メモリへの書き出し
 		template <bool A>
 		void store(value_t* dst, IConst<N-1>) const {
 			for(int i=0 ; i<a_size-1 ; i++) {
-				this->data[i].template store<A>(dst, IConst<wrap_t::capacity-1>());
-				dst += wrap_t::capacity;
+				this->data[i].template store<A>(dst, IConst<w_capacity-1>());
+				dst += w_capacity;
 			}
 			getTail().template store<A>(dst, IConst<Rem-1>());
 		}
@@ -512,7 +515,7 @@ namespace frea{
 			static_assert(Pos<ToN, "");
 			auto ret = convert<ToN>();
 			if(Pos >= size)
-				ret.data[Pos/wrap_t::capacity].template setAt<Pos % wrap_t::capacity>(vi);
+				ret.data[Pos/w_capacity].template setAt<Pos % w_capacity>(vi);
 			return ret;
 		}
 		template <int N2>
@@ -537,8 +540,8 @@ namespace frea{
 		template <int Pos>
 		spec_t maskH() const {
 			spec_t ret(*this);
-			constexpr auto From = Pos / wrap_t::capacity,
-							Mod = Pos % wrap_t::capacity;
+			constexpr auto From = Pos / w_capacity,
+							Mod = Pos % w_capacity;
 			const auto zero = wrap_t::Zero();
 			for(int i=From+1 ; i<a_size ; i++)
 				ret.data[i] = zero;
@@ -548,8 +551,8 @@ namespace frea{
 		template <int Pos>
 		spec_t maskL() const {
 			spec_t ret(*this);
-			constexpr auto From = Pos / wrap_t::capacity,
-							Mod = Pos % wrap_t::capacity;
+			constexpr auto From = Pos / w_capacity,
+							Mod = Pos % w_capacity;
 			const auto zero = wrap_t::Zero();
 			for(int i=From-1 ; i>=0 ; i--)
 				ret.data[i] = zero;
@@ -558,8 +561,8 @@ namespace frea{
 		}
 		template <int Pos>
 		void setAt(const value_t& val) {
-			constexpr auto At = Pos / wrap_t::capacity,
-							Mod = Pos % wrap_t::capacity;
+			constexpr auto At = Pos / w_capacity,
+							Mod = Pos % w_capacity;
 			this->data[At].template setAt<Mod>(val);
 		}
 		static spec_t Zero() { return spec_t(0); }
