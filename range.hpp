@@ -11,7 +11,8 @@ namespace frea {
 		constexpr static bool ExCmp = noexcept(value_t()>value_t(),
 											value_t()==value_t()),
 								ExEq = noexcept(from=to,
-												from+=to);
+												from+=to),
+								is_integral = std::is_integral<T>{};
 		Range() = default;
 		constexpr Range(const value_t& f, const value_t& t) noexcept(ExEq):
 			from(f),
