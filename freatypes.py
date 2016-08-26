@@ -228,12 +228,16 @@ def qdump__frea__Range(d, value):
     d.putType("Range")
     d.putNumChild(0)
 
-def fr_RotationString(axis, angle):
+def fr_AxisString(axis):
     fmt = "{0:3.3f}"
     str_axis = []
     for a in axis:
         str_axis.append(fmt.format(a))
-    s = "Axis=[" + ",".join(str_axis) + "] Deg=[" + fmt.format(angle) + "]"
+    s = "Axis=[" + ",".join(str_axis) + "]"
+    return s
+def fr_RotationString(axis, angle):
+    fmt = "{0:3.3f}"
+    s = fr_AxisString(axis) + " Deg=[" + fmt.format(angle) + "]"
     return s
 # ------------------------------------------------------------
 # Quaternion
@@ -285,4 +289,13 @@ def qdump__frea__ExpQuatT(d, value):
 # ------------------------------------------------------------
 # Plane
 def qdump__frea__PlaneT(d, value):
-    fr_DumpData(d, value, "Plane")
+    val = value["m"]
+    axis = [float(val[0]), float(val[1]), float(val[2])]
+    fmt = "{0:3.3f}"
+    d.putValue("Plane: " + fr_AxisString(axis) + " D=" + fmt.format(float(val[3])))
+    d.putNumChild(4)
+    if d. isExpanded():
+        index = Fr_ElementIndex
+        with Children(d):
+            for idx in range(4):
+                d.putSubItem(index[idx], val[idx])
