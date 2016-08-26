@@ -43,15 +43,31 @@ def fr_ArrayStringB(elem, size, typ):
 def Embrace(s):
     return "[" + s + "]"
 
-def fr_DumpVector(d, elem, size, typ):
-    d.putValue(fr_ArrayStringB(elem, size, typ))
+def fr_AxisString(axis):
+    fmt = "{0:3.3f}"
+    str_axis = []
+    for a in axis:
+        str_axis.append(fmt.format(a))
+    s = "Axis=[" + ",".join(str_axis) + "]"
+    return s
+def fr_RotationString(axis, angle):
+    fmt = "{0:3.3f}"
+    s = fr_AxisString(axis) + " Deg=[" + fmt.format(angle) + "]"
+    return s
+def fr_DumpChildren(d, node, size, indexIsNumber=False):
     d.putNumChild(size)
-
     if d.isExpanded():
-        index = fr_GetElementIndex(size)
+        if indexIsNumber:
+            index = Fr_ElementIndex
+        else:
+            index = fr_GetElementIndex(size)
         with Children(d):
             for idx in range(size):
-                d.putSubItem(index[idx], elem[idx])
+                d.putSubItem(index[idx], node[idx])
+
+def fr_DumpVector(d, elem, size, typ):
+    d.putValue(fr_ArrayStringB(elem, size, typ))
+    fr_DumpChildren(d, elem, size)
 
 # ------------------------------------------------------------
 # Vector
@@ -87,12 +103,7 @@ def fr_DumpWrap(d, value, name):
         d.putArrayData(elem.address, size, d.lookupType("unsigned int"))
     else:
         d.putValue(fr_ArrayStringB(elem, size, float))
-        d.putNumChild(size)
-        if d.isExpanded():
-            index = fr_GetElementIndex(size)
-            with Children(d):
-                for idx in range(size):
-                    d.putSubItem(index[idx], elem[idx])
+        fr_DumpChildren(d, elem, size)
 
 def qdump__frea__wrap(d, value):
     fr_DumpWrap(d, value, "Wrap")
@@ -139,11 +150,7 @@ def fr_DumpTup(d, value, name):
     if not bInt:
         d.putValue(fr_TupString(value))
         d.putType(fr_TypePrefix(bInt, bw, False) + name + str(size))
-    d.putNumChild(numChild)
-    if d.isExpanded():
-        with Children(d):
-            for idx in range(numChild):
-                d.putSubItem(idx, data[idx])
+    fr_DumpChildren(d, data, numChild, True)
 
 def qdump__frea__tup(d, value):
     fr_DumpTup(d, value, "Wrap")
@@ -174,11 +181,7 @@ def fr_DumpWrapM(d, value, name):
         s += "]"
         d.putValue(s)
         d.putType(name + "[" + str(m) + "][" + str(n) + "]")
-    d.putNumChild(m)
-    if d.isExpanded():
-        with Children(d):
-            for idx in range(m):
-                d.putSubItem(idx, elem[idx])
+    fr_DumpChildren(d, elem, m, True)
 
 def qdump__frea__wrapM(d, value):
     fr_DumpWrapM(d, value, "WrapM")
@@ -207,12 +210,7 @@ def fr_DumpMData(d, value, name):
         s += fr_ArrayStringB(elem[idx]["m"], n, None if bInt else float)
     s += "]"
     d.putValue(s)
-    d.putNumChild(m)
-    if d. isExpanded():
-        index = Fr_ElementIndex
-        with Children(d):
-            for idx in range(m):
-                d.putSubItem(index[idx], elem[idx])
+    fr_DumpChildren(d, elem, m, True)
 
 def qdump__frea__DataM(d, value):
     fr_DumpMData(d, value, "DataM")
@@ -228,17 +226,6 @@ def qdump__frea__Range(d, value):
     d.putType("Range")
     d.putNumChild(0)
 
-def fr_AxisString(axis):
-    fmt = "{0:3.3f}"
-    str_axis = []
-    for a in axis:
-        str_axis.append(fmt.format(a))
-    s = "Axis=[" + ",".join(str_axis) + "]"
-    return s
-def fr_RotationString(axis, angle):
-    fmt = "{0:3.3f}"
-    s = fr_AxisString(axis) + " Deg=[" + fmt.format(angle) + "]"
-    return s
 # ------------------------------------------------------------
 # Quaternion
 def qdump__frea__QuatT(d, value):
@@ -257,12 +244,7 @@ def qdump__frea__QuatT(d, value):
 
     d.putValue("Quat:" + fr_RotationString(axis, angle))
     d.putType(fr_TypePrefix(value["is_integral"], value["bit_width"], value["align"]) + "Quat")
-    d.putNumChild(4)
-    if d. isExpanded():
-        index = Fr_ElementIndex
-        with Children(d):
-            for idx in range(4):
-                d.putSubItem(index[idx], val[idx])
+    fr_DumpChildren(d, val, 4)
 
 # ------------------------------------------------------------
 # ExpQuaternion
@@ -279,12 +261,7 @@ def qdump__frea__ExpQuatT(d, value):
             axis.append(float(val[i] / theta))
         angle = theta*2 / math.pi * 180
     d.putValue("ExpQuat: " + fr_RotationString(axis, angle))
-    d.putNumChild(3)
-    if d. isExpanded():
-        index = Fr_ElementIndex
-        with Children(d):
-            for idx in range(3):
-                d.putSubItem(index[idx], val[idx])
+    fr_DumpChildren(d, val, 3)
 
 # ------------------------------------------------------------
 # Plane
@@ -293,9 +270,4 @@ def qdump__frea__PlaneT(d, value):
     axis = [float(val[0]), float(val[1]), float(val[2])]
     fmt = "{0:3.3f}"
     d.putValue("Plane: " + fr_AxisString(axis) + " D=" + fmt.format(float(val[3])))
-    d.putNumChild(4)
-    if d. isExpanded():
-        index = Fr_ElementIndex
-        with Children(d):
-            for idx in range(4):
-                d.putSubItem(index[idx], val[idx])
+    fr_DumpChildren(d, val, 4)
