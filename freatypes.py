@@ -263,7 +263,24 @@ def qdump__frea__QuatT(d, value):
 # ------------------------------------------------------------
 # ExpQuaternion
 def qdump__frea__ExpQuatT(d, value):
-    fr_DumpData(d, value, "ExpQuat")
+    val = value["m"]
+    theta = math.sqrt(val[0]*val[0] + val[1]*val[1] + val[2]*val[2])
+    if theta < 1e-6:
+        # 無回転クォータニオンとして扱う
+        axis = [0,0,0]
+        angle = 0
+    else:
+        axis = []
+        for i in range(3):
+            axis.append(float(val[i] / theta))
+        angle = theta*2 / math.pi * 180
+    d.putValue("ExpQuat: " + fr_RotationString(axis, angle))
+    d.putNumChild(3)
+    if d. isExpanded():
+        index = Fr_ElementIndex
+        with Children(d):
+            for idx in range(3):
+                d.putSubItem(index[idx], val[idx])
 
 # ------------------------------------------------------------
 # Plane
