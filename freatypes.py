@@ -1,6 +1,7 @@
 # coding: utf-8
 # QtCreator Debugger用のpretty-printer
 from dumper import *
+import math
 
 Fr_ElementName = ["x", "y", "z", "w"]
 Fr_ElementIndex = []
@@ -227,10 +228,37 @@ def qdump__frea__Range(d, value):
     d.putType("Range")
     d.putNumChild(0)
 
+def fr_RotationString(axis, angle):
+    fmt = "{0:3.3f}"
+    str_axis = []
+    for a in axis:
+        str_axis.append(fmt.format(a))
+    s = "Axis=[" + ",".join(str_axis) + "] Deg=[" + fmt.format(angle) + "]"
+    return s
 # ------------------------------------------------------------
 # Quaternion
 def qdump__frea__QuatT(d, value):
-    fr_DumpData(d, value, "Quat")
+    val = value["m"]
+    s_theta = math.sqrt(1.0 - val[3]*val[3])
+    if s_theta < 1e-6:
+        # 無回転クォータニオンとして扱う
+        axis = [0,0,0]
+        angle = 0
+    else:
+        s_theta = 1.0 / s_theta
+        axis = []
+        for i in range(3):
+            axis.append(float(val[i] * s_theta))
+        angle = math.acos(val[3])*2 / math.pi * 180
+
+    d.putValue("Quat:" + fr_RotationString(axis, angle))
+    d.putType(fr_TypePrefix(value["is_integral"], value["bit_width"], value["align"]) + "Quat")
+    d.putNumChild(4)
+    if d. isExpanded():
+        index = Fr_ElementIndex
+        with Children(d):
+            for idx in range(4):
+                d.putSubItem(index[idx], val[idx])
 
 # ------------------------------------------------------------
 # ExpQuaternion
