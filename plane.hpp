@@ -8,8 +8,8 @@ namespace frea {
 		using base_t::base_t;
 		using value_t = typename base_t::value_t;
 		using vec_t = Vec_t<T,3,A>;
-		using mat3_t = MatT<vec_t, 3>;
-		using mat4_t = MatT<typename vec_t::template type_cn<4>, 4>;
+		using mat3_t = Mat_t<T,3,3,A>;
+		using mat4_t = typename mat3_t::template type_cn<4,4>;
 
 		PlaneT() = default;
 		constexpr PlaneT(const base_t& b):
@@ -109,4 +109,9 @@ namespace frea {
 			return !(*this == p);
 		}
 	};
+
+	using Plane = PlaneT<float, false>;
+	using APlane = PlaneT<float, true>;
+	using DPlane = PlaneT<double, false>;
+	using ADPlane = PlaneT<double, true>;
 }

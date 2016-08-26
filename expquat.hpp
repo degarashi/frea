@@ -72,4 +72,9 @@ namespace frea {
 			return std::make_pair(rad_t(theta*2), axis);
 		}
 	};
+
+	using ExpQuat = ExpQuatT<float, false>;
+	using AExpQuat = ExpQuatT<float, true>;
+	using DExpQuat = ExpQuatT<double, false>;
+	using ADExpQuat = ExpQuatT<double, true>;
 }

@@ -420,4 +420,9 @@ namespace frea {
 	inline std::ostream& operator << (std::ostream& os, const QuatT<T,A>& q) {
 		return os << "Quat: [" << q.x << ", " << q.y << ", " << q.z << ", " << q.w << ']';
 	}
+
+	using Quat = QuatT<float, false>;
+	using AQuat = QuatT<float, true>;
+	using DQuat = QuatT<double, false>;
+	using ADQuat = QuatT<double, true>;
 }
