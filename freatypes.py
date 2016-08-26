@@ -226,3 +226,18 @@ def qdump__frea__Range(d, value):
     d.putValue("[" + str(value["from"]) + " | " + str(value["to"]) + "]")
     d.putType("Range")
     d.putNumChild(0)
+
+# ------------------------------------------------------------
+# Quaternion
+def qdump__frea__QuatT(d, value):
+    fr_DumpData(d, value, "Quat")
+
+# ------------------------------------------------------------
+# ExpQuaternion
+def qdump__frea__ExpQuatT(d, value):
+    fr_DumpData(d, value, "ExpQuat")
+
+# ------------------------------------------------------------
+# Plane
+def qdump__frea__PlaneT(d, value):
+    fr_DumpData(d, value, "Plane")
