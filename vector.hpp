@@ -318,6 +318,27 @@ namespace frea{
 
 		wrap_t		data[a_size];
 
+		template <class... Ts, ENABLE_IF(sizeof...(Ts)==capacity)>
+		tup(const Ts&... ts) {
+			// 一度配列に展開
+			alignas(16) value_t tmp[capacity] = {static_cast<value_t>(ts)...};
+			load(tmp, std::true_type());
+		}
+		template <std::size_t... Idx, class... Ts>
+		tup(std::index_sequence<Idx...>, const Ts&... ts):
+			tup(ts..., ZeroValue<Idx>()...) {}
+		template <std::size_t>
+		constexpr static value_t ZeroValue() { return 0; }
+
+		template <class... Ts,
+				 ENABLE_IF((sizeof...(Ts)<capacity-2))>
+		tup(const value_t& t0, const value_t& t1, const Ts&... ts):
+			tup(std::make_index_sequence<capacity-sizeof...(Ts)-2>(), t0, t1, ts...) {}
+		template <bool A>
+		tup(const value_t* src, BConst<A>) {
+			load(src, BConst<A>());
+		}
+
 		template <int D2>
 		using type_cn = Wrap_t<reg_t, D2>;
 
@@ -416,7 +437,7 @@ namespace frea{
 		}
 		// メモリからの読み込み
 		template <bool A>
-		tup(const value_t* src, BConst<A>) {
+		void load(const value_t* src, BConst<A>) {
 			for(auto& d : this->data) {
 				d = wrap_t(src, BConst<A>());
 				src += w_capacity;
