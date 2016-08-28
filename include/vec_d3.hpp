@@ -10,7 +10,8 @@ namespace frea {
 		using wrap_t = typename base_t::wrap_t;
 
 		using this_t = VecT_spec;
-		this_t cross(const wrap_t& v) const { return this->::asInternal().cross(v); }
+		this_t cross(const wrap_t& v) const { return this->asInternal().cross(v); }
+		this_t operator % (const wrap_t& v) const { return cross(v); }
 		this_t verticalVector() const { return this->asInternal().verticalVector(); }
 	};
 }
