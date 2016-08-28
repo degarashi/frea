@@ -8,6 +8,7 @@ namespace frea {
 		using base_t::base_t;
 		using value_t = typename base_t::value_t;
 		using vec_t = Vec_t<T,3,A>;
+		using vec4_t = typename vec_t::template type_cn<4>;
 		using mat3_t = Mat_t<T,3,3,A>;
 		using mat4_t = typename mat3_t::template type_cn<4,4>;
 
@@ -98,8 +99,8 @@ namespace frea {
 		vec_t getOrigin() const {
 			return getNormal() * -this->w;
 		}
-		const vec_t& asVec4() const noexcept {
-			return static_cast<const vec_t&>(*this);
+		const vec4_t& asVec4() const noexcept {
+			return reinterpret_cast<const vec4_t&>(*this);
 		}
 		bool operator == (const PlaneT& p) const {
 			return static_cast<const base_t&>(*this)
