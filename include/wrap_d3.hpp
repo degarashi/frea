@@ -39,22 +39,6 @@ namespace frea {
 		this_t verticalVector() const {
 			return VerticalVector(*this);
 		}
-		//! 平面との交差点を算出
-		template <bool A>
-		auto planeDivide(const this_t& v, const PlaneT<value_t, A>& p) const {
-			// 線分が平面をまたぐか
-			const value_t distf = p.dot(*this);
-			const value_t distb = p.dot(v);
-			if(distf * distb >= 0)
-				return std::make_tuple(this_t(), false);
-		
-			const value_t ratio = fabs(distf) / (fabs(distf) + fabs(distb));
-			// 平面と線分の交点 -> tv
-			this_t tv = v - (*this);
-			tv *= ratio;
-			const this_t cp = tv + (*this);
-			return std::make_tuple(cp,true);
-		}
 	};
 	template <class T>
 	struct tup_spec<T,3> : tup<T,3, tup_spec<T,3>> {

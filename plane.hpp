@@ -115,6 +115,31 @@ namespace frea {
 			const value_t d = dot(v);
 			return {v + nml*-d*2};
 		}
+		//! 平面との交差点を算出
+		auto crosspoint(const vec_t& v0, const vec_t& v1) const {
+			struct {
+				vec_t point;
+				bool cross;
+			} res;
+			// 線分が平面をまたぐか
+			const value_t distf = dot(v0);
+			const value_t distb = dot(v1);
+			if(distf * distb >= 0) {
+				res.cross = false;
+				return res;
+			}
+			res.cross = true;
+			const value_t div = std::fabs(distf) + std::fabs(distb);
+			if(div < 1e-6) {
+				// どちらの頂点ともほぼ面上にあるので交点はその中間ということにする
+				res.point = (v0 + v1) /2;
+			} else {
+				const value_t ratio = std::fabs(distf) / div;
+				// 平面と線分の交点 -> tv
+				res.point = (v1 - v0) * ratio + v0;
+			}
+			return res;
+		}
 	};
 
 	using Plane = PlaneT<float, false>;
