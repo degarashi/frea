@@ -55,13 +55,6 @@ namespace frea {
 			const this_t cp = tv + (*this);
 			return std::make_tuple(cp,true);
 		}
-		//! 平面にてベクトルを反転
-		template <bool A>
-		void flip(const PlaneT<value_t, A>& plane) {
-			const auto& nml = plane.getNormal();
-			const value_t d = plane.dot(*this);
-			*this += nml*-d*2;
-		}
 	};
 	template <class T>
 	struct tup_spec<T,3> : tup<T,3, tup_spec<T,3>> {

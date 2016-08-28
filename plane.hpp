@@ -74,7 +74,7 @@ namespace frea {
 			this->w += d;
 		}
 		const vec_t& getNormal() const {
-			return static_cast<const vec_t&>(*this);
+			return reinterpret_cast<const vec_t&>(*this);
 		}
 		PlaneT operator * (const mat4_t& m) const {
 			const auto& nml = getNormal();
@@ -108,6 +108,12 @@ namespace frea {
 		}
 		bool operator != (const PlaneT& p) const {
 			return !(*this == p);
+		}
+		//! 平面にてベクトルを反転
+		vec_t flip(const vec_t& v) const {
+			const auto& nml = getNormal();
+			const value_t d = dot(v);
+			return {v + nml*-d*2};
 		}
 	};
 
