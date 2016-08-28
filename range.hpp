@@ -14,6 +14,9 @@ namespace frea {
 												from+=to),
 								is_integral = std::is_integral<T>{};
 		Range() = default;
+		template <class T2>
+		constexpr Range(const Range<T2>& r) noexcept(ExEq):
+			Range(static_cast<T>(r.from), static_cast<T>(r.to)) {}
 		constexpr Range(const value_t& f, const value_t& t) noexcept(ExEq):
 			from(f),
 			to(t)
