@@ -98,5 +98,33 @@ namespace frea {
 			const auto dd = dir.dot(p.getNormal());
 			EXPECT_LE(std::abs(dd)-1, Threshold<value_t>(0.8, 0));
 		}
+		TYPED_TEST(VectorD_3, CrossPoint) {
+			using value_t = typename TestFixture::value_t;
+			using vec_t = typename TestFixture::vec_t;
+			constexpr Range<value_t> range{-1e2, 1e2};
+			const auto mtf = this->mt().template getUniformF<value_t>(range);
+			const auto p = random::GenPlane<PlaneT<value_t, false>>(mtf);
+			constexpr auto Th = Threshold<value_t>(0.6, 0);
+			// 平面の両方側に位置するランダム頂点を生成
+			vec_t vf, vb;
+			// 表側に位置する頂点
+			do {
+				vf = random::GenVec<vec_t>(mtf);
+			} while(p.dot(vf) <= Th);
+			// 裏側に位置する頂点
+			do {
+				vb = random::GenVec<vec_t>(mtf);
+			} while(p.dot(vb) >= -Th);
+			const auto res0 = p.crosspoint(vf, vb);
+			// 交差フラグはTrueである
+			ASSERT_TRUE(res0.cross);
+			// 交点は面上にある
+			ASSERT_LE(std::abs(p.dot(res0.point)), Th);
+			// 逆順で計算しても結果は同じ
+			const auto res1 = p.crosspoint(vb, vf);
+			ASSERT_TRUE(res1.cross);
+			// 最初の交点と同じ位置
+			ASSERT_LE(AbsMax(vec_t(res1.point - res0.point)), Th);
+		}
 	}
 }
