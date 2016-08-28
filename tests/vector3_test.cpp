@@ -1,4 +1,6 @@
 #include "test.hpp"
+#include "../plane.hpp"
+#include "../random/plane.hpp"
 
 namespace frea {
 	namespace test {
@@ -71,6 +73,30 @@ namespace frea {
 			EXPECT_LE(std::abs(v2.dot(v0)), Th);
 			EXPECT_LE(std::abs(v2.dot(v1)), Th);
 		}
-		// }
+		TYPED_TEST(VectorD_3, Flip) {
+			using value_t = typename TestFixture::value_t;
+			using vec_t = typename TestFixture::vec_t;
+			constexpr Range<value_t> range{-1e2, 1e2};
+			const auto mtf = this->mt().template getUniformF<value_t>(range);
+			const auto p = random::GenPlane<PlaneT<value_t, false>>(mtf);
+			const auto v0 = random::GenVec<vec_t>(mtf);
+
+			// 一回反転すればplaneとの内積が符号反転
+			const auto v1 = p.flip(v0);
+			const auto d0 = p.dot(v0),
+						d1 = p.dot(v1);
+			constexpr auto Th = Threshold<value_t>(0.6, 0);
+			EXPECT_NEAR(d0, -d1, Th);
+
+			// 二回反転すると元に戻る
+			const auto v2 = p.flip(v1);
+			const auto d2 = p.dot(v2);
+			EXPECT_NEAR(d0, d2, Th);
+
+			// 反転前と後を結ぶ方向は平面の法線と同一、または正対する
+			const vec_t dir = (v1 - v0).normalization();
+			const auto dd = dir.dot(p.getNormal());
+			EXPECT_LE(std::abs(dd)-1, Threshold<value_t>(0.8, 0));
+		}
 	}
 }
