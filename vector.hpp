@@ -6,6 +6,7 @@
 #include <type_traits>
 #include <algorithm>
 #include "meta/check_macro.hpp"
+#include "meta/boolean.hpp"
 #include "operators.hpp"
 
 DEF_HASMETHOD(asInternal)
@@ -318,7 +319,13 @@ namespace frea{
 
 		wrap_t		data[a_size];
 
-		template <class... Ts, ENABLE_IF(sizeof...(Ts)==capacity)>
+		template <
+			class... Ts,
+			ENABLE_IF((
+				 And<std::is_convertible<Ts,value_t>...>{} &&
+					sizeof...(Ts)==capacity
+			))
+		>
 		tup(const Ts&... ts) {
 			// 一度配列に展開
 			alignas(16) value_t tmp[capacity] = {static_cast<value_t>(ts)...};
@@ -603,7 +610,7 @@ namespace frea{
 				}; \
 			}; \
 			Data_spec() = default; \
-			template <class... Ts, ENABLE_IF((sizeof...(Ts)>1))> \
+			template <class... Ts, ENABLE_IF((And<std::is_convertible<Ts,T>...>{} && sizeof...(Ts)>1))> \
 			constexpr Data_spec(const Ts&... ts): m{static_cast<T>(ts)...} {} \
 		};
 	DEF_DATA(2, x,y)
@@ -652,7 +659,7 @@ namespace frea{
 		value_t& operator [](const int n) noexcept { return this->m[n]; }
 		//! 複数要素での初期化
 		template <class... Ts,
-				 ENABLE_IF((sizeof...(Ts)>1))>
+				 ENABLE_IF((And<std::is_convertible<Ts,value_t>...>{} && sizeof...(Ts)>1))>
 		constexpr Data(const Ts&... ts): base_t{static_cast<value_t>(ts)...} {}
 		//! 1要素での初期化(内部呼び出し用)
 		template <std::size_t... Idx, class T2>
