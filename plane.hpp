@@ -3,7 +3,12 @@
 
 namespace frea {
 	template <class T, bool A>
-	struct PlaneT : Data<T,4,A> {
+	struct PlaneT :
+		Data<T,4,A>,
+		op::Mul<PlaneT<T,A>>,
+		op::Ne<PlaneT<T,A>>
+	{
+		using op_m = op::Mul<PlaneT<T,A>>;
 		using base_t = Data<T,4,A>;
 		using base_t::base_t;
 		using value_t = typename base_t::value_t;
@@ -81,9 +86,7 @@ namespace frea {
 			const vec_t tmp(nml * -this->w);
 			return FromPtDir(tmp.convertI<4>(1)*m, (nml.template convert<4>()*m).normalization());
 		}
-		PlaneT& operator *= (const mat4_t& m) {
-			return *this = *this * m;
-		}
+		using op_m::operator *;
 		vec_t placeOnPlane(const vec_t& src, const value_t& offset) const {
 			const value_t d = dot(src);
 			return src + getNormal() * (-this->w+offset);
@@ -105,9 +108,6 @@ namespace frea {
 		bool operator == (const PlaneT& p) const {
 			return static_cast<const base_t&>(*this)
 					== static_cast<const base_t&>(p);
-		}
-		bool operator != (const PlaneT& p) const {
-			return !(*this == p);
 		}
 		//! 平面にてベクトルを反転
 		vec_t flip(const vec_t& v) const {

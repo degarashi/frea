@@ -7,7 +7,8 @@ namespace frea {
 	template <class T, bool A>
 	struct ExpQuatT;
 	template <class T, bool A>
-	struct QuatT : Data<T,4,A> {
+	struct QuatT : Data<T,4,A>, op::Operator_Ne<QuatT<T,A>> {
+		using op_t = op::Operator_Ne<QuatT<T,A>>;
 		using base_t = Data<T,4,A>;
 		using base_t::base_t;
 		using vec_t = Vec_t<T,3,A>;
@@ -222,7 +223,8 @@ namespace frea {
 		#define DEF_SCALAR(op) \
 			QuatT operator op (const value_t& v) const { \
 				return asVec4() * v; \
-			}
+			} \
+			using op_t::operator op;
 		DEF_SCALAR(+)
 		DEF_SCALAR(-)
 		DEF_SCALAR(*)
@@ -245,17 +247,6 @@ namespace frea {
 				this->w*q.w - this->x*q.x - this->y*q.y - this->z*q.z
 			};
 		}
-
-		#define DEF_OP(op) \
-			template <class V> \
-			QuatT operator op##= (const V& v) { \
-				return *this = *this op v; \
-			}
-		DEF_OP(+)
-		DEF_OP(-)
-		DEF_OP(*)
-		DEF_OP(/)
-		#undef DEF_OP
 
 		QuatT rotationX(const rad_t ang) const {
 			return RotationX(ang) * *this;
@@ -313,9 +304,6 @@ namespace frea {
 		}
 		bool operator == (const QuatT& q) const {
 			return asVec4() == q.asVec4();
-		}
-		bool operator != (const QuatT& q) const {
-			return !(this->operator == (q));
 		}
 		QuatT slerp(const QuatT& q, const value_t& t) const {
 			const auto ac = Saturate<value_t>(dot(q), 0.0, 1.0);

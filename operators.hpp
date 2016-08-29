@@ -26,10 +26,15 @@ namespace frea {
 			DEF_OP(-)
 		};
 		template <class Self>
-		struct MulDiv {
+		struct Mul {
 			DEF_OP(*)
+		};
+		template <class Self>
+		struct Div {
 			DEF_OP(/)
 		};
+		template <class Self>
+		struct MulDiv : Mul<Self>, Div<Self> {};
 		template <class Self>
 		struct Arithmetic : PlusMinus<Self>, MulDiv<Self> {};
 		template <class Self>
@@ -40,7 +45,7 @@ namespace frea {
 		};
 		#undef DEF_OP
 		template <class Self>
-		struct Compare_Ne {
+		struct Ne {
 			template <class T>
 			bool operator != (const T& t) const NOEXCEPT(==) {
 				const auto& self = static_cast<const Self&>(*this);
@@ -48,7 +53,7 @@ namespace frea {
 			}
 		};
 		template <class Self>
-		struct Compare_Ge {
+		struct Ge {
 			template <class T>
 			bool operator > (const T& t) const NOEXCEPT_2(<, ==) {
 				const auto& self = static_cast<const Self&>(*this);
@@ -65,12 +70,14 @@ namespace frea {
 				return (self < t) || (self == t);
 			}
 		};
+		template <class Self>
+		struct Cmp : Ne<Self>, Ge<Self> {};
 		#undef _NOEXCEPT
 		#undef NOEXCEPT
 		#undef NOEXCEPT_2
 		template <class Self>
-		struct Operator : Arithmetic<Self>, Logical<Self>, Compare_Ne<Self>, Compare_Ge<Self> {};
+		struct Operator : Arithmetic<Self>, Logical<Self>, Cmp<Self> {};
 		template <class Self>
-		struct Operator_Ne : Arithmetic<Self>, Logical<Self>, Compare_Ne<Self> {};
+		struct Operator_Ne : Arithmetic<Self>, Logical<Self>, Ne<Self> {};
 	}
 }

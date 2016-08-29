@@ -25,8 +25,9 @@ namespace frea {
 		\tparam	S		本来の型
 	*/
 	template <class VW, int M, class S>
-	class wrapM {
+	class wrapM : public op::PlusMinus<S>, public op::Ne<S> {
 		public:
+			using op_t = op::PlusMinus<S>;
 			constexpr static bool is_integral = VW::is_integral;
 			constexpr static int dim_m = M,
 								dim_n = VW::size,
@@ -137,10 +138,7 @@ namespace frea {
 						ret.v[i] = v[i] op tmp; \
 					return ret; \
 				} \
-				template <class T> \
-				spec_t& operator op##= (const T& t) & { \
-					return static_cast<spec_t&>(*this = *this op t); \
-				}
+				using op_t::operator op;
 			DEF_OP(+)
 			DEF_OP(-)
 			#undef DEF_OP
@@ -189,7 +187,6 @@ namespace frea {
 			}
 
 			bool operator == (const wrapM& m) const;
-			bool operator != (const wrapM& m) const;
 
 			template <class VD>
 			void store(VD* dst) const {
@@ -457,7 +454,8 @@ namespace frea {
 
 	#define AsI(t) wrap_t(reinterpret_cast<const value_t*>((t).m), BConst<align>())
 	template <class V, int M, class S>
-	struct MatT : DataM<V,M> {
+	struct MatT : DataM<V,M>, op::Operator_Ne<S> {
+		using op_t = op::Operator_Ne<S>;
 		using spec_t = S;
 		using base_t = DataM<V,M>;
 		using base_t::base_t;
@@ -596,10 +594,7 @@ namespace frea {
 			auto operator op (const value_t& v) const { \
 				return AsI(*this) op v; \
 			} \
-			template <class T> \
-			MatT& operator op##= (const T& m) { \
-				return *this = *this op m; \
-			}
+			using op_t::operator op;
 		DEF_OP(+)
 		DEF_OP(-)
 		DEF_OP(*)
@@ -610,9 +605,6 @@ namespace frea {
 		#undef DEF_OP
 		bool operator == (const MatT& m) const {
 			return AsI(*this) == m;
-		}
-		bool operator != (const MatT& m) const {
-			return !(this->operator == (m));
 		}
 
 		// ベクトルを左から掛ける

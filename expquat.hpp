@@ -5,7 +5,8 @@
 
 namespace frea {
 	template <class T, bool A>
-	struct ExpQuatT : Data<T,3,A> {
+	struct ExpQuatT : Data<T,3,A>, op::Operator_Ne<ExpQuatT<T,A>> {
+		using op_t = op::Operator_Ne<ExpQuatT<T,A>>;
 		using base_t = Data<T,3,A>;
 		using base_t::base_t;
 		using rad_t = Radian<T>;
@@ -39,16 +40,16 @@ namespace frea {
 			ExpQuatT operator op (const value_t& s) const { \
 				return asVec3() op s; \
 			} \
-			template <class T2> \
-			ExpQuatT& operator op##= (const T2& t) { \
-				return *this = *this op t; \
-			}
+			using op_t::operator op;
 		DEF_OP(+)
 		DEF_OP(-)
 		DEF_OP(*)
 		DEF_OP(/)
 		#undef DEF_OP
 
+		bool operator == (const ExpQuatT& q) const {
+			return asVec3() == q.asVec3();
+		}
 		value_t len_sq() const {
 			return asVec3().len_sq();
 		}
