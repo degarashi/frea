@@ -58,23 +58,12 @@ namespace frea {
 			auto q0 = this->makeRQuat(),
 				q1 = this->makeRQuat();
 			// 最短距離で補間するような細工
-			if(q0.dot(q1) < 0)
+			if(q0.dot(q1) < 0) {
 				q1 *= -1;
-			eq_t eq0(q0),
-				eq1(q1),
-				eq10(q0 * -1),
-				eq11(q1 * -1);
-			const auto len0 = eq0.asVec3().length(),
-						len1 = eq1.asVec3().length(),
-						len10 = eq10.asVec3().length(),
-						len11 = eq11.asVec3().length();
-			if(len0+len1 > len10+len11) {
-				eq0 = q0 * -1;
-				eq1 = q1 * -1;
-				eq10 = q0;
-				eq11 = q1;
+				q1.w *= -1;
 			}
-
+			const eq_t eq0(q0),
+						eq1(q1);
 			constexpr value_t Th = Threshold<value_t>(1.0, 0);
 			constexpr int NDiv = 8;
 			value_t err_sum = 0;
