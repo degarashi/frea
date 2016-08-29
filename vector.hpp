@@ -35,8 +35,8 @@ namespace frea {
 		\tparam S	本来の型
 	*/
 	template <class R, int D, class S>
-	struct wrap : op::Operator<S> {
-		using op_t = op::Operator<S>;
+	struct wrap : op::Operator_Ne<S> {
+		using op_t = op::Operator_Ne<S>;
 		using spec_t = S;
 		using reg_t = R;
 		using I = info<R>;
@@ -292,8 +292,8 @@ namespace frea{
 		\tparam S 元のクラス
 	*/
 	template <class W, int N, class S>
-	struct tup : op::Operator<S> {
-		using op_t = op::Operator<S>;
+	struct tup : op::Operator_Ne<S> {
+		using op_t = op::Operator_Ne<S>;
 		using wrap_t = W;
 		using spec_t = S;
 		using value_t = typename wrap_t::value_t;
@@ -744,8 +744,8 @@ namespace frea{
 #include "include/raw.hpp"
 namespace frea {
 	template <class W, class D, class S>
-	struct VecT : D, op::Operator<S> {
-		using op_t = op::Operator<S>;
+	struct VecT : D, op::Operator_Ne<S> {
+		using op_t = op::Operator_Ne<S>;
 		using spec_t = S;
 		using base_t = D;
 		using base_t::base_t;

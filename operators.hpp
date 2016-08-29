@@ -40,12 +40,15 @@ namespace frea {
 		};
 		#undef DEF_OP
 		template <class Self>
-		struct Compare {
+		struct Compare_Ne {
 			template <class T>
 			bool operator != (const T& t) const NOEXCEPT(==) {
 				const auto& self = static_cast<const Self&>(*this);
 				return !(self == t);
 			}
+		};
+		template <class Self>
+		struct Compare_Ge {
 			template <class T>
 			bool operator > (const T& t) const NOEXCEPT_2(<, ==) {
 				const auto& self = static_cast<const Self&>(*this);
@@ -66,6 +69,8 @@ namespace frea {
 		#undef NOEXCEPT
 		#undef NOEXCEPT_2
 		template <class Self>
-		struct Operator : Arithmetic<Self>, Logical<Self>, Compare<Self> {};
+		struct Operator : Arithmetic<Self>, Logical<Self>, Compare_Ne<Self>, Compare_Ge<Self> {};
+		template <class Self>
+		struct Operator_Ne : Arithmetic<Self>, Logical<Self>, Compare_Ne<Self> {};
 	}
 }
