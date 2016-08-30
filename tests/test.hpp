@@ -357,6 +357,7 @@ namespace frea {
 				>
 			>;
 			using QTypes = ToTestTypes_t<QTypes_t>;
+			using PTypes = QTypes;
 		}
 	}
 }
