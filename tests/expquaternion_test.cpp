@@ -32,9 +32,9 @@ namespace frea {
 		TYPED_TEST_CASE(ExpQuaternion, types::QTypes);
 
 		TYPED_TEST(ExpQuaternion, QuaternionConvert) {
-			using eq_t = typename TestFixture::eq_t;
-			using vec_t = typename TestFixture::vec_t;
-			using value_t = typename TestFixture::value_t;
+			USING(eq_t);
+			USING(vec_t);
+			USING(value_t);
 
 			// Quat -> ExpQuat -> Quat の結果比較
 			const auto q0 = this->makeRQuat();
@@ -52,8 +52,8 @@ namespace frea {
 			EXPECT_LT(AbsMax(vec_t(v1-v3)), Th);
 		}
 		TYPED_TEST(ExpQuaternion, AngAxis) {
-			using value_t = typename TestFixture::value_t;
-			using vec_t = typename TestFixture::vec_t;
+			USING(value_t);
+			USING(vec_t);
 			const auto q = this->makeRQuat();
 			const auto e = q.asExpQuat();
 
@@ -67,8 +67,8 @@ namespace frea {
 			}
 		}
 		TYPED_TEST(ExpQuaternion, Lerp) {
-			using eq_t = typename TestFixture::eq_t;
-			using value_t = typename TestFixture::value_t;
+			USING(eq_t);
+			USING(value_t);
 			// ExpQuatを合成した結果をQuat合成のケースと比較
 			auto q0 = this->makeRQuat(),
 				q1 = this->makeRQuat();

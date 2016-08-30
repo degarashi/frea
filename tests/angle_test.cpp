@@ -68,7 +68,7 @@ namespace frea {
 			ASSERT_LT(AngleDiff(a0, a1).get(), ThresholdF<TypeParam>(0.6));
 		}
 		TYPED_TEST(Angle, Range) {
-			using deg_t = typename TestFixture::deg_t;
+			USING(deg_t);
 			deg_t degf(this->makeRF());
 			auto r = this->makeRange();
 			auto val = Saturate(degf.get(), r.from, r.to);
@@ -98,7 +98,7 @@ namespace frea {
 			EXPECT_NEAR(r0, r1, ThresholdF<TypeParam>(0.6));
 		}
 		TYPED_TEST(Angle, Arithmetic) {
-			using deg_t = typename TestFixture::deg_t;
+			USING(deg_t);
 			deg_t	degf(this->makeRF()),
 					degf2(this->makeRF());
 			EXPECT_EQ((degf + degf2).get(), degf.get() + degf2.get());
@@ -116,7 +116,7 @@ namespace frea {
 			EXPECT_EQ((degf /= 2).get(), val);
 		}
 		TYPED_TEST(Angle, Lerp) {
-			using deg_t = typename TestFixture::deg_t;
+			USING(deg_t);
 			deg_t	 ang0(this->makeRF()),
 					ang1(this->makeRF()),
 					tmp, tmp2;
@@ -139,8 +139,8 @@ namespace frea {
 			EXPECT_NEAR(tmp.get(), tmp2.get(), Th);
 		}
 		TYPED_TEST(Angle, Move) {
-			using value_t = typename TestFixture::value_t;
-			using deg_t = typename TestFixture::deg_t;
+			USING(value_t);
+			USING(deg_t);
 			deg_t	ang0(this->makeRF()),
 					ang1;
 			constexpr auto oa = deg_t::OneRotationAng;
@@ -166,9 +166,9 @@ namespace frea {
 			EXPECT_TRUE(fnDiff() < Th);
 		}
 		TYPED_TEST(Angle, AngleValue) {
-			using deg_t = typename TestFixture::deg_t;
-			using vec_t = typename TestFixture::vec_t;
-			using mat_t = typename TestFixture::mat_t;
+			USING(deg_t);
+			USING(vec_t);
+			USING(mat_t);
 			deg_t ang(this->makeRF());
 			// VectorFromAngleで計算したものと行列で計算したものとはほぼ一致する
 			const vec_t v0 = VectorFromAngle(ang),

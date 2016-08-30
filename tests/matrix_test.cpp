@@ -11,8 +11,8 @@ namespace frea {
 
 		// 内部表現による演算結果の差異をチェック
 		TYPED_TEST(Matrix, Register) {
-			using value_t = typename TestFixture::value_t;
-			using array_t = typename TestFixture::array_t;
+			USING(value_t);
+			USING(array_t);
 
 			// 逆数を掛けることで除算としていたりx86の場合内部精度がvalue_tと違うかも知れないのである程度のマージンを設ける
 			constexpr auto Th = Threshold<value_t>(0.1, 2);		// 除算以外

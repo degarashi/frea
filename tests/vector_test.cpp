@@ -14,9 +14,9 @@ namespace frea {
 			constexpr Range<T> DefaultRange{-1e3, 1e3};
 		}
 		TYPED_TEST(Vector, Minus) {
-			using value_t = typename TestFixture::value_t;
-			using array_t = typename TestFixture::array_t;
-			using vec_t = typename TestFixture::vec_t;
+			USING(value_t);
+			USING(array_t);
+			USING(vec_t);
 
 			// operator -
 			constexpr auto range = DefaultRange<value_t>;
@@ -107,7 +107,7 @@ namespace frea {
 					seq::Range_t<2,5>
 				>
 			>;
-			using value_t = typename TestFixture::value_t;
+			USING(value_t);
 			const value_t val = this->mt().template getUniform<value_t>();
 			const auto v = this->makeRVec(DefaultRange<value_t>);
 			ASSERT_NO_FATAL_FAILURE((Proc<ConvertSeq_t>(CheckConvert(), v, val)));
@@ -119,7 +119,7 @@ namespace frea {
 					seq::Range_t<2,5>
 				>
 			>;
-			using value_t = typename TestFixture::value_t;
+			USING(value_t);
 			const auto v = this->makeRVec(DefaultRange<value_t>);
 			ASSERT_NO_FATAL_FAILURE((Proc<ConvertSeq_t>(CheckConvert(), v)));
 		}
@@ -138,9 +138,9 @@ namespace frea {
 			}
 		}
 		TYPED_TEST(Vector, Saturation) {
-			using value_t = typename TestFixture::value_t;
-			using array_t = typename TestFixture::array_t;
-			using vec_t = typename TestFixture::vec_t;
+			USING(value_t);
+			USING(array_t);
+			USING(vec_t);
 
 			const auto vec = this->makeRVec(DefaultRange<value_t>);
 			const auto range = random::GenRange<value_t>(this->mt().template getUniformF<value_t>());
@@ -220,14 +220,14 @@ namespace frea {
 			};
 		}
 		TYPED_TEST(Vector, InternalFunc) {
-			using vec_t = typename TestFixture::vec_t;
+			USING(vec_t);
 			using Types = seq::ExpandTypes_t2<
 				std::tuple,
 				std::tuple<
 					seq::Range_t<0, vec_t::size-1>
 				>
 			>;
-			using value_t = typename TestFixture::value_t;
+			USING(value_t);
 			const auto v = this->makeRVec(DefaultRange<value_t>);
 			// 各種ルーチンのチェック
 			ASSERT_NO_FATAL_FAILURE(Proc<Types>(Check_Equality(), v));
@@ -238,8 +238,8 @@ namespace frea {
 			ASSERT_NO_FATAL_FAILURE(Proc<Types>(Check_InitAt(), v, val));
 		}
 		TYPED_TEST(Vector, Average) {
-			using value_t = typename TestFixture::value_t;
-			using vec_t = typename TestFixture::vec_t;
+			USING(value_t);
+			USING(vec_t);
 
 			const auto vec = this->makeRVec(DefaultRange<value_t>);
 			const value_t a0 = vec.average(),
@@ -255,9 +255,9 @@ namespace frea {
 			ASSERT_NEAR(avg, a0, Th);
 		}
 		TYPED_TEST(Vector, DotProduct) {
-			using value_t = typename TestFixture::value_t;
-			using array_t = typename TestFixture::array_t;
-			using vec_t = typename TestFixture::vec_t;
+			USING(value_t);
+			USING(array_t);
+			USING(vec_t);
 
 			// 配列で計算した場合と比較
 			constexpr auto range = DefaultRange<value_t>;
@@ -283,9 +283,9 @@ namespace frea {
 			ASSERT_NEAR(-res2, res0, ThInv);
 		}
 		TYPED_TEST(Vector, MinMax) {
-			using value_t = typename TestFixture::value_t;
-			using vec_t = typename TestFixture::vec_t;
-			using array_t = typename TestFixture::array_t;
+			USING(value_t);
+			USING(vec_t);
+			USING(array_t);
 			constexpr auto range = DefaultRange<value_t>;
 			const vec_t v = this->makeRVec(range),
 						vt = this->makeRVec(range);
@@ -309,8 +309,8 @@ namespace frea {
 			ASSERT_LE(AbsMax(aMax - vMax0), Th);
 		}
 		TYPED_TEST(Vector, SumUp) {
-			using value_t = typename TestFixture::value_t;
-			using array_t = typename TestFixture::array_t;
+			USING(value_t);
+			USING(array_t);
 			constexpr auto range = DefaultRange<value_t>;
 			const auto vec = this->makeRVec(range);
 			const array_t ar(vec);
@@ -324,7 +324,7 @@ namespace frea {
 		}
 		// 内部表現による演算結果の差異をチェック
 		TYPED_TEST(Vector, Register) {
-			using value_t = typename TestFixture::value_t;
+			USING(value_t);
 			auto& mt = this->mt();
 			constexpr auto range = DefaultRange<value_t>;
 			auto vec = this->makeRVec(range);
@@ -371,7 +371,7 @@ namespace frea {
 		}
 		// 要素比較チェック
 		TYPED_TEST(Vector, Compare) {
-			using value_t = typename TestFixture::value_t;
+			USING(value_t);
 			constexpr auto range = DefaultRange<value_t>;
 			const auto v0 = this->makeRVec(range),
 						v1 = this->makeRVec(range);
@@ -380,7 +380,7 @@ namespace frea {
 			// ==と!=は正反対の結果になる
 			ASSERT_NE(v0==v1, v0!=v1);
 
-			using vec_t = typename TestFixture::vec_t;
+			USING(vec_t);
 			const auto randNumNZ = [this]{
 				auto ret = this->mt().template getUniform<value_t>();
 				if(std::abs(ret) < 1)
@@ -400,8 +400,8 @@ namespace frea {
 		}
 		// 論理演算チェック
 		TYPED_TEST(Vector, Logical) {
-			using value_t = typename TestFixture::value_t;
-			using vec_t = typename TestFixture::vec_t;
+			USING(value_t);
+			USING(vec_t);
 			constexpr auto range = DefaultRange<value_t>;
 			const auto v0 = this->makeRVec(range);
 			ASSERT_EQ(v0.asInternal(), v0);
@@ -425,7 +425,7 @@ namespace frea {
 		}
 		// 四則演算のチェック
 		TYPED_TEST(Vector, Arithmetic) {
-			using value_t = typename TestFixture::value_t;
+			USING(value_t);
 			constexpr auto range = DefaultRange<value_t>;
 			const auto v0 = this->makeRVec(range),
 						v1 = this->makeRVec(range);

@@ -41,8 +41,8 @@ namespace frea {
 			}
 		}
 		TYPED_TEST(VectorD_3, Cross) {
-			using value_t = typename TestFixture::value_t;
-			using vec_t = typename TestFixture::vec_t;
+			USING(value_t);
+			USING(vec_t);
 
 			const auto v = GenVecPair<vec_t>(this->mt());
 			const auto s = std::sqrt(1 - v.cos*v.cos);
@@ -58,8 +58,8 @@ namespace frea {
 			EXPECT_LE(AbsMax(vec_t(v2-v3)), Threshold<value_t>(0.3, 0));
 		}
 		TYPED_TEST(VectorD_3, VerticalVector) {
-			using value_t = typename TestFixture::value_t;
-			using vec_t = typename TestFixture::vec_t;
+			USING(value_t);
+			USING(vec_t);
 			const auto mtf = this->mt().template getUniformF<value_t>();
 			const auto v0 = random::GenVecUnit<vec_t>(mtf);
 			const auto v1 = v0.verticalVector();
@@ -74,8 +74,8 @@ namespace frea {
 			EXPECT_LE(std::abs(v2.dot(v1)), Th);
 		}
 		TYPED_TEST(VectorD_3, Flip) {
-			using value_t = typename TestFixture::value_t;
-			using vec_t = typename TestFixture::vec_t;
+			USING(value_t);
+			USING(vec_t);
 			constexpr Range<value_t> range{-1e2, 1e2};
 			const auto mtf = this->mt().template getUniformF<value_t>(range);
 			const auto p = random::GenPlane<PlaneT<value_t, false>>(mtf);
@@ -99,8 +99,8 @@ namespace frea {
 			EXPECT_LE(std::abs(dd)-1, Threshold<value_t>(0.8, 0));
 		}
 		TYPED_TEST(VectorD_3, CrossPoint) {
-			using value_t = typename TestFixture::value_t;
-			using vec_t = typename TestFixture::vec_t;
+			USING(value_t);
+			USING(vec_t);
 			constexpr Range<value_t> range{-1e2, 1e2};
 			const auto mtf = this->mt().template getUniformF<value_t>(range);
 			const auto p = random::GenPlane<PlaneT<value_t, false>>(mtf);

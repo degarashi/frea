@@ -15,9 +15,9 @@ namespace frea {
 		using SqTypes = ToTestTypes_t<SqTypes_t>;
 		TYPED_TEST_CASE(SMatrix, SqTypes);
 		TYPED_TEST(SMatrix, Transpose) {
-			using value_t = typename TestFixture::value_t;
-			using array_t = typename TestFixture::array_t;
-			using mat_t = typename TestFixture::mat_t;
+			USING(value_t);
+			USING(array_t);
+			USING(mat_t);
 
 			// 転置行列を二次元配列で計算した結果と比較
 			constexpr auto range = Range<value_t>{-1e3, 1e3};

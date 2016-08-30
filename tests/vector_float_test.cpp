@@ -13,9 +13,9 @@ namespace frea {
 			constexpr Range<T> DefaultRange{-1e3, 1e3};
 		}
 		TYPED_TEST(FloatVector, Distance) {
-			using vec_t = typename TestFixture::vec_t;
-			using array_t = typename TestFixture::array_t;
-			using value_t = typename TestFixture::value_t;
+			USING(vec_t);
+			USING(array_t);
+			USING(value_t);
 			const Range<value_t> range{-1e2, 1e2};
 			const auto v0 = this->makeRVec(range),
 						v1 = this->makeRVec(range);
@@ -30,8 +30,8 @@ namespace frea {
 			ASSERT_NEAR(sum, v0.distance(v1), Th);
 		}
 		TYPED_TEST(FloatVector, Normalize) {
-			using vec_t = typename TestFixture::vec_t;
-			using value_t = typename TestFixture::value_t;
+			USING(vec_t);
+			USING(value_t);
 
 			vec_t vec = this->makeRVec(DefaultRange<value_t>);
 			auto iv = vec.asInternal();
@@ -43,9 +43,9 @@ namespace frea {
 			ASSERT_NEAR(vec.length(), value_t(1.0), Th);
 		}
 		TYPED_TEST(FloatVector, Interpolation) {
-			using vec_t = typename TestFixture::vec_t;
-			using value_t = typename TestFixture::value_t;
-			using array_t = typename TestFixture::array_t;
+			USING(vec_t);
+			USING(value_t);
+			USING(array_t);
 
 			const vec_t v0 = this->makeRVec(DefaultRange<value_t>),
 						v1 = this->makeRVec(DefaultRange<value_t>);
@@ -61,7 +61,7 @@ namespace frea {
 			ASSERT_LT(AbsMax(a2 - v2), Th);
 		}
 		TYPED_TEST(FloatVector, MulDiv) {
-			using value_t = typename TestFixture::value_t;
+			USING(value_t);
 			constexpr auto threshold = ThresholdF<value_t>(0.7);
 			const auto v0 = this->makeRVec(DefaultRange<value_t>);
 			const int n = this->mt().template getUniform<int>({1,8});
@@ -70,7 +70,7 @@ namespace frea {
 			for(int i=1 ; i<n ; i++)
 				sum += v0;
 
-			using vec_t = typename TestFixture::vec_t;
+			USING(vec_t);
 			{
 				const vec_t tmul(mul),
 							 tsum(sum);
@@ -86,8 +86,8 @@ namespace frea {
 
 		// isNaN, Outstandingのチェック
 		TYPED_TEST(FloatVector, InvalidValue) {
-			using value_t = typename TestFixture::value_t;
-			using vec_t = typename TestFixture::vec_t;
+			USING(value_t);
+			USING(vec_t);
 			using VL = std::numeric_limits<value_t>;
 			vec_t qn = this->makeRVec(),
 				sn = this->makeRVec(),

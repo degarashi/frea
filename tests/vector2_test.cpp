@@ -18,7 +18,7 @@ namespace frea {
 					v.x*-s + v.y*c);
 		}
 		TYPED_TEST(VectorD_2, Clockwise) {
-			using value_t = typename TestFixture::value_t;
+			USING(value_t);
 			using angle_t = Radian<value_t>;
 			const auto v0 = this->makeRVec({-1e3, 1e3});
 			const auto r_ang = [&mt=this->mt()](const Range<value_t>& r) {

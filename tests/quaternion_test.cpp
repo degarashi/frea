@@ -51,11 +51,11 @@ namespace frea {
 		TYPED_TEST_CASE(Quaternion, types::QTypes);
 
 		TYPED_TEST(Quaternion, ConvertMatrix) {
-			using mat3_t = typename TestFixture::mat3_t;
-			using value_t = typename TestFixture::value_t;
-			using quat_t = typename TestFixture::quat_t;
-			using array33_t = typename TestFixture::array33_t;
-			using vec_t = typename TestFixture::vec_t;
+			USING(mat3_t);
+			USING(value_t);
+			USING(quat_t);
+			USING(array33_t);
+			USING(vec_t);
 
 			const auto ang = this->makeRadian();
 			const auto axis = this->makeDir();
@@ -82,12 +82,12 @@ namespace frea {
 			}
 		}
 		TYPED_TEST(Quaternion, Multiply) {
-			using quat_t = typename TestFixture::quat_t;
-			using vec_t = typename TestFixture::vec_t;
-			using mat3_t = typename TestFixture::mat3_t;
-			using rad_t = typename TestFixture::rad_t;
-			using value_t = typename TestFixture::value_t;
-			using array33_t = typename TestFixture::array33_t;
+			USING(quat_t);
+			USING(vec_t);
+			USING(mat3_t);
+			USING(rad_t);
+			USING(value_t);
+			USING(array33_t);
 
 			// クォータニオンを合成した結果を行列のケースと比較
 			const rad_t ang[2] = {this->makeRadian(), this->makeRadian()};
@@ -104,10 +104,10 @@ namespace frea {
 			ASSERT_LT(AbsMax(array33_t(q[2].asMat33()) - m[2]), ThresholdF<value_t>(0.8));
 		}
 		TYPED_TEST(Quaternion, Rotation) {
-			using quat_t = typename TestFixture::quat_t;
-			using vec_t = typename TestFixture::vec_t;
-			using rad_t = typename TestFixture::rad_t;
-			using value_t = typename TestFixture::value_t;
+			USING(quat_t);
+			USING(vec_t);
+			USING(rad_t);
+			USING(value_t);
 
 			// getRight(), getUp(), getDir()が{1,0,0},{0,1,0},{0,0,1}を変換した結果と比較
 			const rad_t ang(this->makeRadian());
@@ -122,11 +122,11 @@ namespace frea {
 		}
 		//! クォータニオンの線形補間テスト
 		TYPED_TEST(Quaternion, SLerp) {
-			using vec_t = typename TestFixture::vec_t;
-			using quat_t = typename TestFixture::quat_t;
-			using rad_t = typename TestFixture::rad_t;
-			using value_t = typename TestFixture::value_t;
-			using mat3_t = typename TestFixture::mat3_t;
+			USING(vec_t);
+			USING(quat_t);
+			USING(rad_t);
+			USING(value_t);
+			USING(mat3_t);
 
 			const int div = 8;
 			const value_t tdiv = 1.0/div;

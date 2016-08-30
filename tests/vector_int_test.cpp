@@ -10,7 +10,7 @@ namespace frea {
 
 		// 整数の積算、除算に関するチェック
 		TYPED_TEST(IntVector, MulDiv) {
-			using value_t = typename TestFixture::value_t;
+			USING(value_t);
 			using Lim = std::numeric_limits<value_t>;
 			const Range<value_t> range = {Lim::lowest()/2048, Lim::max()/2048};
 			const auto v0 = this->makeRVec(range);
@@ -21,7 +21,7 @@ namespace frea {
 				sum += v0;
 			ASSERT_EQ(sum, mul);
 
-			using vec_t = typename TestFixture::vec_t;
+			USING(vec_t);
 			// 自身との除算は1
 			ASSERT_EQ(v0/v0, vec_t(1));
 			{
