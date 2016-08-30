@@ -51,6 +51,21 @@ namespace frea {
 			EXPECT_LT(AbsMax(vec_t(v1-v2)), Th);
 			EXPECT_LT(AbsMax(vec_t(v1-v3)), Th);
 		}
+		TYPED_TEST(ExpQuaternion, AngAxis) {
+			using value_t = typename TestFixture::value_t;
+			using vec_t = typename TestFixture::vec_t;
+			const auto q = this->makeRQuat();
+			const auto e = q.asExpQuat();
+
+			const auto qv = q.getAxis();
+			const auto qa = q.angle();
+			const auto ei = e.getAngAxis();
+			if(qa.get() > ThresholdF<value_t>(0.8)) {
+				constexpr auto Th = ThresholdF<value_t>(0.8);
+				EXPECT_LT(AbsMax(vec_t(qv-ei.axis)), Th);
+				EXPECT_LT(Radian<value_t>(qa-ei.angle).get(), Th);
+			}
+		}
 		TYPED_TEST(ExpQuaternion, Lerp) {
 			using eq_t = typename TestFixture::eq_t;
 			using value_t = typename TestFixture::value_t;
