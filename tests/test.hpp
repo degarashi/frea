@@ -264,14 +264,6 @@ namespace frea {
 				}
 		};
 
-		template <class T, ENABLE_IF(std::is_floating_point<T>{})>
-		constexpr T Threshold(const double fr, const T&) noexcept {
-			constexpr auto FB = IEEE754<T>::FracBits;
-			const auto r = int64_t(1) << static_cast<int>(FB*fr);
-			return std::numeric_limits<T>::epsilon()*r;
-		}
-		template <class T, ENABLE_IF(std::is_integral<T>{})>
-		constexpr T Threshold(const double, const T& ia) noexcept { return ia; }
 		template <class T>
 		constexpr bool IsZero(const T& val, const T& th) noexcept {
 			return std::abs(val) < th;
