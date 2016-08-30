@@ -16,7 +16,10 @@ namespace frea {
 
 		ExpQuatT() = default;
 		constexpr ExpQuatT(const quat_t& q) noexcept {
-			if(std::fabs(q.w) >= 1.0-1e-6) {
+			constexpr auto Th = ThresholdF<value_t>(0.1);
+			if(std::abs(q.w) >= 1.0-Th &&
+				std::abs(q.x)+std::abs(q.y)+std::abs(q.z) <= Th)
+			{
 				// 無回転クォータニオンとみなす
 				this->x = this->y = this->z = 0;
 			} else {
@@ -69,7 +72,7 @@ namespace frea {
 			} ret;
 			ret.axis = asVec3();
 			const value_t theta = ret.axis.length();		// = (angle/2)
-			if(theta < 1e-6) {
+			if(theta < ThresholdF<value_t>(0.1)) {
 				// 無回転クォータニオンとする
 				ret.angle = rad_t(0);
 				ret.axis = vec_t(1,0,0);
