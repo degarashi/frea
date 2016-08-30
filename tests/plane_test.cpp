@@ -79,7 +79,6 @@ namespace frea {
 
 		TYPED_TEST_CASE(Plane, types::PTypes);
 
-		#define USING(t) using t = typename TestFixture::t
 		TYPED_TEST(Plane, Compare) {
 			const auto p0 = this->makePlane();
 			auto p1 = p0;
