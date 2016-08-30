@@ -353,11 +353,12 @@ namespace frea {
 	{
 		private:
 			using base_t = std::iterator<std::input_iterator_tag, ConstIf<C, typename D::value_t>>;
-			D&		_target;
+			using D_t = ConstIf<C, D>;
+			D_t&	_target;
 			int		_cursor;
 			constexpr static int dim_m = D::dim_m;
 		public:
-			ItrM(D& t, const int cur):
+			ItrM(D_t& t, const int cur):
 				_target(t),
 				_cursor(cur)
 			{}
@@ -415,11 +416,11 @@ namespace frea {
 
 			// --- iterator interface ---
 			auto begin() { return ItrM<DataM, false>(*this, 0); }
-			auto end() { return ItrM<DataM, false>(*this, dim_m); }
+			auto end() { return ItrM<DataM, false>(*this, dim_m*dim_n); }
 			auto begin() const { return ItrM<DataM, true>(*this, 0); }
-			auto end() const { return ItrM<DataM, true>(*this, dim_m); }
+			auto end() const { return ItrM<DataM, true>(*this, dim_m*dim_n); }
 			auto cbegin() const { return ItrM<DataM, true>(*this, 0); }
-			auto cend() const { return ItrM<DataM, true>(*this, dim_m); }
+			auto cend() const { return ItrM<DataM, true>(*this, dim_m*dim_n); }
 
 			vec_t& operator [](const int n) {
 				return m[n];
