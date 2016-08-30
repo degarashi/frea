@@ -19,6 +19,7 @@ namespace frea {
 				using exp_t = typename quat_t::exp_t;
 				using array_t = Array<value_t, 3>;
 				using array33_t = ArrayM<value_t, 3, 3>;
+				using array44_t = ArrayM<value_t, 4, 4>;
 			private:
 				constexpr static Range<value_t> DefaultRange{-1e3, 1e3};
 				constexpr static Range<value_t> DefaultAngleRange{-Radian<value_t>::OneRotationAng/2, Radian<value_t>::OneRotationAng/2};
@@ -50,6 +51,42 @@ namespace frea {
 
 		TYPED_TEST_CASE(Quaternion, types::QTypes);
 
+		TYPED_TEST(Quaternion, Identity) {
+			USING(quat_t);
+			USING(value_t);
+			{
+				// 単位クォータニオンをどちらから掛けても値が変わらない
+				const auto q0 = this->makeRQuat(),
+							qi = quat_t::Identity();
+				const auto q1 = qi * q0,
+							q2 = q0 * qi;
+				constexpr auto Th = ThresholdF<value_t>(0.1);
+				ASSERT_LE(q0.distance(q1), Th);
+				ASSERT_LE(q0.distance(q2), Th);
+			}
+		}
+		TYPED_TEST(Quaternion, Compare) {
+			USING(value_t);
+
+			const auto q0 = this->makeRQuat();
+			auto q1 = q0;
+			ASSERT_EQ(q0, q0);
+			ASSERT_EQ(q0, q1);
+			auto& mt = this->mt();
+			q1[mt.template getUniform<int>({0,3})] += mt.template getUniform<value_t>();
+			ASSERT_NE(q0, q1);
+		}
+		TYPED_TEST(Quaternion, Invert) {
+			USING(value_t);
+			USING(quat_t);
+			// 逆クォータニオンをどちらから掛けても単位クォータニオンになる
+			const auto q0 = this->makeRQuat(),
+						q1 = q0.inversion(),
+						qi = quat_t::Identity();
+			constexpr auto Th = ThresholdF<value_t>(0.3);
+			ASSERT_LE((q0*q1).distance(qi), Th);
+			ASSERT_LE((q1*q0).distance(qi), Th);
+		}
 		TYPED_TEST(Quaternion, ConvertMatrix) {
 			USING(mat3_t);
 			USING(value_t);
@@ -74,11 +111,78 @@ namespace frea {
 				const array33_t ar1(q.asMat33());
 				EXPECT_LT(AbsMax(ar0 - ar1), Th);
 			}
+			{
+				USING(array44_t);
+				USING(mat4_t);
+				// 4x4行列のテスト
+				const array44_t ar1(q.asMat44()),
+								ar0(mat4_t(m.template convertI<4,4,3>(1)));
+				EXPECT_LT(AbsMax(ar0 - ar1), Th);
+			}
 			// Matrix -> Quaternion -> Matrix の順で変換して前と後で一致するか
 			q = quat_t::FromMat(m);
 			{
 				const array33_t ar1(q.asMat33());
 				EXPECT_LT(AbsMax(ar0 - ar1), Th);
+			}
+		}
+		TYPED_TEST(Quaternion, FunctionEquality_Static) {
+			USING(quat_t);
+			{
+				// Identity
+				quat_t q0, q1=quat_t::Identity();
+				q0.identity();
+				EXPECT_EQ(q0, q1);
+			}
+			const auto angle = this->makeRadian();
+			{
+				// RotationXYZ -> rotationXYZ
+				const quat_t q0[3] = {
+					quat_t::RotationX(angle),
+					quat_t::RotationY(angle),
+					quat_t::RotationZ(angle)
+				};
+				quat_t q1[3];
+				for(auto& q : q1)
+					q = quat_t::Identity();
+				q1[0] = q1[0].rotationX(angle);
+				q1[1] = q1[1].rotationY(angle);
+				q1[2] = q1[2].rotationZ(angle);
+
+				for(int i=0 ; i<3 ; i++)
+					EXPECT_EQ(q0[i], q1[i]);
+			}
+			const auto axis = this->makeDir();
+			{
+				// Rotation -> rotation
+				const auto q0 = quat_t::Rotation(axis, angle);
+				auto q1 = quat_t::Identity();
+				q1.rotate(axis, angle);
+				EXPECT_EQ(q0, q1);
+			}
+		}
+		TYPED_TEST(Quaternion, FunctionEquality_Method) {
+			USING(quat_t);
+			{
+				// conjugate
+				auto q0 = this->makeRQuat(),
+					 q1 = q0.conjugation();
+				q0.conjugate();
+				EXPECT_EQ(q0, q1);
+			}
+			{
+				// invert
+				auto q0 = this->makeRQuat(),
+					 q1 = q0.inversion();
+				q0.invert();
+				EXPECT_EQ(q0, q1);
+			}
+			{
+				// normalize
+				auto q0 = this->makeRQuat(),
+					 q1 = q0.normalization();
+				q0.normalize();
+				EXPECT_EQ(q0, q1);
 			}
 		}
 		TYPED_TEST(Quaternion, Multiply) {
