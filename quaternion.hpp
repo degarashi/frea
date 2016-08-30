@@ -264,8 +264,7 @@ namespace frea {
 			return reinterpret_cast<const vec4_t&>(*this);
 		}
 		QuatT normalization() const {
-			const value_t rlen(1 / length());
-			return asVec4() * rlen;
+			return asVec4().normalization();
 		}
 		QuatT conjugation() const {
 			return
@@ -283,7 +282,7 @@ namespace frea {
 			return asVec4().len_sq();
 		}
 		value_t length() const {
-			return std::sqrt(len_sq());
+			return asVec4().length();
 		}
 		rad_t angle() const {
 			return rad_t(std::acos(Saturate<value_t>(this->w, 1.0))*2);
@@ -300,7 +299,7 @@ namespace frea {
 		}
 
 		value_t dot(const QuatT& q) const {
-			return this->x*q.x + this->y*q.y + this->z*q.z + this->w*q.w;
+			return asVec4().dot(q.asVec4());
 		}
 		bool operator == (const QuatT& q) const {
 			return asVec4() == q.asVec4();
