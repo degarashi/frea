@@ -222,7 +222,7 @@ namespace frea {
 
 		#define DEF_SCALAR(op) \
 			QuatT operator op (const value_t& v) const { \
-				return asVec4() * v; \
+				return asVec4() op v; \
 			} \
 			using op_t::operator op;
 		DEF_SCALAR(+)
