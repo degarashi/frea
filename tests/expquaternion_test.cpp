@@ -47,7 +47,7 @@ namespace frea {
 			const vec_t v1 = v0 * q0,
 						v2 = v0 * q1,
 						v3 = v0 * q2;
-            constexpr value_t Th = Threshold<value_t>(0.9, 0);
+            constexpr value_t Th = ThresholdF<value_t>(0.9);
 			EXPECT_LT(AbsMax(vec_t(v1-v2)), Th);
 			EXPECT_LT(AbsMax(vec_t(v1-v3)), Th);
 		}
@@ -79,7 +79,7 @@ namespace frea {
 			}
 			const eq_t eq0(q0),
 						eq1(q1);
-			constexpr value_t Th = Threshold<value_t>(1.0, 0);
+			constexpr value_t Th = ThresholdF<value_t>(1.0);
 			constexpr int NDiv = 8;
 			value_t err_sum = 0;
 			const auto v0 = this->makeDir();

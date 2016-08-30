@@ -23,7 +23,7 @@ namespace frea {
 		TYPED_TEST(FSMatrix, Inverse) {
 			using value_t = typename TestFixture::value_t;
 			using mat_t = typename TestFixture::mat_t;
-			constexpr auto Th = Threshold<value_t>(0.9, 0);
+			constexpr auto Th = ThresholdF<value_t>(0.9);
 
 			constexpr auto range = Range<value_t>{-1, 1};
 			const auto mat = this->makeRMat(range);

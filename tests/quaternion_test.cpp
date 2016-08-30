@@ -66,7 +66,7 @@ namespace frea {
 			auto v = this->makeVec3();
 			const auto v0 = vec_t(v * q),
 						v1 = vec_t(v * m);
-			constexpr auto Th = Threshold<value_t>(0.7, 0);
+			constexpr auto Th = ThresholdF<value_t>(0.7);
             EXPECT_LT(AbsMax(vec_t(v0-v1)), Th);
 			const array33_t ar0(m);
 			// クォータニオンを行列に変換した結果が一致するか
@@ -101,7 +101,7 @@ namespace frea {
 			q[2] = q[0] * q[1];
 			q[2].normalize();
 			m[2] = m[0] * m[1];
-			ASSERT_LT(AbsMax(array33_t(q[2].asMat33()) - m[2]), Threshold<value_t>(0.8,0));
+			ASSERT_LT(AbsMax(array33_t(q[2].asMat33()) - m[2]), ThresholdF<value_t>(0.8));
 		}
 		TYPED_TEST(Quaternion, Rotation) {
 			using quat_t = typename TestFixture::quat_t;
@@ -115,7 +115,7 @@ namespace frea {
 			const auto q = quat_t::Rotation(axis, ang);
 			const auto m = q.asMat33();
 
-			constexpr auto Th = Threshold<value_t>(0.1, 0);
+			constexpr auto Th = ThresholdF<value_t>(0.1);
 			EXPECT_LT(AbsMax(vec_t(vec_t(1,0,0)*m - q.getRight())), Th);
 			EXPECT_LT(AbsMax(vec_t(vec_t(0,1,0)*m - q.getUp())), Th);
 			EXPECT_LT(AbsMax(vec_t(vec_t(0,0,1)*m - q.getDir())), Th);
@@ -145,7 +145,7 @@ namespace frea {
 				const vec_t v0 = v * q2;
 				const vec_t v1 = v * m1;
 
-				constexpr auto Th = Threshold<value_t>(0.9, 0);
+				constexpr auto Th = ThresholdF<value_t>(0.9);
 				EXPECT_LT(AbsMax(vec_t(v0 - v1)), Th);
 			}
 		}

@@ -50,7 +50,7 @@ namespace frea {
 						val -= onerotation;
 					while(val < 0)
 						val += onerotation;
-					EXPECT_NEAR(tmp_degf.get(), val, Threshold<TypeParam>(0.5, 0));
+					EXPECT_NEAR(tmp_degf.get(), val, ThresholdF<TypeParam>(0.5));
 				}
 
 				auto a = this->makeRF();
@@ -65,7 +65,7 @@ namespace frea {
 			a0.semicircle();
 			a1.semicircle();
 			a1.single();
-			ASSERT_LT(AngleDiff(a0, a1).get(), Threshold<TypeParam>(0.6,0));
+			ASSERT_LT(AngleDiff(a0, a1).get(), ThresholdF<TypeParam>(0.6));
 		}
 		TYPED_TEST(Angle, Range) {
 			using deg_t = typename TestFixture::deg_t;
@@ -87,7 +87,7 @@ namespace frea {
 			const Degree<TypeParam> degf(this->makeRF());
 			const auto radf = degf.template convert<Radian_t>();
 			const auto degf2 = radf.template convert<Degree_t>();
-			EXPECT_NEAR(degf.get(), degf2.get(), Threshold<TypeParam>(0.6, 0));
+			EXPECT_NEAR(degf.get(), degf2.get(), ThresholdF<TypeParam>(0.6));
 		}
 		TYPED_TEST(Angle, Degree_Radian_Convert) {
 			const auto deg = this->makeRF();
@@ -95,7 +95,7 @@ namespace frea {
 			const Radian<TypeParam> radf(degf);
 			const auto r0 = degf.get() / AngleInfo<Degree_t>::one_rotation<TypeParam>;
 			const auto r1 = radf.get() / AngleInfo<Radian_t>::one_rotation<TypeParam>;
-			EXPECT_NEAR(r0, r1, Threshold<TypeParam>(0.6, 0));
+			EXPECT_NEAR(r0, r1, ThresholdF<TypeParam>(0.6));
 		}
 		TYPED_TEST(Angle, Arithmetic) {
 			using deg_t = typename TestFixture::deg_t;
@@ -125,7 +125,7 @@ namespace frea {
 			// Lerp係数が0ならang0と等しい
 			tmp = AngleLerp(ang0, ang1, 0.0);
 			tmp.single();
-			constexpr auto Th = Threshold<TypeParam>(0.5, 0);
+			constexpr auto Th = ThresholdF<TypeParam>(0.5);
 			EXPECT_NEAR(ang0.get(), tmp.get(), Th);
 			// Lerp係数が1ならang1と等しい
 			tmp = AngleLerp(ang0, ang1, 1.0);
@@ -158,7 +158,7 @@ namespace frea {
 				return std::abs(AngleLerpValueDiff(tmp.get(), ang1.get(), oa));
 			};
 			tmp = AngleMove(tmp, ang1, diff3);
-			constexpr auto Th = Threshold<TypeParam>(0.6, 0);
+			constexpr auto Th = ThresholdF<TypeParam>(0.6);
 			EXPECT_FALSE(fnDiff() < Th);
 			tmp = AngleMove(tmp, ang1, diff3);
 			EXPECT_FALSE(fnDiff() < Th);
@@ -173,7 +173,7 @@ namespace frea {
 			// VectorFromAngleで計算したものと行列で計算したものとはほぼ一致する
 			const vec_t v0 = VectorFromAngle(ang),
 						v1 = vec_t(0,1) * mat_t::Rotation(ang);
-			constexpr auto Th = Threshold<TypeParam>(0.6, 0);
+			constexpr auto Th = ThresholdF<TypeParam>(0.6);
 			EXPECT_NEAR(v0.x, v1.x, Th);
 			EXPECT_NEAR(v0.y, v1.y, Th);
 
@@ -181,7 +181,7 @@ namespace frea {
 			deg_t ang1 = AngleValue(v0);
 			ang.single();
 			ang1.single();
-			EXPECT_LT(AngleDiff(ang, ang1).get(), Threshold<TypeParam>(0.9, 0));
+			EXPECT_LT(AngleDiff(ang, ang1).get(), ThresholdF<TypeParam>(0.9));
 		}
 	}
 }

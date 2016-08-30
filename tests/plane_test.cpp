@@ -101,7 +101,7 @@ namespace frea {
 			USING(plane_t);
 			USING(value_t);
 
-			constexpr auto Th = Threshold<value_t>(0.6, 0);
+			constexpr auto Th = ThresholdF<value_t>(0.6);
 			const auto vtx = this->makeVec3s(3);
 			{
 				auto p = plane_t::FromPts(vtx[0], vtx[1], vtx[2]);
@@ -134,7 +134,7 @@ namespace frea {
 			v = (v.template convertI<4,3>(1) * m).template convert<3>();
 			const auto d1 = p.dot(v);
 
-			constexpr auto Th = Threshold<value_t>(0.6, 0);
+			constexpr auto Th = ThresholdF<value_t>(0.6);
 			ASSERT_LE(std::abs(d1-d0), Th);
 		}
 		TYPED_TEST(Plane, Place) {
@@ -145,7 +145,7 @@ namespace frea {
 			{
 				const auto v1 = p.placeOnPlane(v0);
 				// 平面との距離はゼロである
-				ASSERT_LE(std::abs(p.dot(v1)), Threshold<value_t>(0.5,0));
+				ASSERT_LE(std::abs(p.dot(v1)), ThresholdF<value_t>(0.5));
 			}
 			{
 				p.x = 1;
@@ -160,7 +160,7 @@ namespace frea {
 				} while(std::abs(dir.dot(p.getNormal())) < 0.25);
 				const auto dist = p.placeOnPlaneDirDist(dir, v0);
 				const auto v1 = v0 + dir*dist;
-				ASSERT_LE(std::abs(p.dot(v1)), Threshold<value_t>(0.5,0));
+				ASSERT_LE(std::abs(p.dot(v1)), ThresholdF<value_t>(0.5));
 			}
 		}
 		TYPED_TEST(Plane, CrossLine) {
@@ -181,7 +181,7 @@ namespace frea {
 			constexpr int NDiv = 8;
 			for(int i=0 ; i<NDiv ; i++) {
 				const auto pos = res.pt + res.dir * value_t(i)/NDiv;
-				constexpr auto Th = Threshold<value_t>(0.8,0);
+				constexpr auto Th = ThresholdF<value_t>(0.8);
 				ASSERT_LE(std::abs(p0.dot(pos)), Th);
 				ASSERT_LE(std::abs(p1.dot(pos)), Th);
 			}
@@ -222,7 +222,7 @@ namespace frea {
 					ASSERT_TRUE(res.cross);
 					dir[i] = res.dir;
 				}
-				constexpr auto Th = Threshold<value_t>(0.6, 0);
+				constexpr auto Th = ThresholdF<value_t>(0.6);
 				ASSERT_LE(std::abs(dir[0].dot(dir[1]))-1, Th);
 				ASSERT_LE(std::abs(dir[0].dot(dir[2]))-1, Th);
 				ASSERT_LE(std::abs(dir[1].dot(dir[2]))-1, Th);
