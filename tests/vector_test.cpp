@@ -13,6 +13,35 @@ namespace frea {
 			template <class T>
 			constexpr Range<T> DefaultRange{-1e3, 1e3};
 		}
+		TYPED_TEST(Vector, Iterator) {
+			USING(value_t);
+			// イテレータを介して値を加算した場合とインデックスを介した場合で比べる　
+			constexpr auto R = DefaultRange<value_t>;
+			auto v0 = this->makeRVec(R);
+			auto v1 = v0;
+			const auto value = this->mt().template getUniform<value_t>(R);
+			for(auto itr=v1.begin() ; itr!=v1.end() ; ++itr)
+				*itr += value;
+			constexpr int N = decltype(v0)::size;
+			for(int i=0 ; i<N ; i++)
+				v0[i] += value;
+
+			for(int i=0 ; i<N ; i++)
+				ASSERT_FLOAT_EQ(v0[i], v1[i]);
+
+			auto itr0 = v0.cbegin();
+			auto itr1 = v1.cbegin();
+			for(;;) {
+				bool b0 = itr0==v0.cend(),
+					 b1 = itr1==v1.cend();
+				ASSERT_EQ(b0, b1);
+				if(b0)
+					break;
+				ASSERT_FLOAT_EQ(*itr0, *itr1);
+				++itr0;
+				++itr1;
+			}
+		}
 		TYPED_TEST(Vector, Minus) {
 			USING(value_t);
 			USING(array_t);
