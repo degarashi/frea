@@ -560,25 +560,29 @@ namespace frea {
 			return wrap_t::Diagonal(1);
 		}
 
-		const auto& getRow(const int at) const {
-			D_Expect(at < dim_m, "invalid position")
-			return this->m[at];
+		template <int At>
+		const auto& getRow() const {
+			static_assert(At < dim_m, "invalid position");
+			return this->m[At];
 		}
-		auto& getRow(const int at) {
-			D_Expect(at < dim_m, "invalid position")
-			return this->m[at];
+		template <int At>
+		auto& getRow() {
+			static_assert(At < dim_m, "invalid position");
+			return this->m[At];
 		}
-		column_t getColumn(const int at) const {
-			D_Expect(at < dim_n, "invalid position")
+		template <int At>
+		column_t getColumn() const {
+			static_assert(At < dim_n, "invalid position");
 			column_t ret;
 			for(int i=0 ; i<dim_m ; i++)
-				ret[i] = this->m[i][at];
+				ret[i] = this->m[i][At];
 			return ret;
 		}
-		void setColumn(const int at, const column_t& c) {
-			D_Expect(at < dim_n, "invalid position")
+		template <int At>
+		void setColumn(const column_t& c) {
+			static_assert(At < dim_n, "invalid position");
 			for(int i=0 ; i<dim_m ; i++)
-				this->m[i][at] = c[i];
+				this->m[i][At] = c[i];
 		}
 
 		constexpr operator wrap_t() const {
