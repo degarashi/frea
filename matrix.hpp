@@ -215,11 +215,12 @@ namespace frea {
 					 int ToN,
 					 ENABLE_IF((ToM>dim_m))>
 			auto convert() const {
-				type_cn<ToM, ToN> ret;
+				using ret_t = type_cn<ToM, ToN>;
+				ret_t ret;
 				for(int i=0 ; i<dim_m ; i++)
 					ret.v[i] = v[i].template convert<ToN>();
 				for(int i=dim_m ; i<ToM ; i++)
-					ret.v[i] = vec_t::I::Zero();
+					ret.v[i] = ret_t::vec_t::Zero();
 				return ret;
 			}
 			// 大きいサイズへの変換
@@ -229,11 +230,12 @@ namespace frea {
 					 int Pos,
 					 ENABLE_IF((ToM>dim_m))>
 			auto convertI(const value_t& v) const {
-				type_cn<ToM, ToN> ret;
+				using ret_t = type_cn<ToM, ToN>;
+				ret_t ret;
 				for(int i=0 ; i<dim_m ; i++)
 					ret.v[i] = this->v[i].template convertI<ToN, (Pos<dim_m ? Pos : 0)>(v);
 				for(int i=dim_m ; i<ToM ; i++)
-					ret.v[i] = vec_t::I::Zero();
+					ret.v[i] = ret_t::vec_t::Zero();
 				// 指定位置の要素に値をセット
 				if(Pos >= dim_m)
 					ret.v[Pos].template setAt<Pos>(v);
@@ -293,7 +295,6 @@ namespace frea {
 			using base_t = wrapM<VW, S, wrapM_spec<VW,S,S>>;
 			using this_t = wrapM_spec;
 			using value_t = typename base_t::value_t;
-			using vec_t = typename base_t::vec_t;
 			using mat_t = Mat_t<value_t, base_t::dim_m, base_t::dim_n, true>;
 			// InfoにTranspose関数が用意されていればtrue
 			template <class VW2,
@@ -325,6 +326,7 @@ namespace frea {
 				return this_t((const typename base_t::value_t*)tmp, std::false_type());
 			}
 		public:
+			using vec_t = typename base_t::vec_t;
 			using base_t::base_t;
 			wrapM_spec() = default;
 	
