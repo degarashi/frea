@@ -9,6 +9,42 @@ namespace frea {
 		using Types = ToTestTypes_t<Types_t>;
 		TYPED_TEST_CASE(Matrix, Types);
 
+		TYPED_TEST(Matrix, Iterator) {
+			USING(value_t);
+			constexpr auto range = Range<value_t>{-1e3, 1e3};
+			// イテレータを介して値を加算した場合とインデックスを介した場合で比べる　
+			auto m0 = this->makeRMat(range);
+			auto m1 = m0;
+			const auto value = this->mt().template getUniform<value_t>(range);
+			constexpr int M = decltype(m0)::dim_m,
+						N = decltype(m1)::dim_n;
+			for(auto itr=m1.begin() ; itr!=m1.end() ; ++itr)
+				*itr += value;
+			for(int i=0 ; i<M ; i++) {
+				for(int j=0 ; j<N ; j++) {
+					m0[i][j] += value;
+				}
+			}
+			for(int i=0 ; i<M ; i++) {
+				for(int j=0 ; j<N ; j++) {
+					ASSERT_FLOAT_EQ(m0[i][j], m1[i][j]);
+				}
+			}
+
+			// const_iteratorで巡回して値を比べる
+			auto itr0 = m0.cbegin();
+			auto itr1 = m1.cbegin();
+			for(;;) {
+				bool b0 = itr0==m0.cend(),
+					 b1 = itr1==m1.cend();
+				ASSERT_EQ(b0, b1);
+				if(b0)
+					break;
+				ASSERT_FLOAT_EQ(*itr0, *itr1);
+				++itr0;
+				++itr1;
+			}
+		}
 		// 内部表現による演算結果の差異をチェック
 		TYPED_TEST(Matrix, Register) {
 			USING(value_t);
