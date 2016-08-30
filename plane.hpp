@@ -2,6 +2,10 @@
 #include "matrix.hpp"
 
 namespace frea {
+	struct CantReachToPlane : std::runtime_error {
+		using std::runtime_error::runtime_error;
+	};
+
 	template <class T, bool A>
 	struct PlaneT :
 		Data<T,4,A>,
@@ -35,45 +39,67 @@ namespace frea {
 			nml.normalize();
 			return {nml, -p0.dot(nml)};
 		}
-		constexpr static std::tuple<vec_t,bool> ChokePoint(const PlaneT& p0, const PlaneT& p1, const PlaneT& p2) {
+		static auto ChokePoint(const PlaneT& p0, const PlaneT& p1, const PlaneT& p2) {
+			struct {
+				vec_t	pt;
+				bool	cross;
+			} ret;
+			ret.cross = false;
+
 			mat3_t m, mInv;
-			m.getRow(0) = p0.getNormal();
-			m.getRow(1) = p1.getNormal();
-			m.getRow(2) = p2.getNormal();
+			m.template getRow<0>() = p0.getNormal();
+			m.template getRow<1>() = p1.getNormal();
+			m.template getRow<2>() = p2.getNormal();
 			m.transpose();
 
-			if(!m.inversion(mInv))
-				return std::make_tuple(vec_t(), false);
+			try {
+				mInv = m.inversion();
+			} catch(const NoInverseMatrix&) {
+				return ret;
+			}
 
-			vec_t v(-p0.d, -p1.d, -p2.d);
+			vec_t v(-p0.w, -p1.w, -p2.w);
 			v *= mInv;
-			return std::make_tuple(v, true);
+			ret.cross = true;
+			ret.pt = v;
+			return ret;
 		}
-		constexpr static std::tuple<vec_t,vec_t,bool> CrossLine(const PlaneT& p0, const PlaneT& p1) {
+		static auto CrossLine(const PlaneT& p0, const PlaneT& p1) {
+			struct {
+				vec_t	pt, dir;
+				bool	cross;
+			} ret;
+			ret.cross = false;
+
 			const auto &nml0 = p0.getNormal(),
 						&nml1 = p1.getNormal();
 			vec_t nml = nml0 % nml1;
 			if(std::fabs(nml.len_sq()) < 1e-5)
-				return std::make_tuple(vec_t(),vec_t(), false);
+				return ret;
 			nml.normalize();
 
 			mat3_t m, mInv;
-			m.getRow(0) = nml0;
-			m.getRow(1) = nml1;
-			m.getRow(2) = nml;
+			m.template getRow<0>() = nml0;
+			m.template getRow<1>() = nml1;
+			m.template getRow<2>() = nml;
 			m.transpose();
 
-			if(!m.inversion(mInv))
-				return std::make_tuple(vec_t(),vec_t(),false);
+			try {
+				mInv = m.inversion();
+			} catch(const NoInverseMatrix&) {
+				return ret;
+			}
 
-			vec_t v(-p0.d, -p1.d, 0);
+			ret.cross = true;
+			vec_t v(-p0.w, -p1.w, 0);
 			v *= mInv;
-			return std::make_tuple(v, nml, true);
+			ret.pt = v;
+			ret.dir = nml;
+			return ret;
 		}
 
 		value_t dot(const vec_t& p) const {
-			const auto v = asVec4() * p.template convert<4>();
-			return v.sumUp() + this->w;
+			return asVec4().dot(p.template convertI<4,3>(1));
 		}
 		void move(const value_t& d) {
 			this->w += d;
@@ -81,33 +107,36 @@ namespace frea {
 		const vec_t& getNormal() const {
 			return reinterpret_cast<const vec_t&>(*this);
 		}
-		PlaneT operator * (const mat4_t& m) const {
+		template <class M>
+		PlaneT operator * (const M& m) const {
 			const auto& nml = getNormal();
 			const vec_t tmp(nml * -this->w);
-			return FromPtDir(tmp.convertI<4>(1)*m, (nml.template convert<4>()*m).normalization());
+			return FromPtDir(
+				(tmp.template convertI<4,3>(1)*m).template convert<3>(),
+				((nml.template convert<4>()*m).normalization()).template convert<3>()
+			);
 		}
 		using op_m::operator *;
-		vec_t placeOnPlane(const vec_t& src, const value_t& offset) const {
+		vec_t placeOnPlane(const vec_t& src) const {
 			const value_t d = dot(src);
-			return src + getNormal() * (-this->w+offset);
+			return src - getNormal() * d;
 		}
 		value_t placeOnPlaneDirDist(const vec_t& dir, const vec_t& src) const {
 			const value_t r = dir.dot(getNormal());
-			if(std::fabs(r) < 1e-6)
-				throw 0;
-			const auto v = src - getOrigin();
-			const value_t act = dot(v);
-			return act / r;
+			if(std::abs(r) < 1e-6) {
+				// dirと法線がほぼ平行なので幾ら頂点を移動させても平面へ辿りつけない
+				throw CantReachToPlane("");
+			}
+			return -dot(src) / r;
 		}
 		vec_t getOrigin() const {
-			return getNormal() * -this->w;
+			return getNormal() * this->w;
 		}
 		const vec4_t& asVec4() const noexcept {
 			return reinterpret_cast<const vec4_t&>(*this);
 		}
 		bool operator == (const PlaneT& p) const {
-			return static_cast<const base_t&>(*this)
-					== static_cast<const base_t&>(p);
+			return asVec4() == p.asVec4();
 		}
 		//! 平面にてベクトルを反転
 		vec_t flip(const vec_t& v) const {
@@ -129,12 +158,12 @@ namespace frea {
 				return res;
 			}
 			res.cross = true;
-			const value_t div = std::fabs(distf) + std::fabs(distb);
+			const value_t div = std::abs(distf) + std::abs(distb);
 			if(div < 1e-6) {
 				// どちらの頂点ともほぼ面上にあるので交点はその中間ということにする
 				res.point = (v0 + v1) /2;
 			} else {
-				const value_t ratio = std::fabs(distf) / div;
+				const value_t ratio = std::abs(distf) / div;
 				// 平面と線分の交点 -> tv
 				res.point = (v1 - v0) * ratio + v0;
 			}
