@@ -286,7 +286,7 @@ namespace frea {
 			return std::sqrt(len_sq());
 		}
 		rad_t angle() const {
-			return std::acos(Saturate<value_t>(this->w, 1.0))*2;
+			return rad_t(std::acos(Saturate<value_t>(this->w, 1.0))*2);
 		}
 		const vec_t& getVector() const {
 			return reinterpret_cast<const vec_t&>(*this);
