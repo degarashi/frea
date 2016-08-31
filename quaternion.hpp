@@ -2,6 +2,7 @@
 #include "matrix.hpp"
 #include "error.hpp"
 #include "compare.hpp"
+#include "ieee754.hpp"
 
 namespace frea {
 	struct InvalidAxis : std::invalid_argument {
@@ -26,6 +27,8 @@ namespace frea {
 		using mat4_t = Mat_t<T,4,4, A>;
 		using exp_t = ExpQuatT<value_t, A>;
 
+		constexpr static T ZeroLen_Th = ThresholdF<value_t>(0.5),
+							Theta_Th = ThresholdF<value_t>(0.8);
 		QuatT() = default;
 		operator const base_t&() = delete;
 		// 違う要素Quatからの変換
@@ -142,7 +145,7 @@ namespace frea {
 			vec_t t_up = up;
 			vec_t rv = t_up % dir;
 			const value_t len_s = rv.len_sq();
-			if(len_s < 1e-6) {
+			if(len_s < ZeroLen_Th) {
 				// 真上か真下を向いている
 				// upベクトルは適当に定める
 				t_up = dir.verticalVector();
@@ -155,7 +158,7 @@ namespace frea {
 		}
 		static QuatT Rotation(const vec_t& from, const vec_t& to) {
 			vec_t rAxis = from % to;
-			if(rAxis.len_sq() < 1e-4)
+			if(rAxis.len_sq() < ZeroLen_Th)
 				return QuatT::Identity();
 			rAxis.normalize();
 			const value_t d = std::acos(Saturate<value_t>(from.dot(to), 1.0));
@@ -190,10 +193,10 @@ namespace frea {
 				&vOther = axis[axF[1]],
 				&vBase = axis[axF[2]];
 			vTarget = at - pos;
-			if(vTarget.normalize() < 1e-6)
+			if(vTarget.normalize() < ZeroLen_Th)
 				throw NoValidAxis("");
 			vOther = baseVec.cross(vTarget);
-			if(vOther.normalize() < 1e-6)
+			if(vOther.normalize() < ZeroLen_Th)
 				throw NoValidAxis("");
 			vBase = vTarget.cross(vOther);
 			const value_t b = (int(targetAxis) == (int(baseAxis)+1)%3) ? 1 : -1;
@@ -300,7 +303,7 @@ namespace frea {
 		}
 		vec_t getAxis() const {
 			auto s_theta = std::sqrt(1.0 - Square(this->w));
-			if(s_theta < 1e-6)
+			if(s_theta < ZeroLen_Th)
 				return vec_t(0);
 			s_theta = 1.0 / s_theta;
 			return vec_t(this->x*s_theta, this->y*s_theta, this->z*s_theta);
@@ -316,7 +319,7 @@ namespace frea {
 			const auto ac = Saturate<value_t>(dot(q), 0.0, 1.0);
 			const auto theta = std::acos(ac),
 						S = std::sin(theta);
-			if(std::fabs(S) < 1e-4)
+			if(std::abs(S) < Theta_Th)
 				return *this;
 			QuatT rq = *this * (std::sin(theta*(1-t)) / S);
 			rq += q * (std::sin(theta * t) / S);
@@ -410,6 +413,10 @@ namespace frea {
 			return exp_t(*this);
 		}
 	};
+	template <class T, bool A>
+	const T QuatT<T,A>::ZeroLen_Th;
+	template <class T, bool A>
+	const T QuatT<T,A>::Theta_Th;
 
 	template <class T, bool A>
 	inline std::ostream& operator << (std::ostream& os, const QuatT<T,A>& q) {
