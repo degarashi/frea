@@ -37,7 +37,7 @@ namespace frea {
 				const auto axis = this->makeDir();
 				const auto m0 = mat_t::RotationAxis(axis, angle),
 							m1 = quat_t::Rotation(axis, angle).asMat33();
-				EXPECT_LE(AbsMax(mat_t(m0-m1)), Th);
+				EXPECT_LE(AbsMax(mat_t(m0-m1)), ThresholdF<value_t>(0.5));
 			}
 		}
 	}
