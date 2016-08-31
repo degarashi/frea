@@ -30,8 +30,8 @@ namespace frea {
 				Quaternion():
 					_rd(mt().template getUniformF<value_t>(DefaultRange))
 				{}
-				value_t makeRF() {
-					return _rd();
+				value_t makeRF(const Range<value_t>& r) {
+					return mt().template getUniform<value_t>(r);
 				}
 				rad_t makeRadian() {
 					return random::GenHalfAngle<rad_t>(_rd);
@@ -161,30 +161,28 @@ namespace frea {
 				EXPECT_EQ(q0, q1);
 			}
 		}
+		#define CHECK(m0, m1) \
+			{ \
+				auto q0 = this->makeRQuat(), \
+					q1 = q0.m1(); \
+					q0.m0(); \
+					EXPECT_EQ(q0, q1); \
+			}
 		TYPED_TEST(Quaternion, FunctionEquality_Method) {
-			USING(quat_t);
+			CHECK(conjugate, conjugation)
+			CHECK(invert, inversion)
+			CHECK(normalize, normalization)
 			{
-				// conjugate
+				// rotate
+				const auto axis = this->makeDir();
+				const auto ang = this->makeRadian();
 				auto q0 = this->makeRQuat(),
-					 q1 = q0.conjugation();
-				q0.conjugate();
-				EXPECT_EQ(q0, q1);
-			}
-			{
-				// invert
-				auto q0 = this->makeRQuat(),
-					 q1 = q0.inversion();
-				q0.invert();
-				EXPECT_EQ(q0, q1);
-			}
-			{
-				// normalize
-				auto q0 = this->makeRQuat(),
-					 q1 = q0.normalization();
-				q0.normalize();
+					 q1 = q0.rotation(axis, ang);
+				q0.rotate(axis, ang);
 				EXPECT_EQ(q0, q1);
 			}
 		}
+		#undef CHECK
 		TYPED_TEST(Quaternion, Multiply) {
 			USING(quat_t);
 			USING(vec_t);
@@ -210,12 +208,15 @@ namespace frea {
 		TYPED_TEST(Quaternion, Rotation) {
 			USING(quat_t);
 			USING(vec_t);
-			USING(rad_t);
 			USING(value_t);
+			USING(rad_t);
 
 			// getRight(), getUp(), getDir()が{1,0,0},{0,1,0},{0,0,1}を変換した結果と比較
-			const rad_t ang(this->makeRadian());
-			const vec_t axis = this->makeDir();
+			rad_t ang;
+			do {
+				ang = this->makeRadian();
+			} while(std::abs(ang.get()) < 0.01);
+			const auto axis = this->makeDir();
 			const auto q = quat_t::Rotation(axis, ang);
 			const auto m = q.asMat33();
 
@@ -223,6 +224,160 @@ namespace frea {
 			EXPECT_LT(AbsMax(vec_t(vec_t(1,0,0)*m - q.getRight())), Th);
 			EXPECT_LT(AbsMax(vec_t(vec_t(0,1,0)*m - q.getUp())), Th);
 			EXPECT_LT(AbsMax(vec_t(vec_t(0,0,1)*m - q.getDir())), Th);
+
+			// getXAxis() == 行列の1列目
+			EXPECT_LE(AbsMax(vec_t(q.getXAxis() - m.template getColumn<0>())), Th);
+			// Invは1行目
+			EXPECT_LE(AbsMax(vec_t(q.getXAxisInv() - m.template getRow<0>())), Th);
+			// getYAxis() == 行列の2列目
+			EXPECT_LE(AbsMax(vec_t(q.getYAxis() - m.template getColumn<1>())), Th);
+			// Invは2行目
+			EXPECT_LE(AbsMax(vec_t(q.getYAxisInv() - m.template getRow<1>())), Th);
+			// getZAxis() == 行列の3列目
+			EXPECT_LE(AbsMax(vec_t(q.getZAxis() - m.template getColumn<2>())), Th);
+			// Invは3行目
+			EXPECT_LE(AbsMax(vec_t(q.getZAxisInv() - m.template getRow<2>())), Th);
+
+			// RotationX(ang) == Rotation({1,0,0}, ang)
+			EXPECT_EQ(quat_t::RotationX(ang), quat_t::Rotation({1,0,0}, ang));
+			// RotationY(ang) == Rotation({0,1,0}, ang)
+			EXPECT_EQ(quat_t::RotationY(ang), quat_t::Rotation({0,1,0}, ang));
+			// RotationZ(ang) == Rotation({0,0,1}, ang)
+			EXPECT_EQ(quat_t::RotationZ(ang), quat_t::Rotation({0,0,1}, ang));
+
+			#define CHECK(func, x,y,z) { \
+				auto q0 = q, \
+					 q1 = q; \
+				q0.func(ang); \
+				q1.rotate({x,y,z}, ang); \
+				EXPECT_EQ(q0, q1); \
+			}
+			// rotateX(ang) == rotate({1,0,0}, ang)
+			CHECK(rotateX, 1,0,0)
+			// rotateY(ang) == rotate({0,1,0}, ang)
+			CHECK(rotateY, 0,1,0)
+			// rotateZ(ang) == rotate({0,0,1}, ang)
+			CHECK(rotateZ, 0,0,1)
+			#undef CHECK
+
+			{
+				// angle & axis
+				auto ang0 = q.angle().get(),
+					 ang1 = ang.get();
+				const auto axis0 = q.getAxis(),
+					  axis1 = axis;
+				constexpr auto Th = ThresholdF<value_t>(0.8);
+				if(ang0 * ang1 < 0) {
+					EXPECT_NEAR(axis0.dot(axis1), -1, Th);
+					ang1 *= -1;
+				}
+				EXPECT_NEAR(ang0, ang1, Th);
+			}
+		}
+		TYPED_TEST(Quaternion, YawPitchRoll) {
+			USING(quat_t);
+			USING(rad_t);
+			const rad_t pitch(this->makeRF(rad_t::HalfRotationRange)),
+						yaw(this->makeRF(rad_t::OneRotationRange)),
+						roll(this->makeRF(rad_t::OneRotationRange));
+			// Roll, Pitch, Yawの順番
+			quat_t q0 = quat_t::Identity();
+			q0.rotateZ(roll);
+			q0.rotateX(-pitch);
+			q0.rotateY(yaw);
+			const quat_t q1 = quat_t::RotationYPR(yaw, pitch, roll);
+			EXPECT_EQ(q0, q1);
+		}
+		TYPED_TEST(Quaternion, LookAt) {
+			USING(vec_t);
+			USING(value_t);
+			USING(quat_t);
+			// Z,Y軸方向のベクトルをLookAt(dir,up)で算出したクォータニオンで回転させ、それがdir,upと同一か確認
+			const auto dir = this->makeDir();
+			constexpr auto Th = ThresholdF<value_t>(0.5);
+			vec_t up;
+			do {
+				up = this->makeDir();
+			} while(std::abs(dir.dot(up)) > 1-Th);
+			const auto q = quat_t::LookAt(dir, up);
+
+			vec_t z(0,0,1),
+				  y(0,1,0);
+			z *= q;
+			y *= q;
+			EXPECT_NEAR(dir.dot(z), 1, Th);
+			EXPECT_GE(up.dot(y), 0);
+		}
+		TYPED_TEST(Quaternion, SetLookAt) {
+			USING(quat_t);
+			USING(vec_t);
+			USING(value_t);
+			// 適当に重複しない軸フラグを決める
+			Axis::e flag[3] = {Axis::X, Axis::Y, Axis::Z};
+			std::shuffle(flag, flag+3, this->mt().refMt());
+			// 重複しない位置座標をランダム生成
+			vec_t pos = this->makeVec3(),
+				  at, baseVec;
+			constexpr auto Th = ThresholdF<value_t>(0.7);
+			do {
+				at = this->makeVec3();
+			} while(pos.distance(at) < Th);
+			// (at-pos)方向と重複しない方向ベクトルを生成
+			const vec_t tdir = (at-pos).normalization();
+			do {
+				baseVec = this->makeDir();
+			} while(std::abs(tdir.dot(baseVec)) > 0.9);
+			const auto q = quat_t::SetLookAt(flag[0], flag[1], baseVec, at, pos);
+			const vec_t axis[3] = {{1,0,0}, {0,1,0}, {0,0,1}};
+			{
+				// TargetAxisに指定された方向ベクトルは(at-pos)の方向と同じ
+				const auto v = axis[flag[0]] * q;
+				EXPECT_GE(v.dot(tdir), 1-Th);
+			}
+			{
+				const auto v = axis[flag[1]] * q;
+				// BaseAxisは多少補正される事があっても内積がマイナスにはならない
+				EXPECT_GE(v.dot(baseVec), 0);
+			}
+
+			// 軸フラグが同一の時、InvalidAxis例外を送出
+			for(int i=0 ; i<Axis::_Num ; i++)
+				EXPECT_THROW(quat_t::SetLookAt(static_cast<Axis::e>(i), static_cast<Axis::e>(i), baseVec, at, pos), InvalidAxis);
+			// atとposが同位置の時にNoValidAxis例外が送出される
+			EXPECT_THROW(quat_t::SetLookAt(flag[0], flag[1], baseVec, at, at), NoValidAxis);
+			// baseVecの方向が(at-pos)と同じか正対する時にNoValidAxisが送出される
+			EXPECT_THROW(quat_t::SetLookAt(flag[0], flag[1], tdir, at, pos), NoValidAxis);
+		}
+		//! スカラとの四則演算, クォータニオンとの加減算
+		TYPED_TEST(Quaternion, Operation) {
+			USING(quat_t);
+			const auto q = this->makeRQuat();
+			const auto s = this->makeRF({-1e2, 1e2});
+
+			#define CHECK(op) { \
+				quat_t q0 = q op s, \
+						q1 = q; \
+				for(auto& qv : q1) \
+					qv op##= s; \
+				EXPECT_EQ(q0, q1); \
+			}
+			CHECK(+)
+			CHECK(-)
+			CHECK(*)
+			CHECK(/)
+			#undef CHECK
+
+			const auto qa = this->makeRQuat();
+			#define CHECK(op) { \
+				quat_t q0 = q, \
+						q1 = q op qa; \
+				for(int i=0 ; i<4 ; i++) \
+					q0[i] op##= qa[i]; \
+				EXPECT_EQ(q0, q1); \
+			}
+			CHECK(+)
+			CHECK(-)
+			#undef CHECK
 		}
 		//! クォータニオンの線形補間テスト
 		TYPED_TEST(Quaternion, SLerp) {
@@ -251,6 +406,13 @@ namespace frea {
 
 				constexpr auto Th = ThresholdF<value_t>(0.9);
 				EXPECT_LT(AbsMax(vec_t(v0 - v1)), Th);
+			}
+			{
+				// scale
+				const auto t = this->makeRF({0.0, 1.0});
+				const auto q_0 = quat_t::Identity().slerp(q0, t),
+							q_1 = q0.scale(t);
+				EXPECT_EQ(q_0, q_1);
 			}
 		}
 	}
