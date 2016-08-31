@@ -71,8 +71,7 @@ namespace frea {
 			/*! 範囲がnumeric_limits<T>::lowest() -> max()の乱数 */
 			template <class T>
 			T getUniform() {
-				constexpr auto R = Dist_t<T>::NumericRange;
-				return getUniform<T>(R);
+				return getUniform<T>(Dist_t<T>::NumericRange);
 			}
 			//! 指定範囲の一様分布(in range)
 			template <class T>
@@ -87,8 +86,7 @@ namespace frea {
 			//! 一様分布を返すファンクタを作成
 			template <class T>
 			auto getUniformF() noexcept {
-				constexpr auto R = Dist_t<T>::NumericRange;
-				return RObj<T>(*this, R);
+				return RObj<T>(*this, Dist_t<T>::NumericRange);
 			}
 			//! 指定範囲の一様分布(vmax)
 			template <class T>
@@ -110,6 +108,11 @@ namespace frea {
 				return std::move(Random<MT_t>(MT_t{seq}));
 			}
 	};
+	template <class MT> template <class T>
+	const Range<T> Random<MT>::Dist_Int<T>::NumericRange;
+	template <class MT> template <class T>
+	const Range<T> Random<MT>::Dist_Float<T>::NumericRange;
+
 	using RandomMT = Random<std::mt19937>;
 	using RandomMT64 = Random<std::mt19937_64>;
 }

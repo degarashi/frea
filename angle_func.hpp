@@ -42,8 +42,7 @@ namespace frea {
 	}
 	template <class A>
 	A AngleDiff(const A& ang0, const A& ang1) {
-		constexpr auto oa = A::OneRotationAng;
-		return A(AngleLerpValueDiff(ang0.get(), ang1.get(), oa));
+		return A(AngleLerpValueDiff(ang0.get(), ang1.get(), A::OneRotationAng));
 	}
 
 	template <class A, class Proc>
@@ -60,8 +59,7 @@ namespace frea {
 	template <class T>
 	T AngleLerp(const T& ang0, const T& ang1, const typename T::value_t& r) {
 		const auto fn = [r](auto&& v){ return v*r; };
-		constexpr auto oa = T::OneRotationAng;
-		return T(AngleLerpValue(ang0.get(), ang1.get(), fn, oa));
+		return T(AngleLerpValue(ang0.get(), ang1.get(), fn, T::OneRotationAng));
 	}
 	//! ang0からang1へ向けてmaxDiff以下の分だけ近づける
 	template <class T>
@@ -71,7 +69,6 @@ namespace frea {
 				return (v > 0) ? mdiff : -mdiff;
 			return decltype(mdiff)(v);
 		};
-		constexpr auto oa = T::OneRotationAng;
-		return T(AngleLerpValue(ang0.get(), ang1.get(), fn, oa));
+		return T(AngleLerpValue(ang0.get(), ang1.get(), fn, T::OneRotationAng));
 	}
 }

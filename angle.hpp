@@ -197,6 +197,12 @@ namespace frea {
 			DEF_OP(>=)
 			#undef DEF_OP
 	};
+	template <class TAG, class V>
+	constexpr V Angle<TAG,V>::OneRotationAng;
+	template <class TAG, class V>
+	constexpr Range<V> Angle<TAG,V>::OneRotationRange;
+	template <class TAG, class V>
+	constexpr Range<V> Angle<TAG,V>::HalfRotationRange;
 
 	template <class T>
 	using Degree = Angle<Degree_t, T>;
