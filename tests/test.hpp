@@ -257,10 +257,19 @@ namespace frea {
 				using elem_t = typename base_t::elem_t;
 				using mat_t = Mat_t<elem_t, dim_m, dim_n, align>;
 				using array_t = ArrayM<value_t, dim_m, dim_n>;
+				using rad_t = Radian<value_t>;
 			public:
 				auto makeRMat(const Range<value_t>& r) {
 					auto rd = this->mt().template getUniformF<value_t>(r);
 					return random::GenMat<mat_t>(rd);
+				}
+				auto makeDir() {
+					auto rd = this->mt().template getUniformF<value_t>();
+					return random::GenVecUnit<typename base_t::vec_t>(rd);
+				}
+				auto makeRadian() {
+					auto rd = this->mt().template getUniformF<value_t>();
+					return random::GenAngle<rad_t>(rd);
 				}
 		};
 
