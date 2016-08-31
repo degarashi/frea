@@ -304,7 +304,7 @@ namespace frea {
 		vec_t getAxis() const {
 			auto s_theta = std::sqrt(1.0 - Square(this->w));
 			if(s_theta < ZeroLen_Th)
-				return vec_t(0);
+				throw NoValidAxis("");
 			s_theta = 1.0 / s_theta;
 			return vec_t(this->x*s_theta, this->y*s_theta, this->z*s_theta);
 		}
