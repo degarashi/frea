@@ -4,6 +4,13 @@
 #include "compare.hpp"
 
 namespace frea {
+	struct InvalidAxis : std::invalid_argument {
+		using std::invalid_argument::invalid_argument;
+	};
+	struct NoValidAxis : std::runtime_error {
+		using std::runtime_error::runtime_error;
+	};
+
 	template <class T, bool A>
 	struct ExpQuatT;
 	template <class T, bool A>
@@ -141,7 +148,7 @@ namespace frea {
 				t_up = dir.verticalVector();
 				rv = t_up % dir;
 			} else {
-				rv *= RSqrt(len_s);
+				rv /= std::sqrt(len_s);
 				t_up = dir % rv;
 			}
 			return FromAxis(rv, t_up, dir);
@@ -155,11 +162,13 @@ namespace frea {
 			return Rotation(rAxis, rad_t(d));
 		}
 		static QuatT SetLookAt(const Axis::e targetAxis, const Axis::e baseAxis, const vec_t& baseVec, const vec_t& at, const vec_t& pos) {
+			if(targetAxis == baseAxis)
+				throw InvalidAxis("");
 			// [0] = target
 			// [1] = right
 			// [2] = base
 			int axF[3] = {targetAxis, 0, baseAxis};
-			// target, base以外の軸を設定
+			// axF[1]へtarget, base以外の軸フラグを設定
 			switch((1<<targetAxis) | (1<<baseAxis)) {
 				// 110
 				case 0x06:
@@ -176,18 +185,19 @@ namespace frea {
 				default:
 					D_Expect(false, "invalid axis flag")
 			}
-
 			vec_t axis[3];
 			auto &vTarget = axis[axF[0]],
 				&vOther = axis[axF[1]],
 				&vBase = axis[axF[2]];
 			vTarget = at - pos;
 			if(vTarget.normalize() < 1e-6)
-				return Identity();
+				throw NoValidAxis("");
 			vOther = baseVec.cross(vTarget);
 			if(vOther.normalize() < 1e-6)
-				return Identity();
+				throw NoValidAxis("");
 			vBase = vTarget.cross(vOther);
+			const value_t b = (int(targetAxis) == (int(baseAxis)+1)%3) ? 1 : -1;
+			vOther *= b;
 			return FromAxis(axis[0], axis[1], axis[2]);
 		}
 		void rotateX(const rad_t ang) {
@@ -214,10 +224,8 @@ namespace frea {
 		void invert() {
 			*this = inversion();
 		}
-		void scale(const value_t& s) {
-			QuatT q = Identity();
-			q.slerp(*this, s);
-			*this = q;
+		QuatT scale(const value_t& s) const {
+			return Identity().slerp(*this, s);
 		}
 
 		#define DEF_SCALAR(op) \
