@@ -14,8 +14,8 @@ namespace frea {
 							S = std::sin(ang.get());
 			return {
 				1,	0,	0,
-				0,	C,	-S,
-				0,	S,	C,
+				0,	C,	S,
+				0,	-S,	C,
 			};
 		}
 		//! Y軸周りの回転
@@ -23,9 +23,9 @@ namespace frea {
 			const value_t	C = std::cos(ang.get()),
 							S = std::sin(ang.get());
 			return {
-				C,	0,	S,
+				C,	0,	-S,
 				0,	1,	0,
-				-S,	0,	C
+				S,	0,	C
 			};
 		}
 		//! Z軸周りの回転
@@ -33,8 +33,8 @@ namespace frea {
 			const value_t	C = std::cos(ang.get()),
 							S = std::sin(ang.get());
 			return {
-				C,	-S,	0,
-				S,	C,	0,
+				C,	S,	0,
+				-S,	C,	0,
 				0,	0,	1
 			};
 		}
@@ -53,9 +53,9 @@ namespace frea {
 						M21 = axis.y * axis.z * RC - axis.x*S,
 						M22 = C + Square(axis.z) * RC;
 			return {
-				M00, M10, M20,
-				M01, M11, M21,
-				M02, M12, M22
+				M00, M01, M02,
+				M10, M11, M12,
+				M20, M21, M22
 			};
 		}
 		static this_t LookAtLH(const vec_t& pos, const vec_t& at, const vec_t& up);

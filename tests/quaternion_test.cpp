@@ -200,7 +200,7 @@ namespace frea {
 				q[i] = quat_t::Rotation(axis[i], ang[i]);
 				m[i] = mat3_t::RotationAxis(axis[i], ang[i]);
 			}
-			q[2] = q[0] * q[1];
+			q[2] = q[1] * q[0];
 			q[2].normalize();
 			m[2] = m[0] * m[1];
 			ASSERT_LT(AbsMax(array33_t(q[2].asMat33()) - m[2]), ThresholdF<value_t>(0.8));
@@ -393,7 +393,7 @@ namespace frea {
 			const rad_t ang(this->makeRadian());
 			const auto q0 = this->makeRQuat();
 			auto q1 = quat_t::Rotation(axis, ang);
-			q1 = q0 * q1;
+			q1 = q1 * q0;
 			const mat3_t m0 = q0.asMat33();
 			for(int i=0 ; i<div ; i++) {
 				const value_t t = tdiv * i;

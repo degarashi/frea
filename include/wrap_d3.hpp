@@ -28,7 +28,7 @@ namespace frea {
 			QuatT<typename Q::value_t, true> q0;
 			this->template store<true>((typename Q::value_t*)&q0, IConst<2>());
 			q0.w = 0;
-			return (q.inversion() * q0 * q).getVector();
+			return (q * q0 * q.inversion()).getVector();
 		}
 		this_t cross(const this_t& w) const {
 			return base_t::I::Cross(base_t::m, w.m);
@@ -53,7 +53,7 @@ namespace frea {
 			QuatT<typename Q::value_t, true> q0;
 			this->template store<true>(reinterpret_cast<typename Q::value_t*>(&q0), IConst<2>());
 			q0.w = 0;
-			return (q.inversion() * q0 * q).getVector();
+			return (q * q0 * q.inversion()).getVector();
 		}
 		using value_t = typename base_t::value_t;
 		this_t cross(const this_t& t) const {

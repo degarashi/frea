@@ -27,7 +27,7 @@ namespace frea {
 		using mat4_t = Mat_t<T,4,4, A>;
 		using exp_t = ExpQuatT<value_t, A>;
 
-		constexpr static T ZeroLen_Th = ThresholdF<value_t>(0.5),
+		constexpr static T ZeroLen_Th = ThresholdF<value_t>(0.2),
 							Theta_Th = ThresholdF<value_t>(0.8);
 		QuatT() = default;
 		operator const base_t&() = delete;
@@ -42,16 +42,9 @@ namespace frea {
 		constexpr QuatT(const vec_t& v, const value_t& w):
 			base_t{v.x, v.y, v.z, w}
 		{}
-		static QuatT FromMat(const mat3_t& m) {
-			return FromAxisF(
-				m.m[0][0], m.m[0][1], m.m[0][2],
-				m.m[1][0], m.m[1][1], m.m[1][2],
-				m.m[2][0], m.m[2][1], m.m[2][2]
-			);
-		}
-		static QuatT FromAxisF(const value_t& f11, const value_t& f21, const value_t& f31,
-								const value_t& f12, const value_t& f22, const value_t& f32,
-								const value_t& f13, const value_t& f23, const value_t& f33)
+		static QuatT FromAxisF(const value_t& f11, const value_t& f12, const value_t& f13,
+								const value_t& f21, const value_t& f22, const value_t& f23,
+								const value_t& f31, const value_t& f32, const value_t& f33)
 		{
 			// 最大成分を検索
 			const value_t elem[4] = {f11 - f22 - f33 + 1,
@@ -95,6 +88,9 @@ namespace frea {
 			}
 			return res;
 			
+		}
+		static QuatT FromMat(const mat3_t& m) {
+			return FromAxis(m.m[0], m.m[1], m.m[2]);
 		}
 		static QuatT FromAxis(const vec_t& xA,
 								const vec_t& yA,
@@ -327,13 +323,13 @@ namespace frea {
 		}
 
 		#define ELEM00 (1-2*this->y*this->y-2*this->z*this->z)
-		#define ELEM10 (2*this->x*this->y+2*this->w*this->z)
-		#define ELEM20 (2*this->x*this->z-2*this->w*this->y)
-		#define ELEM01 (2*this->x*this->y-2*this->w*this->z)
+		#define ELEM01 (2*this->x*this->y+2*this->w*this->z)
+		#define ELEM02 (2*this->x*this->z-2*this->w*this->y)
+		#define ELEM10 (2*this->x*this->y-2*this->w*this->z)
 		#define ELEM11 (1-2*this->x*this->x-2*this->z*this->z)
-		#define ELEM21 (2*this->y*this->z+2*this->w*this->x)
-		#define ELEM02 (2*this->x*this->z+2*this->w*this->y)
-		#define ELEM12 (2*this->y*this->z-2*this->w*this->x)
+		#define ELEM12 (2*this->y*this->z+2*this->w*this->x)
+		#define ELEM20 (2*this->x*this->z+2*this->w*this->y)
+		#define ELEM21 (2*this->y*this->z-2*this->w*this->x)
 		#define ELEM22 (1-2*this->x*this->x-2*this->y*this->y)
 		//! 回転を行列表現した時のX軸
 		vec_t getXAxis() const {

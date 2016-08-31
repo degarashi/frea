@@ -26,7 +26,11 @@ namespace frea {
 					return random::GenVecUnit<vec_t>(_rd);
 				}
 				quat_t makeRQuat() {
-					return random::GenQuat<quat_t>(_rd);
+					quat_t ret;
+					do {
+						ret = random::GenQuat<quat_t>(_rd);
+					} while(ret.angle().get() < 1e-2);
+					return ret;
 				}
 		};
 		TYPED_TEST_CASE(ExpQuaternion, types::QTypes);
