@@ -5,13 +5,11 @@ namespace frea {
 	namespace random {
 		template <class Ang, class RD>
 		Ang GenAngle(RD&& rd) {
-			constexpr auto OR = Ang::OneRotationRange;
-			return Ang(rd(OR));
+			return Ang(rd(Ang::OneRotationRange));
 		}
 		template <class Ang, class RD>
 		Ang GenHalfAngle(RD&& rd) {
-			constexpr auto HR = Ang::HalfRotationRange;
-			return Ang(rd(HR));
+			return Ang(rd(Ang::HalfRotationRange));
 		}
 	}
 }
