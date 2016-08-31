@@ -273,6 +273,24 @@ namespace frea {
 				}
 				EXPECT_NEAR(ang0, ang1, Th);
 			}
+			{
+				// rotation(from, to)
+				const vec_t dir0 = this->makeDir();
+				vec_t dir1;
+				do {
+					dir1 = this->makeDir();
+				} while(std::abs(dir0.dot(dir1)) > 0.8);
+
+				const auto q = quat_t::Rotation(dir0, dir1);
+				const vec_t vdir = dir0 * q;
+				constexpr auto Th = ThresholdF<value_t>(0.8);
+				// Fromベクトルを変換したらToベクトルになる
+				EXPECT_LE(AbsMax(vec_t(dir1-vdir)), Th);
+				// 回転軸に平行なベクトルを回転させても値が変わらない
+				const vec_t vvert0 = dir0.cross(dir1).normalization(),
+							vvert1 = vvert0 * q;
+				EXPECT_LE(AbsMax(vec_t(vvert1-vvert0)), Th);
+			}
 		}
 		TYPED_TEST(Quaternion, YawPitchRoll) {
 			USING(quat_t);
