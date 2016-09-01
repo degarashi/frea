@@ -45,6 +45,20 @@ namespace frea {
 				++itr1;
 			}
 		}
+		TYPED_TEST(Matrix, Compare) {
+			USING(mat_t);
+			USING(value_t);
+			constexpr auto range = Range<value_t>{-1e3, 1e3};
+			auto m0 = this->makeRMat(range),
+				m1 = m0;
+			EXPECT_EQ(m0, m0);
+			EXPECT_EQ(m0, m1);
+			const auto idx = this->mt().template getUniformF<int>();
+			const int idxM = idx({0, mat_t::dim_m-1}),
+					idxN = idx({0, mat_t::dim_n-1});
+			m1[idxM][idxN] += 1;
+			EXPECT_NE(m0, m1);
+		}
 		// 内部表現による演算結果の差異をチェック
 		TYPED_TEST(Matrix, Register) {
 			USING(value_t);

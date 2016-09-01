@@ -180,7 +180,13 @@ namespace frea {
 				return _mul_vecL(std::make_index_sequence<dim_n>(), vc);
 			}
 
-			bool operator == (const wrapM& m) const;
+			bool operator == (const wrapM& m) const {
+				for(int i=0 ; i<dim_m ; i++) {
+					if(v[i] != m.v[i])
+						return false;
+				}
+				return true;
+			}
 
 			template <class VD>
 			void store(VD* dst) const {
