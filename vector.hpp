@@ -296,6 +296,7 @@ namespace frea{
 		using op_t = op::Operator_Ne<S>;
 		using wrap_t = W;
 		using spec_t = S;
+		using I = typename wrap_t::I;
 		using value_t = typename wrap_t::value_t;
 		using reg_t = typename wrap_t::reg_t;
 		constexpr static int size = N,
@@ -353,7 +354,7 @@ namespace frea{
 			auto sum = wrap_t::Zero();
 			for(int i=0 ; i<a_size-1 ; i++)
 				sum += data[i] * t.data[i];
-			sum += getTail() * t.getMaskedTail();
+			sum += getMaskedTail() * t.getMaskedTail();
 			return sum.sumUp();
 		}
 		auto average() const {
