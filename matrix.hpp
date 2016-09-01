@@ -2,6 +2,7 @@
 #include "vector.hpp"
 #include "angle.hpp"
 #include "meta/compare.hpp"
+#include "ieee754.hpp"
 
 namespace frea {
 	template <class VW, int M>
@@ -10,13 +11,6 @@ namespace frea {
 	struct NoInverseMatrix : std::runtime_error {
 		using std::runtime_error::runtime_error;
 	};
-
-	template <class T>
-	constexpr T Matrix_ZeroThreshold(1);
-	template <>
-	constexpr float Matrix_ZeroThreshold<float> = 1e-5f;
-	template <>
-	constexpr double Matrix_ZeroThreshold<double> = 1e-10;
 
 	// ベクトル演算レジスタクラスをM方向に束ねたもの
 	/*!
@@ -688,6 +682,7 @@ namespace frea {
 				}
 				return ret;
 			}
+			constexpr static auto ZeroThreshold = Threshold<value_t>(0.6, 1);
 
 		public:
 			value_t calcDeterminant() const {
@@ -697,7 +692,8 @@ namespace frea {
 				return inversion(calcDeterminant());
 			}
 			spec_t inversion(const value_t& det) const {
-				if(std::abs(det) < Matrix_ZeroThreshold<value_t>)
+				constexpr auto Th = ZeroThreshold;
+				if(std::abs(det) < Th)
 					throw NoInverseMatrix("");
 				return _inversion(1/det, IConst<base_t::dim_m>());
 			}
