@@ -360,7 +360,7 @@ namespace frea {
 			auto tr = _mm_shuffle_pd(r, r, 0b11);
 			tr = Add(tr, r);
 			value_t ret;
-			Store(&ret, tr, std::false_type(), IConst<1>());
+			Store(&ret, tr, std::false_type(), IConst<0>());
 			return ret;
 		}
 
@@ -408,6 +408,12 @@ namespace frea {
 			r1 = _mm_andnot_pd(r1, One());
 			r0 = Or(r0, r1);
 			return SumUp(r0) != 0;
+		}
+		static value_t Reciprocal(const value_t& v) {
+			return 1.0 / v;
+		}
+		static reg_t Reciprocal(reg_t r) {
+			return Div(Set1(1), r);
 		}
 	};
 	template <int N, bool A> SVec_t<__m128, N, A> info_detect(float);
