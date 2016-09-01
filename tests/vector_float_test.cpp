@@ -12,6 +12,91 @@ namespace frea {
 			template <class T>
 			constexpr Range<T> DefaultRange{-1e3, 1e3};
 		}
+		TYPED_TEST(FloatVector, FunctionEquality_Method) {
+			USING(vec_t);
+			USING(value_t);
+			const auto v = this->makeRVec(DefaultRange<value_t>);
+			constexpr auto Th = ThresholdF<value_t>(0.1);
+			{
+				const auto w = v.asInternal();
+				// Wrap
+				{
+					// normalize
+					auto w0 = w.normalization(),
+						 w1 = w;
+					w1.normalize();
+					EXPECT_LE(AbsMax(vec_t(w0-w1)), Th);
+				}
+			}
+			{
+				// Vector
+				{
+					// normalize
+					auto v0 = v.normalization(),
+						 v1 = v;
+					v1.normalize();
+					EXPECT_LE(AbsMax(vec_t(v0-v1)), Th);
+				}
+			}
+		}
+		namespace {
+			template <class V, class RD>
+			V MakeNZVec(RD&& rdf, const typename V::value_t& th) {
+				V ret;
+				for(;;) {
+					ret = random::GenVec<V>(rdf);
+					bool b = true;
+					for(int i=0 ; i<V::size ; i++) {
+						if(std::abs(ret[i]) < th) {
+							b = false;
+							break;
+						}
+					}
+					if(b)
+						break;
+				}
+				return ret;
+			}
+		}
+		TYPED_TEST(FloatVector, Wrap_Equality) {
+			USING(value_t);
+			USING(vec_t);
+			const auto mtf = this->mt().template getUniformF<value_t>({-1e2, 1e2});
+			auto v0 = MakeNZVec<vec_t>(mtf, 1e-2),
+				v1 = MakeNZVec<vec_t>(mtf, 1e-2);
+			auto w0 = v0.asInternal(),
+				w1 = v1.asInternal();
+			const auto mtf01 = this->mt().template getUniformF<value_t>({0,1});
+			const auto s01 = mtf01();
+
+			// distance
+			EXPECT_EQ(v0.distance(v1), w0.distance(w1));
+			// dist_sq
+			EXPECT_EQ(v0.dist_sq(v1), w0.dist_sq(w1));
+			// normalize
+			EXPECT_EQ(vec_t(v0.normalization()), vec_t(w0.normalization()));
+			// length
+			EXPECT_EQ(v0.length(), w0.length());
+			// len_sq
+			EXPECT_EQ(v0.len_sq(), w0.len_sq());
+			// l_intp
+			EXPECT_EQ(v0.l_intp(v1, s01), w0.l_intp(w1, s01));
+
+			// isNaN & isOutstanding
+			const auto chk = [&v0, &w0](){
+				EXPECT_EQ(v0.isNaN(), w0.isNaN());
+				EXPECT_EQ(v0.isOutstanding(), w0.isOutstanding());
+			};
+			using Lm = std::numeric_limits<value_t>;
+			const int idx = this->mt().template getUniform<int>({0,vec_t::size-1});
+			EXPECT_NO_FATAL_FAILURE(chk());
+			v0[idx] = Lm::quiet_NaN();
+			w0 = v0.asInternal();
+			EXPECT_NO_FATAL_FAILURE(chk());
+			v0[idx] = Lm::infinity();
+			w0 = v0.asInternal();
+			EXPECT_NO_FATAL_FAILURE(chk());
+		}
 		TYPED_TEST(FloatVector, Distance) {
 			USING(vec_t);
 			USING(array_t);

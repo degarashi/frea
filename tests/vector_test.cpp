@@ -13,6 +13,61 @@ namespace frea {
 			template <class T>
 			constexpr Range<T> DefaultRange{-1e3, 1e3};
 		}
+		TYPED_TEST(Vector, Wrap_Equality) {
+			USING(value_t);
+			constexpr auto range = DefaultRange<value_t>;
+			const auto v0 = this->makeRVec(range),
+						v1 = this->makeRVec(range);
+			const auto w0 = v0.asInternal(),
+						w1 = v1.asInternal();
+			const auto mtf = this->mt().template getUniformF<value_t>(range);
+			auto s0 = mtf(),
+				 s1 = mtf();
+			if(s0 > s1)
+				std::swap(s0, s1);
+
+			// (vec +-*/ vec) == (wrap +-*/ wrap)
+			EXPECT_EQ(v0+v1, w0+w1);
+			EXPECT_EQ(v0-v1, w0-w1);
+			EXPECT_EQ(v0*v1, w0*w1);
+			EXPECT_EQ(v0/v1, w0/w1);
+			// (vec +-*/ s) == (wrap +-*/ s)
+			EXPECT_EQ(v0+s0, w0+s0);
+			EXPECT_EQ(v0-s0, w0-s0);
+			EXPECT_EQ(v0*s0, w0*s0);
+			EXPECT_EQ(v0/s0, w0/s0);
+			// (vec == vec) == (wrap == wrap)
+			EXPECT_EQ(v0==v0, w0==w0);
+			EXPECT_EQ(v0!=v0, w0!=w0);
+			// dot
+			EXPECT_EQ(v0.dot(v1), w0.dot(w1));
+			// average
+			EXPECT_EQ(v0.average(), w0.average());
+			// saturation
+			EXPECT_EQ(v0.saturation(s0, s1), w0.saturation(s0, s1));
+			// getMin
+			EXPECT_EQ(v0.getMin(v1), w0.getMin(w1));
+			{
+				// selectMin
+				auto tv0 = v0;
+				auto tw0 = w0;
+				tv0.selectMin(v1);
+				tw0.selectMin(w1);
+				EXPECT_EQ(tv0, tw0);
+			}
+			// getMax
+			EXPECT_EQ(v0.getMax(v1), w0.getMax(w1));
+			{
+				// selectMax
+				auto tv0 = v0;
+				auto tw0 = w0;
+				tv0.selectMax(v1);
+				tw0.selectMax(w1);
+				EXPECT_EQ(tv0, tw0);
+			}
+			// op -
+			EXPECT_EQ(-v0, -w0);
+		}
 		TYPED_TEST(Vector, Iterator) {
 			USING(value_t);
 			// イテレータを介して値を加算した場合とインデックスを介した場合で比べる　

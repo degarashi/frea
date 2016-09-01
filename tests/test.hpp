@@ -204,6 +204,28 @@ namespace frea {
 					return ret;
 				}
 		};
+		//! 方向が重ならない単位ベクトルを任意の数、生成
+		template <int N, class V, class RDF>
+		auto MakeDir(RDF&& rdf, const typename V::value_t& th) {
+			static_assert(N>0, "N shoud be greater than 0");
+			std::array<V, N> ret;
+			ret[0] = random::GenVecUnit<V>(rdf);
+			for(int i=1 ; i<N ; i++) {
+				for(;;) {
+					ret[i] = random::GenVecUnit<V>(rdf);
+					bool b = true;
+					for(int j=0 ; j<i ; j++) {
+						if(ret[j].dot(ret[i]) >= th) {
+							b = false;
+							break;
+						}
+					}
+					if(b)
+						break;
+				}
+			}
+			return ret;
+		}
 		template <class T, int M, int N>
 		struct ArrayM : Array<Array<T,N>, M> {
 			using base_t = Array<Array<T,N>, M>;

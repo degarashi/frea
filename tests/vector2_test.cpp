@@ -9,6 +9,18 @@ namespace frea {
 		using TypesD_2 = ToTestTypes_t<types::VectorRangeD_t<types::FReg_t, 2>>;
 		TYPED_TEST_CASE(VectorD_2, TypesD_2);
 
+		TYPED_TEST(VectorD_2, Wrap_Equality) {
+			USING(vec_t);
+			USING(value_t);
+			const auto mtf = this->mt().template getUniformF<value_t>();
+			const auto dir = MakeDir<2, vec_t>(mtf, 0.8);
+			const auto w0 = dir[0].asInternal(),
+						w1 = dir[1].asInternal();
+			// cw
+			EXPECT_EQ(dir[0].cw(dir[1]), w0.cw(w1));
+			// ccw
+			EXPECT_EQ(dir[0].ccw(dir[1]), w0.ccw(w1));
+		}
 		template <class V, class A>
 		V Rotate(const V& v, const A& ang) {
 			const double a = RadD(ang).get();

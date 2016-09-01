@@ -9,6 +9,24 @@ namespace frea {
 		using TypesD_3 = ToTestTypes_t<types::VectorRangeD_t<types::FReg_t, 3>>;
 		TYPED_TEST_CASE(VectorD_3, TypesD_3);
 
+		TYPED_TEST(VectorD_3, Wrap_Equality) {
+			USING(value_t);
+			USING(vec_t);
+			using quat_t = QuatT<value_t, false>;
+			const auto mtf = this->mt().template getUniformF<value_t>();
+			const auto dir = MakeDir<2, vec_t>(mtf, 0.8);
+			const auto w0 = dir[0].asInternal(),
+						w1 = dir[1].asInternal();
+			const auto q = random::GenQuat<quat_t>(mtf);
+			// cross
+			EXPECT_EQ(dir[0].cross(dir[1]), w0.cross(w1));
+			// op %
+			EXPECT_EQ(dir[0]%dir[1], w0%w1);
+			// verticalVector
+			EXPECT_EQ(dir[0].verticalVector(), w0.verticalVector());
+			// op * q
+			EXPECT_EQ(dir[0]*q, w0*q);
+		}
 		namespace {
 			template <class value_t, class MT>
 			value_t Scale(MT& mt) {
