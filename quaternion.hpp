@@ -3,15 +3,9 @@
 #include "error.hpp"
 #include "compare.hpp"
 #include "ieee754.hpp"
+#include "exception.hpp"
 
 namespace frea {
-	struct InvalidAxis : std::invalid_argument {
-		using std::invalid_argument::invalid_argument;
-	};
-	struct NoValidAxis : std::runtime_error {
-		using std::runtime_error::runtime_error;
-	};
-
 	template <class T, bool A>
 	struct ExpQuatT;
 	template <class T, bool A>
