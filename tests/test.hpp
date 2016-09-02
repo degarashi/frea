@@ -204,18 +204,17 @@ namespace frea {
 					return ret;
 				}
 		};
-		//! 方向が重ならない単位ベクトルを任意の数、生成
-		template <int N, class V, class RDF>
-		auto MakeDir(RDF&& rdf, const typename V::value_t& th) {
+		template <int N, class V, class Gen, class Chk>
+		auto MakeVec(Gen&& gen, Chk&& chk) {
 			static_assert(N>0, "N shoud be greater than 0");
 			std::array<V, N> ret;
-			ret[0] = random::GenVecUnit<V>(rdf);
+			ret[0] = gen();
 			for(int i=1 ; i<N ; i++) {
 				for(;;) {
-					ret[i] = random::GenVecUnit<V>(rdf);
+					ret[i] = gen();
 					bool b = true;
 					for(int j=0 ; j<i ; j++) {
-						if(ret[j].dot(ret[i]) >= th) {
+						if(!chk(ret[j], ret[i])) {
 							b = false;
 							break;
 						}
@@ -226,6 +225,22 @@ namespace frea {
 			}
 			return ret;
 		}
+		//! 方向が重ならない単位ベクトルを任意の数、生成
+		template <int N, class V, class RDF>
+		auto MakeDir(RDF&& rdf, const typename V::value_t& th) {
+			return MakeVec<N,V>(
+				[&rdf](){ return random::GenVecUnit<V>(rdf); },
+				[th](const auto& v0, const auto& v1){ return v0.dot(v1) < th; }
+			);
+		}
+		template <int N, class V, class RDF>
+		auto MakePos(RDF&& rdf, const typename V::value_t& th) {
+			return MakeVec<N,V>(
+				[&rdf](){ return random::GenVec<V>(rdf); },
+				[th=th*th](const auto& v0, const auto& v1){ return v0.dist_sq(v1) >= th; }
+			);
+		}
+
 		template <class T, int M, int N>
 		struct ArrayM : Array<Array<T,N>, M> {
 			using base_t = Array<Array<T,N>, M>;
@@ -287,7 +302,7 @@ namespace frea {
 				}
 				auto makeDir() {
 					auto rd = this->mt().template getUniformF<value_t>();
-					return random::GenVecUnit<typename base_t::vec_t>(rd);
+					return random::GenVecUnit<typename base_t::vec_t::template type_cn<3>>(rd);
 				}
 				auto makeRadian() {
 					auto rd = this->mt().template getUniformF<value_t>();

@@ -58,10 +58,6 @@ namespace frea {
 				M20, M21, M22
 			};
 		}
-		static this_t LookAtLH(const vec_t& pos, const vec_t& at, const vec_t& up);
-		static this_t LookDirLH(const vec_t& pos, const vec_t& at, const vec_t& up);
-		static this_t LookAtRH(const vec_t& pos, const vec_t& at, const vec_t& up);
-		static this_t LookDirRH(const vec_t& pos, const vec_t& at, const vec_t& up);
 		this_t transposition() const { return this->asInternal().transposition(); }
 		void transpose() { *this = transposition(); }
 	};

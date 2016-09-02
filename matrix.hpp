@@ -3,6 +3,7 @@
 #include "angle.hpp"
 #include "meta/compare.hpp"
 #include "ieee754.hpp"
+#include "exception.hpp"
 
 namespace frea {
 	template <class VW, int M>
