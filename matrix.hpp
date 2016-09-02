@@ -623,8 +623,17 @@ namespace frea {
 		auto _pre_mul(const column_t& vc) const {
 			return vc * AsI(*this);
 		}
-		static spec_t Translation(const vec_min& v);
-		static spec_t Scaling(const vec_min& v);
+		static spec_t Translation(const vec_t& v) {
+			spec_t ret = Identity();
+			ret.template getRow<dim_m-1>() = v;
+			return ret;
+		}
+		static spec_t Scaling(const vec_min& v) {
+			spec_t ret(0);
+			for(int i=0 ; i<vec_min::size ; i++)
+				ret.m[i][i] = v[i];
+			return ret;
+		}
 
 		//! サイズ変換
 		//! 足りない要素はゼロで埋める

@@ -59,6 +59,37 @@ namespace frea {
 			m1[idxM][idxN] += 1;
 			EXPECT_NE(m0, m1);
 		}
+		TYPED_TEST(Matrix, Translation) {
+			USING(mat_t);
+			USING(vec_t);
+			USING(value_t);
+			constexpr auto range = Range<value_t>{-1e3, 1e3};
+			auto v0 = this->makeRVec(range),
+				vd = this->makeRVec(range);
+			v0[vec_t::size-1] = 1;
+			vd[vec_t::size-1] = 1;
+			const auto m = mat_t::Translation(vd);
+			const vec_t v1 = v0 * m;
+			v0 += vd;
+			v0[vec_t::size-1] = 1;
+			EXPECT_LE(AbsMax(vec_t(v1-v0)), Threshold<value_t>(0.1, 0));
+		}
+		TYPED_TEST(Matrix, Scaling) {
+			USING(mat_t);
+			USING(vec_t);
+			USING(value_t);
+			using vecmin_t = typename vec_t::template type_cn<mat_t::dim_min>;
+			using column_t = typename mat_t::column_t;
+
+			constexpr auto range = Range<value_t>{-1e2, 1e2};
+			const auto mtf = this->mt().template getUniformF<value_t>(range);
+			const column_t v0 = random::GenVec<vecmin_t>(mtf).template convert<mat_t::dim_m>();
+			const vecmin_t sc = random::GenVec<vecmin_t>(mtf);
+			const auto m = mat_t::Scaling(sc);
+			const vec_t v1a = v0 * m,
+						v1b = v0 * sc;
+			EXPECT_LE(AbsMax(vec_t(v1a-v1b)), Threshold<value_t>(0.1, 0));
+		}
 		// 内部表現による演算結果の差異をチェック
 		TYPED_TEST(Matrix, Register) {
 			USING(value_t);
