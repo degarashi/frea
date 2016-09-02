@@ -238,13 +238,13 @@ namespace frea {
 		template <int ToN,
 				 ENABLE_IF((ToN<=size))>
 		decltype(auto) convert() const {
-			return *this;
+			return reinterpret_cast<const type_cn<ToN>&>(*this);
 		}
 		template <int ToN,
 				 int Pos,
 				 ENABLE_IF((ToN<=size))>
 		decltype(auto) convertI(const value_t&) const {
-			return *this;
+			return reinterpret_cast<const type_cn<ToN>&>(*this);
 		}
 		// 大きいサイズへの変換
 		// 隙間をゼロで埋める
