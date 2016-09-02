@@ -586,7 +586,7 @@ namespace frea{
 			const auto zero = wrap_t::Zero();
 			for(auto& a : this->data)
 				a = zero;
-			this->data[Pos/a_size].template initAt<Pos>(val);
+			this->data[Pos/a_size].template initAt<Pos%w_capacity>(val);
 		}
 		template <int Pos>
 		spec_t maskH() const {

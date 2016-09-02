@@ -25,6 +25,7 @@ namespace frea {
 			constexpr static bool is_integral = VW::is_integral;
 			constexpr static int dim_m = M,
 								dim_n = VW::size,
+								dim_min = Arithmetic<dim_m, dim_n>::less,
 								bit_width = VW::bit_width;
 			using spec_t = S;
 			using vec_t = VW;
@@ -53,10 +54,11 @@ namespace frea {
 			}
 			template <class... Ts>
 			static void _Dummy(Ts&&...) {}
-			template <std::size_t... Idx>
-			static spec_t _Diagonal(const value_t& v, std::index_sequence<Idx...>) {
+			template <std::size_t... Idx, std::size_t... IdxE>
+			static spec_t _Diagonal(const value_t& v, std::index_sequence<Idx...>, std::index_sequence<IdxE...>) {
 				spec_t ret;
 				_Dummy((ret.v[Idx].template initAt<Idx>(v), 0)...);
+				_Dummy((ret.v[IdxE+dim_min] = vec_t::Zero())...);
 				return ret;
 			}
 			template <class VW2, int N2, class S2>
@@ -245,7 +247,10 @@ namespace frea {
 				return Diagonal(1);
 			}
 			static spec_t Diagonal(const value_t& v) {
-				return _Diagonal(v, std::make_index_sequence<dim_m>());
+				return _Diagonal(v,
+					std::make_index_sequence<dim_min>(),
+					std::make_index_sequence<dim_m-dim_min>()
+				);
 			}
 			template <int At>
 			const auto& getRow() const {
