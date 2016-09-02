@@ -266,6 +266,28 @@ namespace frea {
 				ret.template setAt<Pos>(v);
 			return ret;
 		}
+		spec_t absolute() const {
+			return I::Absolute(m);
+		}
+		bool isZero(const value_t& th) const {
+			auto r = I::Lt(absolute().template maskH<size-1>(), wrap(th)),
+				full = I::One(),
+				one = I::Set1(1);
+			return wrap(I::And(one, I::Xor(r, full))).sumUp() == 0;
+		}
+		auto getMinValue() const {
+			return I::GetMinValue(maskH<size-1>());
+		}
+		auto getMaxValue() const {
+			return I::GetMaxValue(maskH<size-1>());
+		}
+		void linearNormalize() {
+			*this = linearNormalization();
+		}
+		spec_t linearNormalization() const {
+			const value_t mv = absolute().getMaxValue();
+			return *this / wrap(mv);
+		}
 		static spec_t Zero() { return I::Zero(); }
 	};
 	// wrapクラスに要素数固有の関数などを付加
@@ -594,6 +616,41 @@ namespace frea{
 							Mod = Pos % w_capacity;
 			this->data[At].template setAt<Mod>(val);
 		}
+		spec_t absolute() const {
+			spec_t ret(*this);
+			for(auto& t : ret.data)
+				t = I::Absolute(t);
+			return ret;
+		}
+		bool isZero(const value_t& th) const {
+			const auto tmp = absolute();
+			for(int i=0 ; i<a_size-1 ; i++) {
+				if(!tmp.data[i].isZero(th))
+					return false;
+			}
+			return tmp.getMaskedTail().isZero(th);
+		}
+		value_t getMinValue() const {
+			value_t m = data[0].getMinValue();
+			for(int i=1 ; i<a_size-1 ; i++)
+				m = std::min(m, data[i].getMinValue());
+			m = std::min(m, getMaskedTail().getMinValue());
+			return m;
+		}
+		value_t getMaxValue() const {
+			value_t m = data[0].getMaxValue();
+			for(int i=1 ; i<a_size-1 ; i++)
+				m = std::max(m, data[i].getMaxValue());
+			m = std::max(m, getMaskedTail().getMaxValue());
+			return m;
+		}
+		void linearNormalize() {
+			*this = linearNormalization();
+		}
+		spec_t linearNormalization() const {
+			const value_t mv = absolute().getMaxValue();
+			return *this / spec_t(mv);
+		}
 		static spec_t Zero() { return spec_t(0); }
 	};
 	// Dataクラスに要素数固有の関数などを付加
@@ -839,6 +896,12 @@ namespace frea {
 
 		auto saturation(const value_t& vMin, const value_t& vMax) const { return asInternal().saturation(vMin, vMax); }
 		auto l_intp(const wrap_t& w, const value_t& r) const { return asInternal().l_intp(w, r); }
+		auto absolute() const { return asInternal().absolute(); }
+		value_t getMinValue() const { return asInternal().getMinValue(); }
+		value_t getMaxValue() const { return asInternal().getMaxValue(); }
+		void linearNormalize() { *this = linearNormalization(); }
+		spec_t linearNormalization() const { return asInternal().linearNormalization(); }
+		bool isZero(const value_t& th) const { return asInternal().isZero(th); }
 
 		// ------------------- サイズ変換 -------------------
 		// 大きいサイズへの変換

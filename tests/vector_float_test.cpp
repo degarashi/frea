@@ -27,6 +27,13 @@ namespace frea {
 					w1.normalize();
 					EXPECT_LE(AbsMax(vec_t(w0-w1)), Th);
 				}
+				{
+					// linearNormalize
+					auto w0 = w.linearNormalization(),
+						w1 = w;
+					w1.linearNormalize();
+					EXPECT_LE(AbsMax(vec_t(w0-w1)), Th);
+				}
 			}
 			{
 				// Vector
@@ -35,6 +42,13 @@ namespace frea {
 					auto v0 = v.normalization(),
 						 v1 = v;
 					v1.normalize();
+					EXPECT_LE(AbsMax(vec_t(v0-v1)), Th);
+				}
+				{
+					// linearNormalize
+					auto v0 = v.linearNormalization(),
+						 v1 = v;
+					v1.linearNormalize();
 					EXPECT_LE(AbsMax(vec_t(v0-v1)), Th);
 				}
 			}
@@ -81,6 +95,8 @@ namespace frea {
 			EXPECT_EQ(v0.len_sq(), w0.len_sq());
 			// l_intp
 			EXPECT_EQ(v0.l_intp(v1, s01), w0.l_intp(w1, s01));
+			// linearNormalization
+			EXPECT_EQ(vec_t(v0.linearNormalization()), vec_t(w0.linearNormalization()));
 
 			// isNaN & isOutstanding
 			const auto chk = [&v0, &w0](){
@@ -96,6 +112,17 @@ namespace frea {
 			v0[idx] = Lm::infinity();
 			w0 = v0.asInternal();
 			EXPECT_NO_FATAL_FAILURE(chk());
+		}
+		TYPED_TEST(FloatVector, LinearNormalize) {
+			USING(value_t);
+			USING(vec_t);
+			const Range<value_t> range{-1e2, 1e2};
+			const vec_t v = this->makeRVec(range),
+						vn0 = v.linearNormalization();
+			const value_t mv = v.getMaxValue();
+			const vec_t vn1(vn0 * mv);
+			// 割った数をかければ元と大体同じ
+			EXPECT_NE(AbsMax(vec_t(vn1 - vn0)), ThresholdF<value_t>(0.3));
 		}
 		TYPED_TEST(FloatVector, Distance) {
 			USING(vec_t);

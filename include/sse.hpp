@@ -29,7 +29,8 @@ namespace frea {
 								Or = &_mm_or_ps,
 								Xor = &_mm_xor_ps,
 								Min = &_mm_min_ps,
-								Max = &_mm_max_ps;
+								Max = &_mm_max_ps,
+								Lt = &_mm_cmplt_ps;
 		constexpr static auto Sqrt = &_mm_sqrt_ps;
 		constexpr static auto Set1 = &_mm_set1_ps;
 		constexpr static auto Set = &_mm_set_ps;
@@ -163,6 +164,25 @@ namespace frea {
 			r0 = Sub(r0, r1);
 			return r0;
 		}
+		static reg_t Absolute(const reg_t& r) {
+			return And(AbsMask(), r);
+		}
+		template <class F>
+		static value_t _GetValue(const F func, const reg_t& r) {
+			auto tmp = _mm_shuffle_ps(r, r, _MM_SHUFFLE(0,0,2,3));
+			tmp = func(r, tmp);
+			auto tmp2 = _mm_shuffle_ps(tmp, tmp, _MM_SHUFFLE(0,0,0,1));
+			tmp = func(tmp, tmp2);
+			value_t ret;
+			Store(&ret, tmp, std::false_type(), IConst<0>());
+			return ret;
+		}
+		static value_t GetMinValue(const reg_t& r) {
+			return _GetValue(Min, r);
+		}
+		static value_t GetMaxValue(const reg_t& r) {
+			return _GetValue(Max, r);
+		}
 	};
 	template <>
 	struct info<__m128i> {
@@ -202,7 +222,8 @@ namespace frea {
 								Sub = &_mm_sub_epi32,
 								And = &_mm_and_si128,
 								Or = &_mm_or_si128,
-								Xor = &_mm_xor_si128;
+								Xor = &_mm_xor_si128,
+								Lt = &_mm_cmplt_epi32;
 		constexpr static auto LoadU = &Load;
 		constexpr static auto Set1 = &_mm_set1_epi32;
 		constexpr static auto Set = &_mm_set_epi32;
@@ -311,6 +332,27 @@ namespace frea {
 		static bool IsOutstanding(const reg_t&) {
 			return false;
 		}
+		static reg_t Absolute(const reg_t& r) {
+			const auto lt = Lt(r, Zero());
+			auto tmp = Sub(r, And(lt, _mm_set_epi32(1,1,1,1)));
+			return Xor(tmp, And(lt, One()));
+		}
+		template <class F>
+		static value_t _GetValue(const F func, const reg_t& r) {
+			auto tmp = _mm_shuffle_epi32(r, _MM_SHUFFLE(0,0,2,3));
+			tmp = func(r, tmp);
+			auto tmp2 = _mm_shuffle_epi32(tmp, _MM_SHUFFLE(0,0,0,1));
+			tmp = func(tmp, tmp2);
+			value_t ret;
+			Store(&ret, tmp, std::false_type(), IConst<0>());
+			return ret;
+		}
+		static value_t GetMinValue(const reg_t& r) {
+			return _GetValue(Min, r);
+		}
+		static value_t GetMaxValue(const reg_t& r) {
+			return _GetValue(Max, r);
+		}
 	};
 	template <>
 	struct info<__m128d> {
@@ -327,7 +369,8 @@ namespace frea {
 								Or = &_mm_or_pd,
 								Xor = &_mm_xor_pd,
 								Min = &_mm_min_pd,
-								Max = &_mm_max_pd;
+								Max = &_mm_max_pd,
+								Lt = &_mm_cmplt_pd;
 		constexpr static auto Set1 = &_mm_set1_pd;
 		constexpr static auto Set = &_mm_set_pd;
 		constexpr static auto Zero = &_mm_setzero_pd;
@@ -414,6 +457,23 @@ namespace frea {
 		}
 		static reg_t Reciprocal(reg_t r) {
 			return Div(Set1(1), r);
+		}
+		static reg_t Absolute(const reg_t& r) {
+			return And(AbsMask(), r);
+		}
+		template <class F>
+		static value_t _GetValue(const F func, const reg_t& r) {
+			auto tmp = _mm_shuffle_pd(r, r, 0b11);
+			tmp = func(r, tmp);
+			value_t ret;
+			Store(&ret, tmp, std::false_type(), IConst<0>());
+			return ret;
+		}
+		static value_t GetMinValue(const reg_t& r) {
+			return _GetValue(Min, r);
+		}
+		static value_t GetMaxValue(const reg_t& r) {
+			return _GetValue(Max, r);
 		}
 	};
 	template <int N, bool A> SVec_t<__m128, N, A> info_detect(float);

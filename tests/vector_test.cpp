@@ -67,6 +67,17 @@ namespace frea {
 			}
 			// op -
 			EXPECT_EQ(-v0, -w0);
+			// getMinValue
+			EXPECT_EQ(v0.getMinValue(), w0.getMinValue());
+			// getMaxValue
+			EXPECT_EQ(v0.getMaxValue(), w0.getMaxValue());
+			// absolute
+			EXPECT_EQ(v0.absolute(), w0.absolute());
+			{
+				// isZero
+				const auto th = this->mt().template getUniform<value_t>(range*2);
+				EXPECT_EQ(v0.isZero(th), w0.isZero(th));
+			}
 		}
 		TYPED_TEST(Vector, Iterator) {
 			USING(value_t);
@@ -365,6 +376,47 @@ namespace frea {
 			const vec_t vi = -v0;
 			const value_t res2 = vi.dot(v1);
 			ASSERT_NEAR(-res2, res0, ThInv);
+		}
+		TYPED_TEST(Vector, Absolute) {
+			USING(value_t);
+			USING(vec_t);
+			constexpr auto range = DefaultRange<value_t>;
+			const vec_t v = this->makeRVec(range);
+			const vec_t va = v.absolute();
+			for(int i=0 ; i<vec_t::size ; i++) {
+				EXPECT_EQ(va[i], std::abs(v[i]));
+			}
+		}
+		TYPED_TEST(Vector, GetMinMax) {
+			USING(value_t);
+			USING(vec_t);
+			constexpr auto range = DefaultRange<value_t>;
+			const vec_t v = this->makeRVec(range);
+			value_t vMin=v[0],
+					vMax=v[0];
+			for(int i=1 ; i<vec_t::size ; i++) {
+				vMin = std::min(vMin, v[i]);
+				vMax = std::max(vMax, v[i]);
+			}
+			const value_t vMin0 = v.getMinValue(),
+							vMax0 = v.getMaxValue();
+			EXPECT_EQ(vMin0, vMin);
+			EXPECT_EQ(vMax0, vMax);
+		}
+		TYPED_TEST(Vector, IsZero) {
+			USING(value_t);
+			USING(vec_t);
+			constexpr auto Td = Threshold<value_t>(0.1, 1);
+			const value_t Th = this->mt().template getUniform<value_t>({Td, 1e3});
+			vec_t v;
+			for(int i=0 ; i<vec_t::size ; i++)
+				v[i] = this->mt().template getUniform<value_t>({-Th+Td, Th-Td});
+			// 許容範囲値まではTrue
+			EXPECT_TRUE(v.isZero(Th));
+			// それ以上ならFalse
+			const int idx = this->mt().template getUniform<int>({0,vec_t::size-1});
+			v[idx] += Th*3;
+			EXPECT_FALSE(v.isZero(Th));
 		}
 		TYPED_TEST(Vector, MinMax) {
 			USING(value_t);
