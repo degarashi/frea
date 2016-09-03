@@ -4,6 +4,7 @@
 #include "meta/size.hpp"
 #include "meta/enable_if.hpp"
 #include "meta/check_macro.hpp"
+#include "meta/mask.hpp"
 #include "compare.hpp"
 #include "ieee754.hpp"
 
@@ -100,11 +101,18 @@ namespace frea {
 		}
 
 		template <class T,
-				  ENABLE_IF((std::is_floating_point<T>{}))>
-		auto Move(const T& f, const int m) {
+				ENABLE_IF((std::is_integral<T>{}))>
+		auto Move(const T& f, const T& m) {
+			return f+m;
+		}
+		template <class T,
+				class I,
+				ENABLE_IF((std::is_floating_point<T>{}))>
+		auto Move(const T& f, const I& m) {
 			using Int = typename IEEE754<T>::Integral_t;
 			auto v = *reinterpret_cast<const Int*>(&f);
-			v += m;
+			const Int mask = SignMask(v);
+			v += ((m ^ mask) + (mask & Int(1)));
 			return *reinterpret_cast<const T*>(&v);
 		}
 		//! ある値 + 浮動小数点数で表現できる最小の値 を返す
