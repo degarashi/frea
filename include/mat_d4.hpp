@@ -28,8 +28,20 @@ namespace frea {
 			);
 		}
 		//! 透視変換行列
-		static this_t PerspectiveFovLH(const Radian<value_t>& fov, const value_t& aspect, const value_t& nz, const value_t& fz);
-		static this_t PerspectiveFovRH(const Radian<value_t>& fov, const value_t& aspect, const value_t& nz, const value_t& fz);
-		static this_t _PerspectiveFov(const Radian<value_t>& fov, const value_t& aspect, const value_t& nz, const value_t& fz, const value_t& coeff);
+		static this_t PerspectiveFov(const Radian<value_t>& fov, const value_t& aspect, const value_t& nz, const value_t& fz) {
+			return _PerspectiveFov(fov, aspect, nz, fz, 1);
+		}
+		static this_t _PerspectiveFov(const Radian<value_t>& fov, const value_t& aspect, const value_t& nz, const value_t& fz, const value_t& coeff) {
+			value_t h = 1.0f / std::tan(fov.get()/2),
+				  w = h / aspect,
+				  f0 = fz/(fz-nz),
+				  f1 = -nz*fz/(fz-nz);
+			return this_t(
+				w,	0,		0,			0,
+				0,	h,		0,			0,
+				0,	0,		f0,			coeff,
+				0,	0,		f1*coeff,	0
+			);
+		}
 	};
 }

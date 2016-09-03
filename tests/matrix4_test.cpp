@@ -39,5 +39,34 @@ namespace frea {
 			// 任意のビュー行列を2通りの方法で作っても結果は同じ
 			EXPECT_LE(AbsMax(mat_t(m1-m0)), ThresholdF<value_t>(0.3));
 		}
+		TYPED_TEST(MatrixD_4, PerspectiveFov) {
+			USING(value_t);
+			USING(rad_t);
+			USING(mat_t);
+			USING(vec_t);
+			using vec3_t = typename mat_t::vec3_t;
+
+			const auto mtf = this->mt().template getUniformF<value_t>();
+			const rad_t fov = Degree<value_t>(mtf({10,150}));
+			const value_t nz = mtf({1e-3, 1e3}),
+						fz = nz+mtf({1e-3, 1e3}),
+						aspect = mtf({1e-1, 1e1});
+			const auto m = mat_t::PerspectiveFov(fov, aspect, nz, fz);
+			const value_t xr = mtf({-1,1}),
+						yr = mtf({-1,1}),
+						zr = mtf({0,1});
+			const auto ft2 = std::tan(fov.get()/2);
+			const vec_t v0(ft2*aspect * xr,
+							ft2 * yr,
+							(fz-nz)*zr+nz,
+							1),
+						v1 = v0 * m;
+
+			// (X,Y,Z,1) -> (dir.x*aspect*tan(fov/2), dir.y*tan(fov/2), [0->W], W)
+			const vec3_t v2 = v1.asVec3Coord();
+			EXPECT_TRUE(IsInRange<value_t>(v2.x, -1, 1));
+			EXPECT_TRUE(IsInRange<value_t>(v2.y, -1, 1));
+			EXPECT_TRUE(IsInRange<value_t>(v2.z, 0, 1));
+		}
 	}
 }
