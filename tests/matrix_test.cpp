@@ -1,5 +1,6 @@
 #include "test.hpp"
 #include "../compiler_macro.hpp"
+#include "../ulps.hpp"
 
 namespace frea {
 	namespace test {
@@ -43,6 +44,28 @@ namespace frea {
 				ASSERT_FLOAT_EQ(*itr0, *itr1);
 				++itr0;
 				++itr1;
+			}
+		}
+		TYPED_TEST(Matrix, IsZero) {
+			USING(value_t);
+			USING(mat_t);
+			// 全ての要素がThreshold未満ならTrue
+			const auto mtf = this->mt().template getUniformF<value_t>();
+			const auto Th = mtf({ulps::Increment(value_t(0)), 1e3});
+			const auto range = Range<value_t>{ulps::Increment(-Th), ulps::Decrement(Th)};
+			auto m = this->makeRMat(range);
+			ASSERT_TRUE(m.isZero(Th));
+
+			// どこか一つ値をゼロ以外に変更すればFalse
+			const auto idx = this->mt().template getUniformF<int>();
+			const int idxM = idx({0, mat_t::dim_m-1}),
+					idxN = idx({0, mat_t::dim_n-1});
+			m[idxM][idxN] += Th*3;
+			ASSERT_FALSE(m.isZero(Th));
+
+			// 変更した行のみisZeroRowがFalse
+			for(int i=0 ; i<mat_t::dim_m ; i++) {
+				ASSERT_EQ(i!=idxM, m.isZeroRow(i, Th));
 			}
 		}
 		TYPED_TEST(Matrix, Compare) {

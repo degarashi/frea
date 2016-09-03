@@ -269,6 +269,13 @@ namespace frea {
 				static_assert(At < dim_n, "invalid position");
 				_setColumn<At>(c, std::make_index_sequence<dim_m>());
 			}
+			bool isZero(const value_t& th) const {
+				for(int i=0 ; i<dim_m ; i++) {
+					if(!v[i].isZero(th))
+						return false;
+				}
+				return true;
+			}
 	};
 
 	template <class VW, int M, int N>
@@ -543,11 +550,11 @@ namespace frea {
 				this->m[i][c1] += this->m[i][c0] * s;
 		}
 
-		//! ある行の要素が全てゼロか判定 (誤差=EPSILON込み)
-		bool isZeroRowEps(int n) const;
-		bool isZeroRow(int n) const;
-		//! 零行列か判定
-		bool isZero() const;
+		//! ある行の要素が全てゼロか判定
+		bool isZeroRow(const int n, const value_t& th) const {
+			return this->m[n].isZero(th);
+		}
+		bool isZero(const value_t& th) const { return AsI(*this).isZero(th); }
 		//! 各行を正規化する (最大の係数が1になるように)
 		void rowNormalize();
 		//! 被約形かどうか判定
