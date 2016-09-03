@@ -28,15 +28,20 @@ namespace frea {
 				-pos.dot(xA), -pos.dot(yA), -pos.dot(dir), 1
 			);
 		}
+		using Range_t = Range<value_t>;
+		using Radian_t = Radian<value_t>;
 		//! 透視変換行列
-		static this_t PerspectiveFov(const Radian<value_t>& fov, const value_t& aspect, const value_t& nz, const value_t& fz) {
-			return _PerspectiveFov(fov, aspect, nz, fz, 1);
+		static this_t PerspectiveFov(const Radian_t& fov, const value_t& aspect, const Range_t& z) {
+			return _PerspectiveFov(fov, aspect, z, 1);
 		}
-		static this_t _PerspectiveFov(const Radian<value_t>& fov, const value_t& aspect, const value_t& nz, const value_t& fz, const value_t& coeff) {
+		static this_t _PerspectiveFov(const Radian_t& fov, const value_t& aspect, const Range_t& z, const value_t& coeff) {
+			if(fov.get() <= 0 ||
+				fov.get() >= Radian_t::HalfRotationRange.to)
+				throw InvalidFov("");
 			value_t h = 1.0f / std::tan(fov.get()/2),
-				  w = h / aspect,
-				  f0 = fz/(fz-nz),
-				  f1 = -nz*fz/(fz-nz);
+					w = h / aspect,
+					f0 = z.to/(z.to-z.from),
+					f1 = -z.from*z.to/(z.to-z.from);
 			return this_t(
 				w,	0,		0,			0,
 				0,	h,		0,			0,
