@@ -16,7 +16,8 @@ namespace frea {
 		static this_t LookDir(const vec3_t& pos, const vec3_t& dir, const vec3_t& up) {
 			vec3_t xA(up % dir),
 				   yA;
-			if(xA.normalize() < Threshold<typename vec3_t::value_t>(0.3, 1))
+			if(xA.normalize() < Threshold<typename vec3_t::value_t>(0.3, 1) ||
+				xA.isNaN())
 				throw NoValidAxis("");
 			yA = dir % xA;
 

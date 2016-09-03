@@ -9,7 +9,6 @@ namespace frea {
 
 		TYPED_TEST(MatrixD_4, LookAt) {
 			USING(mat_t);
-			USING(vec_t);
 			USING(value_t);
 			using vec3_t = typename mat_t::vec3_t;
 
@@ -38,6 +37,11 @@ namespace frea {
 			}
 			// 任意のビュー行列を2通りの方法で作っても結果は同じ
 			EXPECT_LE(AbsMax(mat_t(m1-m0)), ThresholdF<value_t>(0.3));
+			// AtとPosが同一座標の場合はNoValidAxis例外を送出
+			EXPECT_THROW(mat_t::LookAt(pos[0], pos[0], up), NoValidAxis);
+			// upとdirの内積が1または-1の場合、NoValidAxis例外を送出
+			EXPECT_THROW(mat_t::LookDir(pos[0], up, up), NoValidAxis);
+			EXPECT_THROW(mat_t::LookDir(pos[0], -up, up), NoValidAxis);
 		}
 		TYPED_TEST(MatrixD_4, PerspectiveFov) {
 			USING(value_t);
