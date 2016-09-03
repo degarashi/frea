@@ -9,10 +9,6 @@ namespace frea {
 	template <class VW, int M>
 	using wrapM_t = wrapM_spec<VW, M, VW::size>;
 
-	struct NoInverseMatrix : std::runtime_error {
-		using std::runtime_error::runtime_error;
-	};
-
 	// ベクトル演算レジスタクラスをM方向に束ねたもの
 	/*!
 		\tparam	VW		各行のベクトル型
