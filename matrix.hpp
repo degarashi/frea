@@ -276,6 +276,12 @@ namespace frea {
 				}
 				return true;
 			}
+			spec_t linearNormalization() const {
+				spec_t ret;
+				for(int i=0 ; i<dim_m ; i++)
+					ret.v[i] = v[i].linearNormalization();
+				return ret;
+			}
 	};
 
 	template <class VW, int M, int N>
@@ -556,7 +562,8 @@ namespace frea {
 		}
 		bool isZero(const value_t& th) const { return AsI(*this).isZero(th); }
 		//! 各行を正規化する (最大の係数が1になるように)
-		void rowNormalize();
+		void linearNormalize() { *this = AsI(*this).linearNormalization(); }
+		spec_t linearNormalization() const { return AsI(*this).linearNormalization(); }
 		//! 被約形かどうか判定
 		bool isEchelon() const;
 		//! 被約形にする
