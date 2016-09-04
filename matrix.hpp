@@ -564,8 +564,36 @@ namespace frea {
 		//! 各行を正規化する (最大の係数が1になるように)
 		void linearNormalize() { *this = AsI(*this).linearNormalization(); }
 		spec_t linearNormalization() const { return AsI(*this).linearNormalization(); }
-		//! 被約形かどうか判定
-		bool isEchelon() const;
+		//! 被約階段行列かどうか判定
+		bool isEchelon(const value_t& th) const {
+			int edge = 0;
+			for(int i=0 ; i<dim_m ; i++) {
+				// 前回の行のエッジより左側がゼロ以外ならFalse
+				for(int j=0 ; j<edge ; j++) {
+					if(std::abs(this->m[i][j]) >= th)
+						return false;
+				}
+				// 行の先頭(=1)を探す
+				for(; edge<dim_n ; edge++) {
+					const auto v = this->m[i][edge];
+					if(std::abs(v) < th) {
+						// ゼロなので更に右を探索
+					} else if(std::abs(v-1) < th) {
+						// 1なのでここが先頭
+						break;
+					} else
+						return false;
+				}
+				if(edge < dim_n) {
+					++edge;
+				} else {
+					// 先頭は既に右端なのでこれ以降の行は全てゼロである
+					if(!this->m[i].isZero(th))
+						return false;
+				}
+			}
+			return true;
+		}
 		//! 被約形にする
 		/*! \return 0の行数 */
 		int rowReduce();
