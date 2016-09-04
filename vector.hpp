@@ -121,6 +121,10 @@ namespace frea {
 			return m._pre_mul(static_cast<const spec_t&>(*this));
 		}
 
+		template <int N>
+		static auto MaskL(IConst<N>) {
+			return I::Xor(I::MaskH(IConst<N>()), I::One());
+		}
 		bool operator == (const wrap& w) const {
 			return I::Equal(maskH<size-1>(), w.maskH<size-1>());
 		}
@@ -134,7 +138,7 @@ namespace frea {
 		template <int N>
 		spec_t maskL() const {
 			static_assert(N<size, "");
-			return I::And(m, I::Xor(I::MaskH(IConst<N>()), I::One()));
+			return I::And(m, MaskL(IConst<N>()));
 		}
 
 		// 指定要素に任意の値をセット(他はいじらない)
@@ -276,10 +280,16 @@ namespace frea {
 			return wrap(I::And(one, I::Xor(r, full))).sumUp() == 0;
 		}
 		auto getMinValue() const {
-			return I::GetMinValue(maskH<size-1>());
+			return I::GetMinValue(
+				maskH<size-1>() |
+				spec_t(I::And(I::Set1(std::numeric_limits<value_t>::max()), MaskL(IConst<size-1>())))
+			);
 		}
 		auto getMaxValue() const {
-			return I::GetMaxValue(maskH<size-1>());
+			return I::GetMaxValue(
+				maskH<size-1>() |
+				spec_t(I::And(I::Set1(std::numeric_limits<value_t>::lowest()), MaskL(IConst<size-1>())))
+			);
 		}
 		void linearNormalize() {
 			*this = linearNormalization();
@@ -329,6 +339,7 @@ namespace frea{
 		constexpr static bool is_integral = wrap_t::is_integral;
 		constexpr static int Rem0 = N % w_capacity,
 							Rem = (Rem0==0) ? w_capacity : Rem0;
+		using wrapTail_t = typename wrap_t::template type_cn<Rem>;
 
 		auto getMaskedTail() const {
 			return data[a_size-1].template maskH<Rem-1>();
@@ -634,14 +645,14 @@ namespace frea{
 			value_t m = data[0].getMinValue();
 			for(int i=1 ; i<a_size-1 ; i++)
 				m = std::min(m, data[i].getMinValue());
-			m = std::min(m, getMaskedTail().getMinValue());
+			m = std::min(m, wrapTail_t(getTail()).getMinValue());
 			return m;
 		}
 		value_t getMaxValue() const {
 			value_t m = data[0].getMaxValue();
 			for(int i=1 ; i<a_size-1 ; i++)
 				m = std::max(m, data[i].getMaxValue());
-			m = std::max(m, getMaskedTail().getMaxValue());
+			m = std::max(m, wrapTail_t(getTail()).getMaxValue());
 			return m;
 		}
 		void linearNormalize() {

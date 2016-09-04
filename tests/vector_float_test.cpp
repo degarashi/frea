@@ -122,7 +122,7 @@ namespace frea {
 			const value_t mv = v.getMaxValue();
 			const vec_t vn1(vn0 * mv);
 			// 割った数をかければ元と大体同じ
-			EXPECT_NE(AbsMax(vec_t(vn1 - vn0)), ThresholdF<value_t>(0.3));
+			EXPECT_LE(AbsMax(vec_t(vn1 - vn0)), ThresholdF<value_t>(0.3));
 		}
 		TYPED_TEST(FloatVector, Distance) {
 			USING(vec_t);
