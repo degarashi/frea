@@ -1,5 +1,6 @@
 #pragma once
 #include <utility>
+#include "meta/enable_if.hpp"
 
 namespace frea {
 	namespace op {
@@ -17,9 +18,17 @@ namespace frea {
 				return std::move(*this op##= t); \
 			} \
 			template <class T> \
-			auto&& operator op (const T& t) && NOEXCEPT(op##=) { \
-				return std::move(static_cast<Self&>(*this) op##= t); \
+			decltype(auto) operator op (const T& t) && { \
+				return static_cast<Self&>(*this) op t; \
 			}
+			// template <class T, ENABLE_IF((std::is_assignable<Self,decltype((Self&)std::declval<Self>() op (T&)std::declval<T>())>::value))> \
+			// decltype(auto) operator op (const T& t) && { \
+			// 	return std::move(static_cast<Self&>(*this) op##= t); \
+			// } \
+			// template <class T, ENABLE_IF(!(std::is_assignable<Self,decltype((Self&)std::declval<Self>() op (T&)std::declval<T>())>::value))> \
+			// decltype(auto) operator op (const T& t) && { \
+			// 	return static_cast<Self&>(*this) op t; \
+			// }
 		template <class Self>
 		struct PlusMinus {
 			DEF_OP(+)
