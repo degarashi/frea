@@ -599,9 +599,59 @@ namespace frea {
 			}
 			return true;
 		}
-		//! 被約形にする
+		//! 被約階段行列にする
 		/*! \return 0の行数 */
-		int rowReduce();
+		int rowReduce(const value_t& th) {
+			int rbase = 0,
+				cbase = 0;
+			for(;;) {
+				// 行の先端が0でなく、かつ絶対値が最大の行を探す
+				int idx = -1;
+				value_t absmax = 0;
+				for(int i=rbase ; i<dim_m ; i++) {
+					value_t v = std::abs(this->m[i][cbase]);
+					if(absmax < v) {
+						if(std::abs(v) >= th) {
+							absmax = v;
+							idx = i;
+						}
+					}
+				}
+				if(idx < 0) {
+					// 無かったので次の列へ
+					++cbase;
+					if(cbase == dim_n) {
+						// 終了
+						break;
+					}
+					continue;
+				}
+
+				// 基準行でなければ入れ替え
+				if(idx > rbase)
+					rowSwap(idx, rbase);
+				// 基点で割って1にする
+				rowMul(rbase, 1/this->m[rbase][cbase]);
+				this->m[rbase][cbase] = 1;	// 精度の問題で丁度1にならない事があるので強制的に1をセット
+				// 他の行の同じ列を0にする
+				for(int i=0 ; i<dim_m ; i++) {
+					if(i==rbase)
+						continue;
+
+					value_t scale = -this->m[i][cbase];
+					rowMulAdd(rbase, scale, i);
+					this->m[i][cbase] = 0;	// 上と同じく精度の問題により0をセット
+				}
+				// 次の行,列へ移る
+				++rbase;
+				++cbase;
+				if(rbase == dim_m || cbase == dim_n) {
+					// 最後の行まで処理し終わるか，全て0の行しか無ければ終了
+					break;
+				}
+			}
+			return dim_m - rbase;
+		}
 
 		static MatT Diagonal(const value_t& v) {
 			return wrap_t::Diagonal(v);
