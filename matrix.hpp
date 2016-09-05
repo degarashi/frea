@@ -31,14 +31,14 @@ namespace frea {
 			template <int M2, int N2>
 			using type_cn = wrapM_t<typename vec_t::template type_cn<N2>, M2>;
 		private:
-			template <class WM>
-			static void _MultipleLine(vec_t&, const vec_t&, const WM&, IConst<dim_n>) {}
-			template <class WM, int N>
-			static void _MultipleLine(vec_t& dst, const vec_t& v, const WM& m, IConst<N>) {
-				auto tv = v;
-				tv.template makeEquality<N>();
+			template <class Vec, class WM, int N>
+			static void _MultipleLine(vec_t&, const Vec&, const WM&, IConst<N>, IConst<N>) {}
+			template <class Vec, class WM, int N, int Z>
+			static void _MultipleLine(vec_t& dst, const Vec& v, const WM& m, IConst<N>, IConst<Z>) {
+				const auto val = v.template pickAt<N>();
+				const vec_t tv(val);
 				dst += tv * m.v[N];
-				_MultipleLine(dst, v, m, IConst<N+1>());
+				_MultipleLine(dst, v, m, IConst<N+1>(), IConst<Z>());
 			}
 			template <int At, std::size_t... Idx>
 			auto _getColumn(std::index_sequence<Idx...>) const {
@@ -63,18 +63,21 @@ namespace frea {
 				using WM = std::decay_t<decltype(m)>;
 				static_assert(WM::dim_m == dim_n, "");
 				wrapM_t<VW2, dim_m> ret;
-				value_t other[dim_m][VW2::size];
-				for(int i=0 ; i<VW2::size ; i++)
-					m.v[i].template store<false>(other[i], IConst<VW2::size-1>());
-				for(int i=0 ; i<WM::dim_m ; i++) {
+				// 一旦メモリに展開する(m -> other)
+				value_t other[WM::dim_m][WM::dim_n];
+				for(int i=0 ; i<WM::dim_m ; i++)
+					m.v[i].template store<false>(other[i], IConst<WM::dim_n-1>());
+				for(int i=0 ; i<dim_m ; i++) {
 					value_t result[WM::dim_n] = {},
 							ths[dim_n];
+					// メモリに展開(this[i] -> ths)
 					v[i].template store<false>(ths, IConst<dim_n-1>());
 					for(int j=0 ; j<WM::dim_n ; j++) {
 						auto& dst = result[j];
 						for(int k=0 ; k<dim_n ; k++)
 							dst += ths[k] * other[k][j];
 					}
+					// 結果を書き込み
 					ret.v[i] = VW2(result, std::false_type());
 				}
 				return ret;
@@ -84,8 +87,8 @@ namespace frea {
 				using WM = std::decay_t<decltype(m)>;
 				static_assert(WM::dim_m == dim_n, "");
 				wrapM_t<VW2, dim_m> ret;
-				for(int i=0 ; i<WM::dim_m ; i++) {
-					_MultipleLine(ret.v[i] = vec_t::Zero(), v[i], m, IConst<0>());
+				for(int i=0 ; i<dim_m ; i++) {
+					_MultipleLine(ret.v[i] = vec_t::Zero(), v[i], m, IConst<0>(), IConst<WM::dim_m>());
 				}
 				return ret;
 			}
@@ -94,9 +97,9 @@ namespace frea {
 				return column_t(v[Idx].dot(vc)...);
 			}
 			template <std::size_t... Idx, ENABLE_IF(sizeof...(Idx) == dim_n)>
-			vec_t _mul_vecL(std::index_sequence<Idx...>, const column_t& vc) const {
+			auto _mul_vecL(std::index_sequence<Idx...>, const column_t& vc) const {
 				vec_t ret = vec_t::Zero();
-				_MultipleLine(ret, vc, *this, IConst<0>());
+				_MultipleLine(ret, vc, *this, IConst<0>(), IConst<dim_m>());
 				return ret;
 			}
 		public:
@@ -111,12 +114,14 @@ namespace frea {
 				}
 			}
 
-			#define DEF_OP(op) \
+			#define DEF_OP2(op) \
 				template <class T, \
 							ENABLE_IF((HasMethod_asInternal_t<T>{}))> \
 				spec_t operator op (const T& t) const { \
 					return *this op t.asInternal(); \
-				} \
+				}
+			#define DEF_OP(op) \
+				DEF_OP2(op) \
 				template <class VW2, class S2> \
 				spec_t operator op (const wrapM<VW2,M,S2>& m) const { \
 					spec_t ret; \
@@ -135,6 +140,9 @@ namespace frea {
 			DEF_OP(+)
 			DEF_OP(-)
 			#undef DEF_OP
+			DEF_OP2(*)
+			DEF_OP2(/)
+			#undef DEF_OP2
 			template <class VW2, class S2>
 			spec_t& operator = (const wrapM<VW2,dim_m,S2>& m) {
 				for(int i=0 ; i<dim_m ; i++)
@@ -162,20 +170,17 @@ namespace frea {
 					ret.v[i] = v[i] / tmp;
 				return ret;
 			}
-			template <class VW2, int N2, class S2>
-			auto operator * (const wrapM<VW2,N2,S2>& m) const {
-				return _mul(m, IsTuple_t<VW2>());
-			}
-			template <class T>
-			spec_t& operator *= (const T& m) {
-				return static_cast<spec_t&>(*this = *this * m);
+			template <class Wr,
+					 ENABLE_IF(is_wrapM<Wr>{})>
+			auto operator * (const Wr& m) const {
+				return _mul(m, IsTuple_t<typename Wr::vec_t>());
 			}
 			// 右からベクトルを掛ける
 			column_t operator * (const vec_t& vc) const {
 				return _mul_vecR(std::make_index_sequence<dim_m>(), vc);
 			}
 			// 左からベクトルを掛ける
-			vec_t _pre_mul(const column_t& vc) const {
+			auto _pre_mul(const column_t& vc) const {
 				return _mul_vecL(std::make_index_sequence<dim_n>(), vc);
 			}
 
@@ -373,14 +378,14 @@ namespace frea {
 			using D_t = ConstIf<C, D>;
 			D_t&	_target;
 			int		_cursor;
-			constexpr static int dim_m = D::dim_m;
+			constexpr static int dim_n = D::dim_n;
 		public:
 			ItrM(D_t& t, const int cur):
 				_target(t),
 				_cursor(cur)
 			{}
 			typename base_t::reference operator * () const {
-				return _target.m[_cursor/dim_m][_cursor%dim_m];
+				return _target.m[_cursor/dim_n][_cursor%dim_n];
 			}
 			ItrM& operator ++ () {
 				++_cursor;
@@ -639,11 +644,9 @@ namespace frea {
 			return AsI(*this);
 		}
 		#define DEF_OP(op) \
-			auto operator op (const wrap_t& m) const { \
-				return AsI(*this) op m; \
-			} \
-			auto operator op (const value_t& v) const { \
-				return AsI(*this) op v; \
+			template <class Num> \
+			auto operator op (const Num& num) const { \
+				return AsI(*this) op num; \
 			} \
 			using op_t::operator op;
 		DEF_OP(+)

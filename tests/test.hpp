@@ -119,6 +119,10 @@ namespace frea {
 				Array() = default;
 				template <class T2>
 				Array(const Array<T2,size>& a): m(a.m) {}
+				explicit Array(const T& v) {
+					for(int i=0 ; i<size ; i++)
+						m[i] = v;
+				}
 				template <class V,
 						 ENABLE_IF((HasIndex_t<V,int>{}))>
 				Array(const V& v) {
@@ -251,13 +255,13 @@ namespace frea {
 			}
 			template <class A2>
 			auto mul(const A2& m, std::true_type) const {
-				static_assert(N==A2::lower_size, "invalid operation");
+				static_assert(N==A2::size, "invalid operation");
 				ArrayM<T, M, A2::lower_size> ret;
 				for(int i=0 ; i<M ; i++) {
 					for(int j=0 ; j<A2::lower_size ; j++) {
 						auto& dst = ret[i][j];
 						dst = 0;
-						for(int k=0 ; k<base_t::size ; k++) {
+						for(int k=0 ; k<base_t::lower_size ; k++) {
 							dst += (*this)[i][k] * m[k][j];
 						}
 					}
@@ -268,6 +272,7 @@ namespace frea {
 			auto operator * (const A2& m) const {
 				return mul(m, HasIndex_t<A2,int>());
 			}
+			explicit ArrayM(const T& v): base_t(Array<T,N>(v)) {}
 			template <class A2>
 			ArrayM& operator *= (const A2& m) {
 				return *this = *this * m;
@@ -399,5 +404,10 @@ namespace frea {
 		}
 
 		#define USING(t) using t = typename TestFixture::t
+		template <class T>
+		using Matrix = RMatrix<T>;
+		using MTypes_t = types::MatrixRange_t<types::Reg_t, 3,5, 3,5>;
+		using MTypes = ToTestTypes_t<MTypes_t>;
+		TYPED_TEST_CASE(Matrix, MTypes);
 	}
 }

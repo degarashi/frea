@@ -98,7 +98,7 @@ namespace frea {
 		// 各種演算定義
 		#define DEF_OP(op, func) \
 			template <class T, ENABLE_IF(HasMethod_asInternal_t<T>{})> \
-			spec_t operator op (const T& t) const& { \
+			auto operator op (const T& t) const& { \
 				return *this op t.asInternal(); } \
 			spec_t operator op (const value_t& t) const& { \
 				return *this op wrap(t); } \
@@ -117,8 +117,8 @@ namespace frea {
 		// 左から行列にベクトルを掛ける
 		template <class M,
 				 ENABLE_IF(is_wrapM<M>{})>
-		spec_t operator * (const M& m) const& {
-			return m._pre_mul(static_cast<const spec_t&>(*this));
+		auto operator * (const M& m) const& {
+			return type_cn<M::dim_n>(m._pre_mul(*this));
 		}
 
 		template <int N>
@@ -514,7 +514,7 @@ namespace frea{
 		}
 		#define DEF_OP(op) \
 			template <class T, ENABLE_IF(HasMethod_asInternal_t<T>{})> \
-			spec_t operator op (const T& t) const& { \
+			auto operator op (const T& t) const& { \
 				return *this op t.asInternal(); } \
 			spec_t operator op (const value_t& t) const& { \
 				spec_t ret; \
@@ -540,7 +540,7 @@ namespace frea{
 		// 左から行列にベクトルを掛ける
 		template <class M,
 				 ENABLE_IF(is_wrapM<M>{})>
-		spec_t operator * (const M& m) const& {
+		type_cn<M::dim_n> operator * (const M& m) const& {
 			return m._pre_mul(static_cast<const spec_t&>(*this));
 		}
 
@@ -863,7 +863,7 @@ namespace frea {
 		// 内部形式との演算子
 		#define DEF_OP(op) \
 			template <class W2> \
-			wrap_t operator op (const W2& w) const& { \
+			auto operator op (const W2& w) const& { \
 				return asInternal() op w; \
 			} \
 			using op_t::operator op;
