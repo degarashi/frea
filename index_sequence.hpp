@@ -6,11 +6,12 @@
 
 namespace frea {
 	namespace seq {
-		//! 複数のシーケンスを結合
+		//! 2つ以上のシーケンスを結合
+		/*!
+			\tparam Ts	std::index_sequence群
+		*/
 		template <class... Ts>
-		struct Concat {
-			using type = std::index_sequence<>;
-		};
+		struct Concat;
 		template <std::size_t... N>
 		struct Concat<std::index_sequence<N...>> {
 			using type = std::index_sequence<N...>;
@@ -22,6 +23,7 @@ namespace frea {
 		template <class... Ts>
 		using Concat_t = typename Concat<Ts...>::type;
 
+		//! 2つのstd::tupleを結合
 		template <class T0, class T1>
 		using TupleCat_t = decltype(std::tuple_cat(std::declval<T0>(), std::declval<T1>()));
 
@@ -33,7 +35,7 @@ namespace frea {
 		struct Repeat<N,0> {
 			using type = std::index_sequence<>;
 		};
-		//! インデックスNをRem回繰り返したシーケンス
+		//! 値NをRem回繰り返したシーケンス
 		template<int N, int Rem>
 		using Repeat_t = typename Repeat<N,Rem>::type;
 
@@ -182,55 +184,90 @@ namespace frea {
 		template <std::size_t From, std::size_t To>
 		using RangeIndex_t = typename RangeIndex<From, To>::type;
 
-		template <class Seq, std::size_t N>
+		//! 特定のシーケンスを指定回ずつ、繰り返す (Tup=[0,1,2], N=3) -> [0,0,0, 1,1,1, 2,2,2]
+		/*!
+			\tparam Tup		対象のシーケンス (std::index_sequence)
+			\tparam N		重複させる回数
+		*/
+		template <class Tup, std::size_t N>
 		struct DuplIndex;
 		template <std::size_t... Idx, std::size_t N>
 		struct DuplIndex<std::index_sequence<Idx...>, N> {
 			using type = Concat_t<Repeat_t<Idx, N>...>;
 		};
-		template <class Seq, std::size_t N>
-		using DuplIndex_t = typename DuplIndex<Seq, N>::type;
+		template <class Tup, std::size_t N>
+		using DuplIndex_t = typename DuplIndex<Tup, N>::type;
 
-		template <class Seq, std::size_t Rem>
+		//! 特定のindex_sequenceを指定回数繰り返す
+		/*!
+			\tparam Tup		繰り返すシーケンス一回分(std::tuple)
+			\tparam Rem		残りのリピート数
+		*/
+		template <class Tup, std::size_t Rem>
 		struct RepeatIndex {
-			using type = Concat_t<Seq, typename RepeatIndex<Seq, Rem-1>::type>;
+			using type = Concat_t<Tup, typename RepeatIndex<Tup, Rem-1>::type>;
 		};
-		template <class Seq>
-		struct RepeatIndex<Seq, 0> {
+		template <class Tup>
+		struct RepeatIndex<Tup, 0> {
 			using type = std::index_sequence<>;
 		};
-		template <class Seq, std::size_t N>
-		using RepeatIndex_t = typename RepeatIndex<Seq, N>::type;
+		template <class Tup, std::size_t N>
+		using RepeatIndex_t = typename RepeatIndex<Tup, N>::type;
 
+		/*!
+			\tparam Sum		組み合わせ総数
+			\tparam Ts		組み合わせるtuple群
+		*/
 		template <std::size_t Sum, class... Ts>
 		struct _Combi;
+		// 末端処理 (T0はtuple群の末尾)
 		template <std::size_t Sum, class T0>
 		struct _Combi<Sum, T0> {
-			constexpr static std::size_t t0_size = std::tuple_size<T0>{},
-											size = t0_size,
-											mod = (t0_size==0) ? 1 : Sum/t0_size;
-			using index = std::tuple<RepeatIndex_t<std::make_index_sequence<t0_size>, mod>>;
+			constexpr static std::size_t t0_size = std::tuple_size<T0>{},					//!< この層における組み合わせ数
+											size = t0_size,									//!< これを含めた下層の組み合わせ総数
+											upper_size = (t0_size==0) ? 1 : Sum/t0_size;	//!< これより上層の組み合わせ総数
+			// [0...t0_size-1]のシーケンスを上位層の組み合わせ回数分、繰り返す
+			using index = std::tuple<RepeatIndex_t<std::make_index_sequence<t0_size>, upper_size>>;
 		};
 		template <std::size_t Sum, class T0, class T1, class... Ts>
 		struct _Combi<Sum, T0,T1,Ts...> {
 			using lower = _Combi<Sum, T1,Ts...>;
-			constexpr static std::size_t lower_size = lower::size;
+			constexpr static std::size_t lower_size = lower::size;							//!< これを含めない下層の組み合わせ総数
 			using lower_index = typename lower::index;
 
-			constexpr static std::size_t t0_size = std::tuple_size<T0>{},
-										size = t0_size * lower_size,
-										mod = (t0_size==0) ? 1 : Sum/t0_size;
-			using index = TupleCat_t<std::tuple<DuplIndex_t<std::make_index_sequence<t0_size>, mod>>, lower_index>;
+			constexpr static std::size_t t0_size = std::tuple_size<T0>{},					//!< この層における組み合わせ数
+										size = t0_size * lower_size,						//!< これを含めた下層の組み合わせ総数
+										upper_size = (t0_size==0) ? 1 : Sum/size;			//!< これより上層の組み合わせ総数
+			using index = TupleCat_t<
+							std::tuple<
+								RepeatIndex_t<
+									DuplIndex_t<
+										std::make_index_sequence<t0_size>,
+										lower_size
+									>,
+									upper_size
+								>
+							>,
+							lower_index
+						>;
 		};
 
+		//! 引数の数値を全て掛けた値
 		template <std::size_t... N>
 		struct Mul : SZConst<1> {};
 		template <std::size_t N0, std::size_t... N>
 		struct Mul<N0,N...> : SZConst<N0 * Mul<N...>{}> {};
+
+		//! 組み合わせ配列の算出
+		/*!
+			\tparam Tup Tupleの二次元配列 (std::tuple<std::tuple<...>, std::tuple<...>, ...>)
+		*/
 		template <class T>
 		struct Combi;
+		// 内部クラス_Combiへ、考えられる全ての組み合わせの総数と配列リストを渡す
 		template <class... Ts>
-		struct Combi<std::tuple<Ts...>>: _Combi<Mul<std::tuple_size<Ts>{}...>{}, Ts...> {};
+		struct Combi<std::tuple<Ts...>>:
+			_Combi<Mul<std::tuple_size<Ts>{}...>{}, Ts...> {};
 		template <class Tup>
 		using Combi_t = typename Combi<Tup>::index;
 
