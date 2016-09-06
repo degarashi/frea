@@ -339,7 +339,7 @@ namespace frea {
 			const auto vec = this->makeRVec(DefaultRange<value_t>);
 			const value_t a0 = vec.average(),
 							a1 = vec.asInternal().average();
-			constexpr auto Th = Threshold<value_t>(0.3, 0);
+			constexpr auto Th = Threshold<value_t>(0.7, 0);
 			ASSERT_NEAR(a0, a1, Th);
 
 			value_t avg = 0;
@@ -355,7 +355,7 @@ namespace frea {
 			USING(vec_t);
 
 			// 配列で計算した場合と比較
-			constexpr auto range = DefaultRange<value_t>;
+			constexpr Range<value_t> range{1e2};
 			const vec_t v0 = this->makeRVec(range),
 						v1 = this->makeRVec(range);
 			const array_t ar0(v0),
@@ -367,7 +367,7 @@ namespace frea {
 			for(auto& a : ar2)
 				sum += a;
 
-			constexpr auto Th = Threshold<value_t>(0.6, 0);
+			constexpr auto Th = Threshold<value_t>(0.8, 0);
 			ASSERT_NEAR(sum, res0, Th);
 			ASSERT_NEAR(sum, res1, Th);
 
@@ -455,7 +455,7 @@ namespace frea {
 			for(int i=0 ; i<array_t::size ; i++)
 				sum0 += ar[i];
 			const value_t sum1 = (vec+0).sumUp();
-			constexpr auto Th = Threshold<value_t>(0.4, 0);
+			constexpr auto Th = Threshold<value_t>(0.8, 0);
 			ASSERT_LE(sum0-sum1, Th);
 		}
 		// 内部表現による演算結果の差異をチェック
