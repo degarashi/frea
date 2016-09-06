@@ -85,7 +85,7 @@ namespace frea {
 		template <class... Ts,
 				 ENABLE_IF((sizeof...(Ts)==capacity))>
 		wrap(const Ts&... ts):
-			m(I::Set(ts...))
+			m(I::SetR(ts...))
 		{}
 		// アラインメモリからの読み込み
 		wrap(const value_t* src, std::true_type):
@@ -230,7 +230,7 @@ namespace frea {
 		// メモリへの書き出し
 		template <bool A, int N>
 		void store(value_t* dst, IConst<N>) const {
-			static_assert(N<capacity, "");
+			static_assert(N<size, "");
 			I::Store(dst, m, BConst<A>(), IConst<N>());
 		}
 		// レジスタ型の読み替え
@@ -372,9 +372,9 @@ namespace frea{
 		constexpr static value_t ZeroValue() { return 0; }
 
 		template <class... Ts,
-				 ENABLE_IF((sizeof...(Ts)<capacity-2))>
+				 ENABLE_IF((capacity-2-sizeof...(Ts)>0))>
 		tup(const value_t& t0, const value_t& t1, const Ts&... ts):
-			tup(std::make_index_sequence<capacity-sizeof...(Ts)-2>(), t0, t1, ts...) {}
+			tup(std::make_index_sequence<capacity-2-sizeof...(Ts)>(), t0, t1, ts...) {}
 		template <bool A>
 		tup(const value_t* src, BConst<A>) {
 			load(src, BConst<A>());

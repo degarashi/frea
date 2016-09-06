@@ -47,7 +47,7 @@ namespace frea {
 			template <int At, std::size_t... Idx>
 			void _setColumn(const column_t& c, std::index_sequence<Idx...>) {
 				const auto dummy = [](auto&&...){};
-				dummy(((v[Idx].template setAt<At>() = c.template pickAt<At>()), 0)...);
+				dummy(((v[Idx].template setAt<At>(c.template pickAt<Idx>())), 0)...);
 			}
 			template <class... Ts>
 			static void _Dummy(Ts&&...) {}

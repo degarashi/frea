@@ -33,7 +33,8 @@ namespace frea {
 								Lt = &_mm_cmplt_ps;
 		constexpr static auto Sqrt = &_mm_sqrt_ps;
 		constexpr static auto Set1 = &_mm_set1_ps;
-		constexpr static auto Set = &_mm_set_ps;
+		constexpr static auto Set = &_mm_set_ps,
+							SetR = &_mm_setr_ps;
 		constexpr static auto Zero = &_mm_setzero_ps;
 		constexpr static auto Load = &_mm_load_ps,
 							LoadU = &_mm_loadu_ps;
@@ -226,7 +227,8 @@ namespace frea {
 								Lt = &_mm_cmplt_epi32;
 		constexpr static auto LoadU = &Load;
 		constexpr static auto Set1 = &_mm_set1_epi32;
-		constexpr static auto Set = &_mm_set_epi32;
+		constexpr static auto Set = &_mm_set_epi32,
+							SetR = &_mm_setr_epi32;
 		constexpr static auto Zero = &_mm_setzero_si128;
 
 		#define AsReg(w,z,y,x)	_mm_set_epi32(w,z,y,x)
@@ -372,7 +374,8 @@ namespace frea {
 								Max = &_mm_max_pd,
 								Lt = &_mm_cmplt_pd;
 		constexpr static auto Set1 = &_mm_set1_pd;
-		constexpr static auto Set = &_mm_set_pd;
+		constexpr static auto Set = &_mm_set_pd,
+							SetR = &_mm_setr_pd;
 		constexpr static auto Zero = &_mm_setzero_pd;
 		constexpr static auto Load = &_mm_load_pd,
 							LoadU = &_mm_loadu_pd;
