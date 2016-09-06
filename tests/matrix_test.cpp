@@ -4,6 +4,105 @@
 
 namespace frea {
 	namespace test {
+		namespace check {
+			template <class M, class W>
+			void GetRow(const M&, const W&, IConst<-1>) {}
+			template <class M, class W, int N>
+			void GetRow(const M& m, const W& w, IConst<N>) {
+				ASSERT_EQ(m.template getRow<N>(), w.template getRow<N>());
+				ASSERT_NO_FATAL_FAILURE(GetRow(m, w, IConst<N-1>()));
+			}
+			template <class M, class W>
+			void GetColumn(const M&, const W&, IConst<-1>) {}
+			template <class M, class W, int N>
+			void GetColumn(const M& m, const W& w, IConst<N>) {
+				ASSERT_EQ(m.template getColumn<N>(), w.template getColumn<N>());
+				ASSERT_NO_FATAL_FAILURE(GetColumn(m, w, IConst<N-1>()));
+			}
+
+			template <class M, class W, class V>
+			void SetRow(M&, W&, const V&, IConst<-1>) {}
+			template <class M, class W, class V, int N>
+			void SetRow(M& m, W& w, const V& r, IConst<N>) {
+				const auto tmp0 = m.template getRow<N>();
+				const auto tmp1 = w.template getRow<N>();
+				m.template setRow<N>(r);
+				w.template setRow<N>(r);
+				ASSERT_EQ(m, w);
+				m.template setRow<N>(tmp0);
+				w.template setRow<N>(tmp1);
+				ASSERT_NO_FATAL_FAILURE(SetRow(m, w, r, IConst<N-1>()));
+			}
+			template <class M, class W, class V>
+			void SetColumn(M&, W&, const V&, IConst<-1>) {}
+			template <class M, class W, class V, int N>
+			void SetColumn(M& m, W& w, const V& c, IConst<N>) {
+				const auto tmp0 = m.template getColumn<N>();
+				const auto tmp1 = w.template getColumn<N>();
+				m.template setColumn<N>(c);
+				w.template setColumn<N>(c);
+				ASSERT_EQ(m, w);
+				m.template setColumn<N>(tmp0);
+				w.template setColumn<N>(tmp1);
+				ASSERT_NO_FATAL_FAILURE(SetColumn(m, w, c, IConst<N-1>()));
+			}
+		}
+		TYPED_TEST(Matrix, Wrap_Equality) {
+			USING(value_t);
+			USING(mat_t);
+			USING(vec_t);
+			using wrap_t = typename mat_t::wrap_t;
+			using column_t = typename mat_t::column_t;
+			constexpr auto range = Range<value_t>{1e3};
+			mat_t m0 = this->makeRMat(range),
+					m1 = this->makeRMat(range);
+			const auto mtf = this->mt().template getUniformF<value_t>(range);
+			using mat2_t = typename mat_t::template type_cn<mat_t::dim_n, mat_t::dim_n>;
+			const mat2_t m2 = random::GenMat<mat2_t>(mtf);
+			auto w0 = m0.asInternal(),
+					w1 = m1.asInternal();
+			const auto w2 = m2.asInternal();
+			const auto s = mtf();
+			const column_t vc = random::GenVec<column_t>(mtf);
+			const vec_t vr = random::GenVec<vec_t>(mtf);
+
+			// (mat +-* mat) == (wrapM +-* wrapM)
+			EXPECT_EQ(m0+m1, w0+w1);
+			EXPECT_EQ(m0-m1, w0-w1);
+			EXPECT_EQ(m0*m2, w0*w2);
+			// (mat +-*/ s) == (wrapM +-*/ s)
+			EXPECT_EQ(m0+s, w0+s);
+			EXPECT_EQ(m0-s, w0-s);
+			EXPECT_EQ(m0*s, w0*s);
+			EXPECT_EQ(m0/s, w0/s);
+			// (mat == mat) == (wrapM == wrapM)
+			EXPECT_EQ(m0==m0, w0==w0);
+			EXPECT_EQ(m0!=m0, w0!=w0);
+			// Identity
+			EXPECT_EQ(mat_t::Identity(), wrap_t::Identity());
+			// (mat * vec) == (wrapM * vec)
+			EXPECT_EQ(m0*vr, w0*vr);
+			// (vec * mat) == (vec * wrapM)
+			EXPECT_EQ(vc*m0, vc*w0);
+			// diagonal
+			EXPECT_EQ(mat_t::Diagonal(s), wrap_t::Diagonal(s));
+			// linearNormalization
+			EXPECT_EQ(m0.linearNormalization(), w0.linearNormalization());
+
+			check::GetRow(m0, w0, IConst<mat_t::dim_m-1>());
+			check::GetColumn(m0, w0, IConst<mat_t::dim_n-1>());
+			check::SetRow(m0, w0, vr, IConst<mat_t::dim_m-1>());
+			check::SetColumn(m0, w0, vc, IConst<mat_t::dim_n-1>());
+		}
+		TYPED_TEST(Matrix, FunctionEquality_Method) {
+			USING(value_t);
+			constexpr auto range = Range<value_t>{1e3};
+			// linearNormalize
+			auto m0 = this->makeRMat(range),
+				 m1 = m0.linearNormalization();
+			m0.linearNormalize();
+			EXPECT_EQ(m0, m1);
+		}
 		TYPED_TEST(Matrix, Iterator) {
 			USING(value_t);
 			constexpr auto range = Range<value_t>{-1e3, 1e3};

@@ -38,5 +38,23 @@ namespace frea {
 			const mat_t result1 = mat2 * mat;
 			ASSERT_LE(AbsMax(mat_t(result0 - result1)), Th);
 		}
+		TYPED_TEST(SMatrix, FunctionEquality_Method) {
+			USING(value_t);
+			constexpr auto range = Range<value_t>{1e3};
+			{
+				// transpose
+				auto m0 = this->makeRMat(range),
+					 m1 = m0.transposition();
+				m0.transpose();
+				EXPECT_EQ(m0, m1);
+			}
+			{
+				// invert
+				auto m0 = this->makeRMat(range),
+					 m1 = m0.inversion();
+				m0.invert();
+				EXPECT_EQ(m0, m1);
+			}
+		}
 	}
 }
