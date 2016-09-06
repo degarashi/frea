@@ -117,7 +117,7 @@ namespace frea {
 			#define DEF_OP2(op) \
 				template <class T, \
 							ENABLE_IF((HasMethod_asInternal_t<T>{}))> \
-				spec_t operator op (const T& t) const { \
+				auto operator op (const T& t) const { \
 					return *this op t.asInternal(); \
 				}
 			#define DEF_OP(op) \
@@ -270,6 +270,11 @@ namespace frea {
 				return _getColumn<At>(std::make_index_sequence<dim_m>());
 			}
 			template <int At>
+			void setRow(const vec_t& r) {
+				static_assert(At < dim_m, "invalid position");
+				v[At] = r;
+			}
+			template <int At>
 			void setColumn(const column_t& c) {
 				static_assert(At < dim_n, "invalid position");
 				_setColumn<At>(c, std::make_index_sequence<dim_m>());
@@ -280,6 +285,9 @@ namespace frea {
 						return false;
 				}
 				return true;
+			}
+			void linearNormalize() {
+				*this = linearNormalization();
 			}
 			spec_t linearNormalization() const {
 				spec_t ret;
@@ -679,6 +687,11 @@ namespace frea {
 			for(int i=0 ; i<dim_m ; i++)
 				ret[i] = this->m[i][At];
 			return ret;
+		}
+		template <int At>
+		void setRow(const vec_t& v) {
+			static_assert(At < dim_m, "invalid position");
+			this->m[At] = v;
 		}
 		template <int At>
 		void setColumn(const column_t& c) {

@@ -58,7 +58,5 @@ namespace frea {
 				M20, M21, M22
 			};
 		}
-		this_t transposition() const { return this->asInternal().transposition(); }
-		void transpose() { *this = transposition(); }
 	};
 }
