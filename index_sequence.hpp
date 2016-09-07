@@ -39,6 +39,20 @@ namespace frea {
 		template<int N, int Rem>
 		using Repeat_t = typename Repeat<N,Rem>::type;
 
+		//! シーケンスを反転
+		template <class Seq>
+		struct Reverse;
+		template <>
+		struct Reverse<std::index_sequence<>> {
+			using type = std::index_sequence<>;
+		};
+		template <std::size_t I0, std::size_t... Idx>
+		struct Reverse<std::index_sequence<I0, Idx...>> {
+			using type = Concat_t<typename Reverse<std::index_sequence<Idx...>>::type, std::index_sequence<I0>>;
+		};
+		template <class Seq>
+		using Reverse_t = typename Reverse<Seq>::type;
+
 		template <std::size_t... N>
 		auto Duplicate(SZConst<0>) -> std::index_sequence<>;
 		template <std::size_t... N, int ND>
