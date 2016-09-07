@@ -1,6 +1,9 @@
 #pragma once
 
 namespace frea {
+	template <class T, int N, bool A>
+	struct Data;
+
 	template <class T, int N, class S>
 	struct tup;
 	template <class T, int N>

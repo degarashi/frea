@@ -12,6 +12,11 @@ namespace frea {
 	using IsTuple_t = decltype(IsTuple((T*)nullptr));
 
 	template <class T>
+	struct is_data : std::false_type {};
+	template <class T, int N, bool A>
+	struct is_data<Data<T,N,A>> : std::true_type {};
+
+	template <class T>
 	struct is_vector : std::false_type {};
 	template <class W, class D, int N>
 	struct is_vector<VecT_spec<W,D,N>> : std::true_type {};
