@@ -28,38 +28,39 @@ namespace frea {
 			using vec_t = VW;
 			using value_t = typename vec_t::value_t;
 			using column_t = typename vec_t::template type_cn<dim_m>;
+			//! 要素数の読み替え
 			template <int M2, int N2>
 			using type_cn = wrapM_t<typename vec_t::template type_cn<N2>, M2>;
 		private:
 			template <class Vec, class WM, int N>
-			static void _MultipleLine(vec_t&, const Vec&, const WM&, IConst<N>, IConst<N>) {}
+			static void _MultipleLine(vec_t&, const Vec&, const WM&, IConst<N>, IConst<N>) noexcept {}
 			template <class Vec, class WM, int N, int Z>
-			static void _MultipleLine(vec_t& dst, const Vec& v, const WM& m, IConst<N>, IConst<Z>) {
+			static void _MultipleLine(vec_t& dst, const Vec& v, const WM& m, IConst<N>, IConst<Z>) noexcept {
 				const auto val = v.template pickAt<N>();
 				const vec_t tv(val);
 				dst += tv * m.v[N];
 				_MultipleLine(dst, v, m, IConst<N+1>(), IConst<Z>());
 			}
 			template <int At, std::size_t... Idx>
-			auto _getColumn(std::index_sequence<Idx...>) const {
+			auto _getColumn(std::index_sequence<Idx...>) const noexcept {
 				return column_t((v[Idx].template pickAt<At>())...);
 			}
 			template <int At, std::size_t... Idx>
-			void _setColumn(const column_t& c, std::index_sequence<Idx...>) {
+			void _setColumn(const column_t& c, std::index_sequence<Idx...>) noexcept {
 				const auto dummy = [](auto&&...){};
 				dummy(((v[Idx].template setAt<At>(c.template pickAt<Idx>())), 0)...);
 			}
 			template <class... Ts>
-			static void _Dummy(Ts&&...) {}
+			static void _Dummy(Ts&&...) noexcept {}
 			template <std::size_t... Idx, std::size_t... IdxE>
-			static spec_t _Diagonal(const value_t& v, std::index_sequence<Idx...>, std::index_sequence<IdxE...>) {
+			static spec_t _Diagonal(const value_t& v, std::index_sequence<Idx...>, std::index_sequence<IdxE...>) noexcept {
 				spec_t ret;
 				_Dummy((ret.v[Idx].template initAt<Idx>(v), 0)...);
 				_Dummy((ret.v[IdxE+dim_min] = vec_t::Zero())...);
 				return ret;
 			}
 			template <class VW2, int N2, class S2>
-			auto _mul(const wrapM<VW2,N2,S2>& m, std::true_type) const {
+			auto _mul(const wrapM<VW2,N2,S2>& m, std::true_type) const noexcept {
 				using WM = std::decay_t<decltype(m)>;
 				static_assert(WM::dim_m == dim_n, "");
 				wrapM_t<VW2, dim_m> ret;
@@ -83,7 +84,7 @@ namespace frea {
 				return ret;
 			}
 			template <class VW2, int N2, class S2>
-			auto _mul(const wrapM<VW2,N2,S2>& m, std::false_type) const {
+			auto _mul(const wrapM<VW2,N2,S2>& m, std::false_type) const noexcept {
 				using WM = std::decay_t<decltype(m)>;
 				static_assert(WM::dim_m == dim_n, "");
 				wrapM_t<VW2, dim_m> ret;
@@ -93,11 +94,11 @@ namespace frea {
 				return ret;
 			}
 			template <std::size_t... Idx, ENABLE_IF(sizeof...(Idx) == dim_m)>
-			column_t _mul_vecR(std::index_sequence<Idx...>, const vec_t& vc) const {
+			column_t _mul_vecR(std::index_sequence<Idx...>, const vec_t& vc) const noexcept {
 				return column_t(v[Idx].dot(vc)...);
 			}
 			template <std::size_t... Idx, ENABLE_IF(sizeof...(Idx) == dim_n)>
-			auto _mul_vecL(std::index_sequence<Idx...>, const column_t& vc) const {
+			auto _mul_vecL(std::index_sequence<Idx...>, const column_t& vc) const noexcept {
 				vec_t ret = vec_t::Zero();
 				_MultipleLine(ret, vc, *this, IConst<0>(), IConst<dim_m>());
 				return ret;
@@ -107,7 +108,7 @@ namespace frea {
 
 			wrapM() = default;
 			template <bool A>
-			wrapM(const value_t* src, BConst<A>) {
+			wrapM(const value_t* src, BConst<A>) noexcept {
 				for(int i=0 ; i<dim_m ; i++) {
 					v[i] = vec_t(src, BConst<A>());
 					src += A ? vec_t::capacity : vec_t::size;
@@ -117,19 +118,19 @@ namespace frea {
 			#define DEF_OP2(op) \
 				template <class T, \
 							ENABLE_IF((HasMethod_asInternal_t<T>{}))> \
-				auto operator op (const T& t) const { \
+				auto operator op (const T& t) const noexcept { \
 					return *this op t.asInternal(); \
 				}
 			#define DEF_OP(op) \
 				DEF_OP2(op) \
 				template <class VW2, class S2> \
-				spec_t operator op (const wrapM<VW2,M,S2>& m) const { \
+				spec_t operator op (const wrapM<VW2,M,S2>& m) const noexcept { \
 					spec_t ret; \
 					for(int i=0 ; i<dim_m ; i++) \
 						ret.v[i] = v[i] op m.v[i]; \
 					return ret; \
 				} \
-				spec_t operator op (const value_t& t) const { \
+				spec_t operator op (const value_t& t) const noexcept { \
 					spec_t ret; \
 					const vec_t tmp(t); \
 					for(int i=0 ; i<dim_m ; i++) \
@@ -144,12 +145,12 @@ namespace frea {
 			DEF_OP2(/)
 			#undef DEF_OP2
 			template <class VW2, class S2>
-			spec_t& operator = (const wrapM<VW2,dim_m,S2>& m) {
+			spec_t& operator = (const wrapM<VW2,dim_m,S2>& m) noexcept {
 				for(int i=0 ; i<dim_m ; i++)
 					v[i] = m.v[i];
 				return *this;
 			}
-			auto operator * (const value_t& t) const {
+			auto operator * (const value_t& t) const noexcept {
 				spec_t ret;
 				vec_t tmp(t);
 				for(int i=0 ; i<dim_m ; i++)
@@ -158,12 +159,12 @@ namespace frea {
 			}
 			template <class T = value_t,
 					 ENABLE_IF(std::is_floating_point<T>{})>
-			auto operator / (const value_t& t) const {
+			auto operator / (const value_t& t) const noexcept {
 				return *this * (1 / t);
 			}
 			template <class T = value_t,
 					 ENABLE_IF(std::is_integral<T>{})>
-			auto operator / (const value_t& t) const {
+			auto operator / (const value_t& t) const noexcept {
 				spec_t ret;
 				const vec_t tmp(t);
 				for(int i=0 ; i<dim_m ; i++)
@@ -172,19 +173,19 @@ namespace frea {
 			}
 			template <class Wr,
 					 ENABLE_IF(is_wrapM<Wr>{})>
-			auto operator * (const Wr& m) const {
+			auto operator * (const Wr& m) const noexcept {
 				return _mul(m, IsTuple_t<typename Wr::vec_t>());
 			}
 			// 右からベクトルを掛ける
-			column_t operator * (const vec_t& vc) const {
+			column_t operator * (const vec_t& vc) const noexcept {
 				return _mul_vecR(std::make_index_sequence<dim_m>(), vc);
 			}
 			// 左からベクトルを掛ける
-			auto _pre_mul(const column_t& vc) const {
+			auto _pre_mul(const column_t& vc) const noexcept {
 				return _mul_vecL(std::make_index_sequence<dim_n>(), vc);
 			}
 
-			bool operator == (const wrapM& m) const {
+			bool operator == (const wrapM& m) const noexcept {
 				for(int i=0 ; i<dim_m ; i++) {
 					if(v[i] != m.v[i])
 						return false;
@@ -193,7 +194,7 @@ namespace frea {
 			}
 
 			template <class VD>
-			void store(VD* dst) const {
+			void store(VD* dst) const noexcept {
 				for(auto& t : v) {
 					t.template store<VD::align>(dst->m, IConst<dim_n-1>());
 					++dst;
@@ -203,14 +204,14 @@ namespace frea {
 			template <int ToM,
 					 int ToN,
 					 ENABLE_IF((ToM<=dim_m))>
-			decltype(auto) convert() const {
+			decltype(auto) convert() const noexcept {
 				return reinterpret_cast<const type_cn<ToM, ToN>&>(*this);
 			}
 			template <int ToM,
 					 int ToN,
 					 int Pos,
 					 ENABLE_IF((ToM<=dim_m))>
-			decltype(auto) convertI(const value_t&) const {
+			decltype(auto) convertI(const value_t&) const noexcept {
 				return reinterpret_cast<const type_cn<ToM, ToN>&>(*this);
 			}
 			// 大きいサイズへの変換
@@ -218,7 +219,7 @@ namespace frea {
 			template <int ToM,
 					 int ToN,
 					 ENABLE_IF((ToM>dim_m))>
-			auto convert() const {
+			auto convert() const noexcept {
 				using ret_t = type_cn<ToM, ToN>;
 				ret_t ret;
 				for(int i=0 ; i<dim_m ; i++)
@@ -233,7 +234,7 @@ namespace frea {
 					 int ToN,
 					 int Pos,
 					 ENABLE_IF((ToM>dim_m))>
-			auto convertI(const value_t& v) const {
+			auto convertI(const value_t& v) const noexcept {
 				using ret_t = type_cn<ToM, ToN>;
 				ret_t ret;
 				for(int i=0 ; i<dim_m ; i++)
@@ -245,51 +246,51 @@ namespace frea {
 					ret.v[Pos].template setAt<Pos>(v);
 				return ret;
 			}
-			static spec_t Identity() {
+			static spec_t Identity() noexcept {
 				return Diagonal(1);
 			}
-			static spec_t Diagonal(const value_t& v) {
+			static spec_t Diagonal(const value_t& v) noexcept {
 				return _Diagonal(v,
 					std::make_index_sequence<dim_min>(),
 					std::make_index_sequence<dim_m-dim_min>()
 				);
 			}
 			template <int At>
-			const auto& getRow() const {
+			const auto& getRow() const noexcept {
 				static_assert(At < dim_m, "invalid position");
 				return v[At];
 			}
 			template <int At>
-			auto& getRow() {
+			auto& getRow() noexcept {
 				static_assert(At < dim_m, "invalid position");
 				return v[At];
 			}
 			template <int At>
-			auto getColumn() const {
+			auto getColumn() const noexcept {
 				static_assert(At < dim_n, "invalid position");
 				return _getColumn<At>(std::make_index_sequence<dim_m>());
 			}
 			template <int At>
-			void setRow(const vec_t& r) {
+			void setRow(const vec_t& r) noexcept {
 				static_assert(At < dim_m, "invalid position");
 				v[At] = r;
 			}
 			template <int At>
-			void setColumn(const column_t& c) {
+			void setColumn(const column_t& c) noexcept {
 				static_assert(At < dim_n, "invalid position");
 				_setColumn<At>(c, std::make_index_sequence<dim_m>());
 			}
-			bool isZero(const value_t& th) const {
+			bool isZero(const value_t& th) const noexcept {
 				for(int i=0 ; i<dim_m ; i++) {
 					if(!v[i].isZero(th))
 						return false;
 				}
 				return true;
 			}
-			void linearNormalize() {
+			void linearNormalize() noexcept {
 				*this = linearNormalization();
 			}
-			spec_t linearNormalization() const {
+			spec_t linearNormalization() const noexcept {
 				spec_t ret;
 				for(int i=0 ; i<dim_m ; i++)
 					ret.v[i] = v[i].linearNormalization();
@@ -305,7 +306,7 @@ namespace frea {
 		wrapM_spec() = default;
 	};
 	#define DEF_FUNC(name, nameC) \
-		void name() { \
+		void name() noexcept(noexcept(this->nameC())) { \
 			*this = nameC(); \
 		}
 
@@ -335,14 +336,14 @@ namespace frea {
 			static std::false_type hasmem(...);
 			//! 効率の良い転置アルゴリズムが使用可能な場合はそれを使用
 			template <std::size_t... Idx>
-			auto _transposition(std::true_type, std::index_sequence<Idx...>) const {
+			auto _transposition(std::true_type, std::index_sequence<Idx...>) const noexcept {
 				auto ret = *this;
 				VW::I::Transpose((ret.v[Idx].m)...);
 				return ret;
 			}
 			//! 効率の良い転置アルゴリズムが定義されていない場合は地道に要素を交換する
 			template <std::size_t... Idx>
-			auto _transposition(std::false_type, std::index_sequence<Idx...>) const {
+			auto _transposition(std::false_type, std::index_sequence<Idx...>) const noexcept {
 				typename base_t::value_t tmp[S][S];
 				const auto dummy = [](auto...) {};
 				dummy((base_t::v[Idx].template store<false>(tmp[Idx], IConst<base_t::dim_n-1>()), 0)...);
@@ -358,12 +359,12 @@ namespace frea {
 			using base_t::base_t;
 			wrapM_spec() = default;
 	
-			auto transposition() const& {
+			auto transposition() const& noexcept {
 				const auto idx = std::make_index_sequence<S>();
 				return _transposition(decltype(this->hasmem<VW, base_t>(idx))(), idx);
 			}
 			// ----------- アダプタ関数群 -----------
-			value_t calcDeterminant() const { return mat_t(*this).calcDeterminant(); }
+			value_t calcDeterminant() const noexcept { return mat_t(*this).calcDeterminant(); }
 			this_t inversion() const { return mat_t(*this).inversion(); }
 			this_t inversion(const value_t& det) const { return mat_t(*this).inversion(det); }
 			DEF_FUNC(inverse, inversion)
@@ -388,28 +389,28 @@ namespace frea {
 			int		_cursor;
 			constexpr static int dim_n = D::dim_n;
 		public:
-			ItrM(D_t& t, const int cur):
+			ItrM(D_t& t, const int cur) noexcept:
 				_target(t),
 				_cursor(cur)
 			{}
-			typename base_t::reference operator * () const {
+			typename base_t::reference operator * () const noexcept {
 				return _target.m[_cursor/dim_n][_cursor%dim_n];
 			}
-			ItrM& operator ++ () {
+			ItrM& operator ++ () noexcept {
 				++_cursor;
 				return *this;
 			}
-			ItrM operator ++ (int) {
+			ItrM operator ++ (int) noexcept {
 				const int cur = _cursor++;
 				return ItrM(_target, cur);
 			}
-			typename base_t::pointer operator -> () const {
+			typename base_t::pointer operator -> () const noexcept {
 				return &(*this);
 			}
-			bool operator == (const ItrM& itr) const {
+			bool operator == (const ItrM& itr) const noexcept {
 				return _cursor == itr._cursor;
 			}
-			bool operator != (const ItrM& itr) const {
+			bool operator != (const ItrM& itr) const noexcept {
 				return _cursor != itr._cursor;
 			}
 	};
@@ -426,14 +427,14 @@ namespace frea {
 								is_integral = vec_t::is_integral;
 			using column_t = typename vec_t::template type_cn<dim_m>;
 		private:
-			void _init(vec_t*) {}
+			void _init(vec_t*) noexcept {}
 			template <class... Ts>
-			void _init(vec_t* dst, const vec_t& v, const Ts&... ts) {
+			void _init(vec_t* dst, const vec_t& v, const Ts&... ts) noexcept {
 				*dst = v;
 				_init(dst+1, ts...);
 			}
 			template <std::size_t... Idx>
-			void _initA(std::index_sequence<Idx...>, const value_t *src) {
+			void _initA(std::index_sequence<Idx...>, const value_t *src) noexcept {
 				static_assert(sizeof...(Idx) == dim_n, "");
 				for(int i=0 ; i<dim_m ; i++) {
 					m[i] = vec_t(src[Idx]...);
@@ -445,40 +446,40 @@ namespace frea {
 			DataM() = default;
 
 			// --- iterator interface ---
-			auto begin() { return ItrM<DataM, false>(*this, 0); }
-			auto end() { return ItrM<DataM, false>(*this, dim_m*dim_n); }
-			auto begin() const { return ItrM<DataM, true>(*this, 0); }
-			auto end() const { return ItrM<DataM, true>(*this, dim_m*dim_n); }
-			auto cbegin() const { return ItrM<DataM, true>(*this, 0); }
-			auto cend() const { return ItrM<DataM, true>(*this, dim_m*dim_n); }
+			auto begin() noexcept { return ItrM<DataM, false>(*this, 0); }
+			auto end() noexcept { return ItrM<DataM, false>(*this, dim_m*dim_n); }
+			auto begin() const noexcept { return ItrM<DataM, true>(*this, 0); }
+			auto end() const noexcept { return ItrM<DataM, true>(*this, dim_m*dim_n); }
+			auto cbegin() const noexcept { return ItrM<DataM, true>(*this, 0); }
+			auto cend() const noexcept { return ItrM<DataM, true>(*this, dim_m*dim_n); }
 
-			vec_t& operator [](const int n) {
+			vec_t& operator [](const int n) noexcept {
 				return m[n];
 			}
-			const vec_t& operator [](const int n) const {
+			const vec_t& operator [](const int n) const noexcept {
 				return m[n];
 			}
 			// vec_tの配列[dim_m]で初期化
 			template <class... Ts,
 					ENABLE_IF((sizeof...(Ts)==dim_m))>
-			DataM(const Ts&... ts) {
+			DataM(const Ts&... ts) noexcept {
 				_init(m, ts...);
 			}
 			// value_tの配列で初期化
 			template <class... Ts,
 					ENABLE_IF((sizeof...(Ts)==dim_m*dim_n))>
-			DataM(const Ts&... ts) {
+			DataM(const Ts&... ts) noexcept {
 				const value_t tmp[dim_m*dim_n] = {static_cast<value_t>(ts)...};
 				_initA(std::make_index_sequence<dim_n>(), tmp);
 			}
 			// 全て同一のvalue_tで初期化
-			explicit DataM(const value_t& t0) {
+			explicit DataM(const value_t& t0) noexcept {
 				vec_t tmp(t0);
 				for(auto& v : m)
 					v = tmp;
 			}
 			// from 内部形式
-			DataM(const wrapM_spec<typename V::wrap_t, M, V::size>& w) {
+			DataM(const wrapM_spec<typename V::wrap_t, M, V::size>& w) noexcept {
 				w.store(m);
 			}
 	};
@@ -501,18 +502,19 @@ namespace frea {
 		constexpr static bool align = base_t::align;
 		using column_t = typename V::template type_cn<dim_m>;
 		using vec_min = typename vec_t::template type_cn<dim_min>;
+		//! 要素数の読み替え
 		template <int M2, int N2>
 		using type_cn = Mat_t<value_t, M2, N2, vec_t::template type_cn<N2>::align>;
 
 		MatT() = default;
-		constexpr MatT(const base_t& b): base_t(b) {}
-		MatT(const wrap_t& w) {
+		constexpr MatT(const base_t& b) noexcept: base_t(b) {}
+		MatT(const wrap_t& w) noexcept {
 			for(int i=0 ; i<dim_m ; i++)
 				base_t::m[i] = w.v[i];
 		}
 
 		//! 指定した行と列を省いた物を出力
-		auto cutRC(const int row, const int clm) const {
+		auto cutRC(const int row, const int clm) const noexcept {
 			type_cn<dim_m-1, dim_n-1>	ret;
 			constexpr int width = dim_n,
 						height = dim_m;
@@ -541,44 +543,44 @@ namespace frea {
 
 		// ---------- < 行の基本操作 > ----------
 		//! 行を入れ替える
-		void rowSwap(const int r0, const int r1) {
+		void rowSwap(const int r0, const int r1) noexcept {
 			std::swap(this->m[r0], this->m[r1]);
 		}
 		//! ある行を定数倍する
-		void rowMul(const int r0, const value_t& s) {
+		void rowMul(const int r0, const value_t& s) noexcept {
 			this->m[r0] *= s;
 		}
 		//! ある行を定数倍した物を別の行へ足す
-		void rowMulAdd(const int r0, const value_t& s, const int r1) {
+		void rowMulAdd(const int r0, const value_t& s, const int r1) noexcept {
 			this->m[r1] += this->m[r0] * s;
 		}
 		// ---------- < 列の基本操作 > ----------
 		//! 列を入れ替える
-		void clmSwap(const int c0, const int c1) {
+		void clmSwap(const int c0, const int c1) noexcept {
 			for(int i=0 ; i<dim_m ; i++)
 				std::swap(this->m[i][c0], this->m[i][c1]);
 		}
 		//! ある列を定数倍する
-		void clmMul(const int c0, const value_t& s) {
+		void clmMul(const int c0, const value_t& s) noexcept {
 			for(int i=0 ; i<dim_m ; i++)
 				this->m[i][c0] *= s;
 		}
 		//! ある列を定数倍した物を別の行へ足す
-		void clmMulAdd(const int c0, const value_t& s, const int c1) {
+		void clmMulAdd(const int c0, const value_t& s, const int c1) noexcept {
 			for(int i=0 ; i<dim_m ; i++)
 				this->m[i][c1] += this->m[i][c0] * s;
 		}
 
 		//! ある行の要素が全てゼロか判定
-		bool isZeroRow(const int n, const value_t& th) const {
+		bool isZeroRow(const int n, const value_t& th) const noexcept {
 			return this->m[n].isZero(th);
 		}
-		bool isZero(const value_t& th) const { return AsI(*this).isZero(th); }
+		bool isZero(const value_t& th) const noexcept { return AsI(*this).isZero(th); }
 		//! 各行を正規化する (最大の係数が1になるように)
-		void linearNormalize() { *this = AsI(*this).linearNormalization(); }
-		spec_t linearNormalization() const { return AsI(*this).linearNormalization(); }
+		void linearNormalize() noexcept { *this = AsI(*this).linearNormalization(); }
+		spec_t linearNormalization() const noexcept { return AsI(*this).linearNormalization(); }
 		//! 被約階段行列かどうか判定
-		bool isEchelon(const value_t& th) const {
+		bool isEchelon(const value_t& th) const noexcept {
 			int edge = 0;
 			for(int i=0 ; i<dim_m ; i++) {
 				// 前回の行のエッジより左側がゼロ以外ならFalse
@@ -609,7 +611,7 @@ namespace frea {
 		}
 		//! 被約階段行列にする
 		/*! \return 0の行数 */
-		int rowReduce(const value_t& th) {
+		int rowReduce(const value_t& th) noexcept {
 			int rbase = 0,
 				cbase = 0;
 			for(;;) {
@@ -661,27 +663,27 @@ namespace frea {
 			return dim_m - rbase;
 		}
 
-		static MatT Diagonal(const value_t& v) {
+		static MatT Diagonal(const value_t& v) noexcept {
 			return wrap_t::Diagonal(v);
 		}
 		template <class... Ts, ENABLE_IF((sizeof...(Ts)==dim_min))>
 		static MatT Diagonal(const value_t& v0, const Ts&... ts);
-		static MatT Identity() {
+		static MatT Identity() noexcept {
 			return wrap_t::Diagonal(1);
 		}
 
 		template <int At>
-		const auto& getRow() const {
+		const auto& getRow() const noexcept {
 			static_assert(At < dim_m, "invalid position");
 			return this->m[At];
 		}
 		template <int At>
-		auto& getRow() {
+		auto& getRow() noexcept {
 			static_assert(At < dim_m, "invalid position");
 			return this->m[At];
 		}
 		template <int At>
-		column_t getColumn() const {
+		column_t getColumn() const noexcept {
 			static_assert(At < dim_n, "invalid position");
 			column_t ret;
 			for(int i=0 ; i<dim_m ; i++)
@@ -689,26 +691,26 @@ namespace frea {
 			return ret;
 		}
 		template <int At>
-		void setRow(const vec_t& v) {
+		void setRow(const vec_t& v) noexcept {
 			static_assert(At < dim_m, "invalid position");
 			this->m[At] = v;
 		}
 		template <int At>
-		void setColumn(const column_t& c) {
+		void setColumn(const column_t& c) noexcept {
 			static_assert(At < dim_n, "invalid position");
 			for(int i=0 ; i<dim_m ; i++)
 				this->m[i][At] = c[i];
 		}
 
-		constexpr operator wrap_t() const {
+		constexpr operator wrap_t() const noexcept {
 			return AsI(*this);
 		}
-		wrap_t asInternal() const {
+		wrap_t asInternal() const noexcept {
 			return AsI(*this);
 		}
 		#define DEF_OP(op) \
 			template <class Num> \
-			auto operator op (const Num& num) const { \
+			auto operator op (const Num& num) const noexcept { \
 				return AsI(*this) op num; \
 			} \
 			using op_t::operator op;
@@ -720,20 +722,20 @@ namespace frea {
 		DEF_OP(|)
 		DEF_OP(^)
 		#undef DEF_OP
-		bool operator == (const MatT& m) const {
+		bool operator == (const MatT& m) const noexcept {
 			return AsI(*this) == m;
 		}
 
 		// ベクトルを左から掛ける
-		auto _pre_mul(const column_t& vc) const {
+		auto _pre_mul(const column_t& vc) const noexcept {
 			return vc * AsI(*this);
 		}
-		static spec_t Translation(const vec_t& v) {
+		static spec_t Translation(const vec_t& v) noexcept {
 			spec_t ret = Identity();
 			ret.template getRow<dim_m-1>() = v;
 			return ret;
 		}
-		static spec_t Scaling(const vec_min& v) {
+		static spec_t Scaling(const vec_min& v) noexcept {
 			spec_t ret(0);
 			for(int i=0 ; i<vec_min::size ; i++)
 				ret.m[i][i] = v[i];
@@ -743,13 +745,13 @@ namespace frea {
 		//! サイズ変換
 		//! 足りない要素はゼロで埋める
 		template <int M2, int N2>
-		auto convert() const {
+		auto convert() const noexcept {
 			return AsI(*this).template convert<M2,N2>();
 		}
 		//! サイズ変換
 		//! 足りない要素はゼロで埋め、対角線上要素を任意の値で初期化
 		template <int M2, int N2, int Pos>
-		auto convertI(const value_t& vi) const {
+		auto convertI(const value_t& vi) const noexcept {
 			return AsI(*this).template convertI<M2,N2,Pos>(vi);
 		}
 	};
@@ -769,13 +771,13 @@ namespace frea {
 			using value_t = typename V::value_t;
 			using this_t = MatT_dspec;
 		private:
-			value_t _calcDeterminant(IConst<2>) const {
+			value_t _calcDeterminant(IConst<2>) const noexcept {
 				// 公式で計算
 				const Mat_t<value_t, 2, 2, false> m(*this);
 				return m[0][0]*m[1][1] - m[0][1]*m[1][0];
 			}
 			template <int N2, ENABLE_IF((N2>2))>
-			value_t _calcDeterminant(IConst<N2>) const {
+			value_t _calcDeterminant(IConst<N2>) const noexcept {
 				value_t res = 0,
 						s = 1;
 				// 部分行列を使って計算
@@ -786,7 +788,7 @@ namespace frea {
 				}
 				return res;
 			}
-			spec_t  _inversion(const value_t& di, IConst<2>) const {
+			spec_t  _inversion(const value_t& di, IConst<2>) const noexcept {
 				spec_t ret;
 				ret.m[0][0] = this->m[1][1] * di;
 				ret.m[1][0] = -this->m[1][0] * di;
@@ -795,7 +797,7 @@ namespace frea {
 				return ret;
 			}
 			template <int N2, ENABLE_IF((N2>2))>
-			spec_t _inversion(const value_t& di, IConst<N2>) const {
+			spec_t _inversion(const value_t& di, IConst<N2>) const noexcept {
 				spec_t ret;
 				const value_t c_val[2] = {1,-1};
 				for(int i=0 ; i<base_t::dim_m ; i++) {
@@ -810,7 +812,7 @@ namespace frea {
 			constexpr static auto ZeroThreshold = Threshold<value_t>(0.6, 1);
 
 		public:
-			value_t calcDeterminant() const {
+			value_t calcDeterminant() const noexcept {
 				return _calcDeterminant(IConst<base_t::dim_m>());
 			}
 			spec_t inversion() const {
@@ -827,8 +829,8 @@ namespace frea {
 			}
 
 			// -------- アダプタ関数群(wrapM) --------
-			spec_t transposition() const { return this->asInternal().transposition(); }
-			void transpose() { *this = transposition(); }
+			spec_t transposition() const noexcept { return this->asInternal().transposition(); }
+			void transpose() noexcept { *this = transposition(); }
 	};
 
 	template <class V, int M, int N>

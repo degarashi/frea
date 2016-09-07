@@ -7,7 +7,7 @@ namespace frea {
 		using value_t = typename V::value_t;
 		using vec_t = typename base_t::vec_t;
 
-		static this_t Rotation(const Radian<value_t>& ang) {
+		static this_t Rotation(const Radian<value_t>& ang) noexcept {
 			const value_t S = std::sin(ang.get()),
 							C = std::cos(ang.get());
 			return {
