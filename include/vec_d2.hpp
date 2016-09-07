@@ -11,12 +11,12 @@ namespace frea {
 		using this_t = VecT_spec;
 		using value_t = typename base_t::value_t;
 
-		value_t ccw(const wrap_t& v) const { return this->asInternal().ccw(v); }
-		value_t cw(const wrap_t& v) const { return this->asInternal().cw(v); }
-		static value_t Ccw(const base_t& v0, const base_t& v1, const base_t& v2) {
+		value_t ccw(const wrap_t& v) const noexcept { return this->asInternal().ccw(v); }
+		value_t cw(const wrap_t& v) const noexcept { return this->asInternal().cw(v); }
+		static value_t Ccw(const base_t& v0, const base_t& v1, const base_t& v2) noexcept {
 			return (v0-v1).ccw(v2-v1);
 		}
-		static value_t Cw(const base_t& v0, const base_t& v1, const base_t& v2) {
+		static value_t Cw(const base_t& v0, const base_t& v1, const base_t& v2) noexcept {
 			return (v0-v1).cw(v2-v1);
 		}
 	};

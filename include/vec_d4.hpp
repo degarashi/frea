@@ -11,6 +11,6 @@ namespace frea {
 
 		using this_t = VecT_spec;
 		typename base_t::template type_cn<3>
-			asVec3Coord() const { return this->asInternal().asVec3Coord(); }
+			asVec3Coord() const noexcept { return this->asInternal().asVec3Coord(); }
 	};
 }

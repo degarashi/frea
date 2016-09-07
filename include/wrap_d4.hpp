@@ -8,7 +8,7 @@ namespace frea {
 		using base_t = wrap<R,4,wrap_spec<R,4>>;
 		using base_t::base_t;
 
-		typename base_t::template type_cn<3> asVec3Coord() const {
+		typename base_t::template type_cn<3> asVec3Coord() const noexcept {
 			auto tmp = *this;
 			tmp.template makeEquality<3>();
 			return this->template convert<3>() * base_t::I::Reciprocal(tmp);
@@ -21,7 +21,7 @@ namespace frea {
 		using this_t = tup_spec;
 		using value_t = typename base_t::value_t;
 
-		auto asVec3Coord() const {
+		auto asVec3Coord() const noexcept {
 			using v3 = typename base_t::template type_cn<3>;
 			alignas(16) value_t tmp[4];
 			this->template store<true>(tmp, IConst<3>());

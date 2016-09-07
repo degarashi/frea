@@ -10,7 +10,7 @@ namespace frea {
 		using value_t = typename base_t::value_t;
 		using this_t = wrap_spec;
 
-		auto asD2() const {
+		auto asD2() const noexcept {
 			struct D2 {
 				value_t x,y;
 			} ret;
@@ -19,14 +19,14 @@ namespace frea {
 		}
 		//! counter clockwise
 		/*! 半時計回りが正数を返す */
-		value_t ccw(const this_t& v) const {
+		value_t ccw(const this_t& v) const noexcept {
 			const auto a = asD2(),
 					 b = v.asD2();
 			return a.x*b.y - a.y*b.x;
 		}
 		//! clockwise
 		/*! 時計回りが正数を返す */
-		value_t cw(const this_t& v) const {
+		value_t cw(const this_t& v) const noexcept {
 			const auto a = asD2(),
 					b = v.asD2();
 			return -a.x*b.y + a.y*b.x;
