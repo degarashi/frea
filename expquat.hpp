@@ -15,7 +15,7 @@ namespace frea {
 		using quat_t = QuatT<T,A>;
 
 		ExpQuatT() = default;
-		constexpr ExpQuatT(const quat_t& q) noexcept {
+		constexpr ExpQuatT(const quat_t& q) {
 			constexpr auto Th = ThresholdF<value_t>(0.1);
 			if(std::abs(q.w) >= 1.0-Th &&
 				std::abs(q.x)+std::abs(q.y)+std::abs(q.z) <= Th)
@@ -27,20 +27,21 @@ namespace frea {
 				asVec3() = q.getAxis() * vec_t(theta);
 			}
 		}
+		//! 異なる内部形式、アラインメントからの変換
 		template <class T2, bool A2>
 		constexpr ExpQuatT(const ExpQuatT<T2,A2>& q) noexcept:
 			base_t(static_cast<const base_t&>(q))
 		{}
-		quat_t asQuat() const {
+		quat_t asQuat() const noexcept {
 			const auto ret = getAngAxis();
 			return quat_t::Rotation(ret.axis, ret.angle);
 		}
 
 		#define DEF_OP(op)	\
-			ExpQuatT operator op (const ExpQuatT& e) const { \
+			ExpQuatT operator op (const ExpQuatT& e) const noexcept { \
 				return asVec3() op e.asVec3(); \
 			} \
-			ExpQuatT operator op (const value_t& s) const { \
+			ExpQuatT operator op (const value_t& s) const noexcept { \
 				return asVec3() op s; \
 			} \
 			using op_t::operator op;
@@ -50,13 +51,13 @@ namespace frea {
 		DEF_OP(/)
 		#undef DEF_OP
 
-		bool operator == (const ExpQuatT& q) const {
+		bool operator == (const ExpQuatT& q) const noexcept {
 			return asVec3() == q.asVec3();
 		}
-		value_t len_sq() const {
+		value_t len_sq() const noexcept {
 			return asVec3().len_sq();
 		}
-		value_t length() const {
+		value_t length() const noexcept {
 			return asVec3().length();
 		}
 		vec_t& asVec3() noexcept {
@@ -65,7 +66,7 @@ namespace frea {
 		const vec_t& asVec3() const noexcept {
 			return reinterpret_cast<const vec_t&>(*this);
 		}
-		auto getAngAxis() const {
+		auto getAngAxis() const noexcept {
 			struct {
 				rad_t	angle;
 				vec_t	axis;
