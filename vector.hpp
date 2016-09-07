@@ -7,6 +7,7 @@
 #include <algorithm>
 #include "meta/check_macro.hpp"
 #include "meta/boolean.hpp"
+#include "meta/compare.hpp"
 #include "operators.hpp"
 
 DEF_HASMETHOD(asInternal)
@@ -769,9 +770,9 @@ namespace frea{
 		//! 指定要素以前をt0, 以降はゼロで初期化
 		template <int Pos, class T2>
 		Data(Mask_t, IConst<Pos>, const T2& t0) noexcept {
-			for(int i=0 ; i<Pos ; i++)
+			for(int i=0 ; i<=Pos ; i++)
 				this->m[i] = t0;
-			for(int i=Pos ; i<size ; i++)
+			for(int i=Pos+1 ; i<size ; i++)
 				this->m[i] = 0;
 		}
 		//! 指定要素のみt0, 他はゼロで初期化
@@ -783,7 +784,10 @@ namespace frea{
 		template <class W,
 				 class=decltype(std::declval<W>().template store<A>(base_t::m, IConst<size-1>()))>
 		Data(const W& w) noexcept {
-			w.template store<A>(base_t::m, IConst<size-1>());
+			constexpr int S = Arithmetic<size, W::size>::less;
+			w.template store<A>(base_t::m, IConst<S-1>());
+			for(int i=S ; i<size ; i++)
+				base_t::m[i] = 0;
 		}
 		template <bool A2, int N2>
 		void store(value_t* dst, IConst<N2>) const noexcept {
