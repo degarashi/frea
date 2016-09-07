@@ -30,12 +30,18 @@ namespace frea {
 			EXPECT_EQ(v0+v1, w0+w1);
 			EXPECT_EQ(v0-v1, w0-w1);
 			EXPECT_EQ(v0*v1, w0*w1);
-			EXPECT_EQ(v0/v1, w0/w1);
+			// ゼロ除算避け
+			constexpr auto Th_z = Threshold<value_t>(0.4, 1);
+			if(!HasZero(v1.m, Th_z)) {
+				EXPECT_EQ(v0/v1, w0/w1);
+			}
 			// (vec +-*/ s) == (wrap +-*/ s)
 			EXPECT_EQ(v0+s0, w0+s0);
 			EXPECT_EQ(v0-s0, w0-s0);
 			EXPECT_EQ(v0*s0, w0*s0);
-			EXPECT_EQ(v0/s0, w0/s0);
+			if(std::abs(s0) >= Th_z) {
+				EXPECT_EQ(v0/s0, w0/s0);
+			}
 			// (vec == vec) == (wrap == wrap)
 			EXPECT_EQ(v0==v0, w0==w0);
 			EXPECT_EQ(v0!=v0, w0!=w0);
@@ -577,11 +583,13 @@ namespace frea {
 				ASSERT_EQ(tv0, v0);
 				ASSERT_EQ(tv1, v1);
 				// 二項演算と三項演算は一緒
+				const auto tv2 = v0;
 				tv0 = op(v0, v1);
 				ope(v0, v1);
 				ASSERT_EQ(tv0, v0);
 				// 複数の三項演算を二項演算に分けても結果は一緒
-				v0 = tv0;
+				v0 = tv2;
+				tv0 = tv2;
 				v0 = op(op(v0, v0), v1);
 				ope(tv0, tv0);
 				ope(tv0, v1);
