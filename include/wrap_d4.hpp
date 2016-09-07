@@ -8,10 +8,10 @@ namespace frea {
 		using base_t = wrap<R,4,wrap_spec<R,4>>;
 		using base_t::base_t;
 
-		typename base_t::template type_cn<3> asVec3Coord() const noexcept {
+		auto asVec3Coord() const noexcept {
 			auto tmp = *this;
 			tmp.template makeEquality<3>();
-			return this->template convert<3>() * base_t::I::Reciprocal(tmp);
+			return (*this * base_t(base_t::I::Reciprocal(tmp))).template convert<3>();
 		}
 	};
 	template <class T>
