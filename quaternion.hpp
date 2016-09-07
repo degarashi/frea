@@ -27,18 +27,18 @@ namespace frea {
 		operator const base_t&() = delete;
 		// 違う要素Quatからの変換
 		template <class T2, bool A2>
-		constexpr QuatT(const QuatT<T2,A2>& q):
+		constexpr QuatT(const QuatT<T2,A2>& q) noexcept:
 			base_t(static_cast<const base_t&>(q))
 		{}
-		constexpr static QuatT Identity() {
+		constexpr static QuatT Identity() noexcept {
 			return {0,0,0,1};
 		}
-		constexpr QuatT(const vec_t& v, const value_t& w):
+		constexpr QuatT(const vec_t& v, const value_t& w) noexcept:
 			base_t{v.x, v.y, v.z, w}
 		{}
 		static QuatT FromAxisF(const value_t& f11, const value_t& f12, const value_t& f13,
 								const value_t& f21, const value_t& f22, const value_t& f23,
-								const value_t& f31, const value_t& f32, const value_t& f33)
+								const value_t& f31, const value_t& f32, const value_t& f33) noexcept
 		{
 			// 最大成分を検索
 			const value_t elem[4] = {f11 - f22 - f33 + 1,
@@ -81,14 +81,13 @@ namespace frea {
 					break;
 			}
 			return res;
-			
 		}
-		static QuatT FromMat(const mat3_t& m) {
+		static QuatT FromMat(const mat3_t& m) noexcept {
 			return FromAxis(m.m[0], m.m[1], m.m[2]);
 		}
 		static QuatT FromAxis(const vec_t& xA,
 								const vec_t& yA,
-								const vec_t& zA)
+								const vec_t& zA) noexcept
 		{
 			return FromAxisF(xA.x, xA.y, xA.z,
 							yA.x, yA.y, yA.z,
@@ -96,13 +95,13 @@ namespace frea {
 		}
 		static QuatT FromMatAxis(const vec_t& xA,
 								const vec_t& yA,
-								const vec_t& zA)
+								const vec_t& zA) noexcept
 		{
 			return FromAxisF(xA.x, yA.x, zA.x,
 							xA.y, yA.y, zA.y,
 							xA.z, yA.z, zA.z);
 		}
-		static QuatT RotationYPR(rad_t yaw, rad_t pitch, rad_t roll) {
+		static QuatT RotationYPR(const rad_t yaw, const rad_t pitch, const rad_t roll) noexcept {
 			QuatT q = Identity();
 			// roll
 			q.rotateZ(roll);
@@ -112,26 +111,27 @@ namespace frea {
 			q.rotateY(yaw);
 			return q;
 		}
-		static QuatT RotationX(rad_t ang) {
+		static QuatT RotationX(rad_t ang) noexcept {
 			ang *= 0.5;
 			return QuatT(std::sin(ang.get()), 0, 0, std::cos(ang.get()));
 		}
-		static QuatT RotationY(rad_t ang) {
+		static QuatT RotationY(rad_t ang) noexcept {
 			ang *= 0.5;
 			return QuatT(0, std::sin(ang.get()), 0, std::cos(ang.get()));
 		}
-		static QuatT RotationZ(rad_t ang) {
+		static QuatT RotationZ(rad_t ang) noexcept {
 			ang *= 0.5;
 			return QuatT(0, 0, std::sin(ang.get()), std::cos(ang.get()));
 		}
-		static QuatT Rotation(const vec_t& axis, const rad_t ang) {
+		static QuatT Rotation(const vec_t& axis, const rad_t ang) noexcept {
+			D_Expect(std::abs(1-axis.length()) < ThresholdF<value_t>(0.4), "invalid axis")
 			D_Expect(std::abs(ang.get()) < rad_t::OneRotationAng, "invalid angle range")
 			const auto C = std::cos(ang.get()/2),
 						S = std::sin(ang.get()/2);
 			const vec_t taxis = axis * S;
 			return QuatT(taxis, C);
 		}
-		static QuatT LookAt(const vec_t& dir, const vec_t& up) {
+		static QuatT LookAt(const vec_t& dir, const vec_t& up) noexcept {
 			vec_t t_up = up;
 			vec_t rv = t_up % dir;
 			const value_t len_s = rv.len_sq();
@@ -146,7 +146,7 @@ namespace frea {
 			}
 			return FromAxis(rv, t_up, dir);
 		}
-		static QuatT Rotation(const vec_t& from, const vec_t& to) {
+		static QuatT Rotation(const vec_t& from, const vec_t& to) noexcept {
 			vec_t rAxis = from % to;
 			if(rAxis.len_sq() < ZeroLen_Th)
 				return QuatT::Identity();
@@ -193,36 +193,36 @@ namespace frea {
 			vOther *= b;
 			return FromAxis(axis[0], axis[1], axis[2]);
 		}
-		void rotateX(const rad_t ang) {
+		void rotateX(const rad_t ang) noexcept {
 			*this = RotationX(ang) * *this;
 		}
-		void rotateY(const rad_t ang) {
+		void rotateY(const rad_t ang) noexcept {
 			*this = RotationY(ang) * *this;
 		}
-		void rotateZ(const rad_t ang) {
+		void rotateZ(const rad_t ang) noexcept {
 			*this = RotationZ(ang) * *this;
 		}
-		void rotate(const vec_t& axis, const rad_t ang) {
+		void rotate(const vec_t& axis, const rad_t ang) noexcept {
 			*this = Rotation(axis, ang) * *this;
 		}
-		void identity() {
+		void identity() noexcept {
 			*this = Identity();
 		}
-		void normalize() {
+		void normalize() noexcept {
 			*this = normalization();
 		}
-		void conjugate() {
+		void conjugate() noexcept {
 			*this = conjugation();
 		}
-		void invert() {
+		void invert() noexcept {
 			*this = inversion();
 		}
-		QuatT scale(const value_t& s) const {
+		QuatT scale(const value_t& s) const noexcept {
 			return Identity().slerp(*this, s);
 		}
 
 		#define DEF_SCALAR(op) \
-			QuatT operator op (const value_t& v) const { \
+			QuatT operator op (const value_t& v) const noexcept { \
 				return asVec4() op v; \
 			} \
 			using op_t::operator op;
@@ -233,14 +233,14 @@ namespace frea {
 		#undef DEF_SCALAR
 
 		#define DEF_QUAT(op) \
-			QuatT operator op (const QuatT& v) const { \
+			QuatT operator op (const QuatT& v) const noexcept { \
 				return asVec4() op v.asVec4(); \
 			}
 		DEF_QUAT(+)
 		DEF_QUAT(-)
 		#undef DEF_QUAT
 
-		QuatT operator * (const QuatT& q) const {
+		QuatT operator * (const QuatT& q) const noexcept {
 			return {
 				this->w*q.x + this->x*q.w + this->y*q.z - this->z*q.y,
 				this->w*q.y - this->x*q.z + this->y*q.w + this->z*q.x,
@@ -249,25 +249,25 @@ namespace frea {
 			};
 		}
 
-		QuatT rotationX(const rad_t ang) const {
+		QuatT rotationX(const rad_t ang) const noexcept {
 			return RotationX(ang) * *this;
 		}
-		QuatT rotationY(const rad_t ang) const {
+		QuatT rotationY(const rad_t ang) const noexcept {
 			return RotationY(ang) * *this;
 		}
-		QuatT rotationZ(const rad_t ang) const {
+		QuatT rotationZ(const rad_t ang) const noexcept {
 			return RotationZ(ang) * *this;
 		}
-		QuatT rotation(const vec_t& axis, rad_t ang) const {
+		QuatT rotation(const vec_t& axis, rad_t ang) const noexcept {
 			return Rotation(axis, ang) * *this;
 		}
-		const vec4_t& asVec4() const {
+		const vec4_t& asVec4() const noexcept {
 			return reinterpret_cast<const vec4_t&>(*this);
 		}
-		QuatT normalization() const {
+		QuatT normalization() const noexcept {
 			return asVec4().normalization();
 		}
-		QuatT conjugation() const {
+		QuatT conjugation() const noexcept {
 			return
 				QuatT(
 					-this->x,
@@ -276,19 +276,19 @@ namespace frea {
 					this->w
 				);
 		}
-		QuatT inversion() const {
+		QuatT inversion() const noexcept {
 			return conjugation() / len_sq();
 		}
-		value_t len_sq() const {
+		value_t len_sq() const noexcept {
 			return asVec4().len_sq();
 		}
-		value_t length() const {
+		value_t length() const noexcept {
 			return asVec4().length();
 		}
-		rad_t angle() const {
+		rad_t angle() const noexcept {
 			return rad_t(std::acos(Saturate<value_t>(this->w, 1.0))*2);
 		}
-		const vec_t& getVector() const {
+		const vec_t& getVector() const noexcept {
 			return reinterpret_cast<const vec_t&>(*this);
 		}
 		vec_t getAxis() const {
@@ -299,13 +299,14 @@ namespace frea {
 			return vec_t(this->x*s_theta, this->y*s_theta, this->z*s_theta);
 		}
 
-		value_t dot(const QuatT& q) const {
+		value_t dot(const QuatT& q) const noexcept {
 			return asVec4().dot(q.asVec4());
 		}
-		bool operator == (const QuatT& q) const {
+		bool operator == (const QuatT& q) const noexcept {
 			return asVec4() == q.asVec4();
 		}
-		QuatT slerp(const QuatT& q, const value_t& t) const {
+		//! 球面線形補間
+		QuatT slerp(const QuatT& q, const value_t& t) const noexcept {
 			const auto ac = Saturate<value_t>(dot(q), 0.0, 1.0);
 			const auto theta = std::acos(ac),
 						S = std::sin(theta);
@@ -326,50 +327,51 @@ namespace frea {
 		#define ELEM21 (2*this->y*this->z-2*this->w*this->x)
 		#define ELEM22 (1-2*this->x*this->x-2*this->y*this->y)
 		//! 回転を行列表現した時のX軸
-		vec_t getXAxis() const {
+		vec_t getXAxis() const noexcept {
 			return {ELEM00, ELEM10, ELEM20};
 		}
 		//! 正規直行座標に回転を掛けた後のX軸
-		vec_t getXAxisInv() const {
+		vec_t getXAxisInv() const noexcept {
 			return {ELEM00, ELEM01, ELEM02};
 		}
 		//!< 回転を行列表現した時のY軸
-		vec_t getYAxis() const {
+		vec_t getYAxis() const noexcept {
 			return {ELEM01, ELEM11, ELEM21};
 		}
 		//!< 正規直行座標に回転を掛けた後のY軸
-		vec_t getYAxisInv() const {
+		vec_t getYAxisInv() const noexcept {
 			return {ELEM10, ELEM11, ELEM12};
 		}
 		//!< 回転を行列表現した時のZ軸
-		vec_t getZAxis() const {
+		vec_t getZAxis() const noexcept {
 			return {ELEM02, ELEM12, ELEM22};
 		}
 		//!< 正規直行座標に回転を掛けた後のZ軸
-		vec_t getZAxisInv() const {
+		vec_t getZAxisInv() const noexcept {
 			return {ELEM20, ELEM21, ELEM22};
 		}
 		//!< X軸に回転を適用したベクトル
-		vec_t getRight() const {
+		vec_t getRight() const noexcept {
 			return {ELEM00, ELEM01, ELEM02};
 		}
 		//!< Y軸に回転を適用したベクトル
-		vec_t getUp() const {
+		vec_t getUp() const noexcept {
 			return {ELEM10, ELEM11, ELEM12};
 		}
 		//!< Z軸に回転を適用したベクトル
-		vec_t getDir() const {
+		vec_t getDir() const noexcept {
 			return {ELEM20, ELEM21, ELEM22};
 		}
-		// 行列変換
-		mat3_t asMat33() const {
+		//! 行列変換(3x3)
+		mat3_t asMat33() const noexcept {
 			return {
 				ELEM00, ELEM01, ELEM02,
 				ELEM10, ELEM11, ELEM12,
 				ELEM20, ELEM21, ELEM22
 			};
 		}
-		mat4_t asMat44() const {
+		//! 行列変換(4x4)
+		mat4_t asMat44() const noexcept {
 			return {
 				ELEM00, ELEM01, ELEM02, 0,
 				ELEM10, ELEM11, ELEM12, 0,
@@ -386,7 +388,8 @@ namespace frea {
 		#undef ELEM20
 		#undef ELEM21
 		#undef ELEM22
-		value_t distance(const QuatT& q) const {
+		//! (デバッグ用)2つのクォータニオンにどれだけ差があるかの目安
+		value_t distance(const QuatT& q) const noexcept {
 			// 単純に値の差分をとる
 			const value_t f[4] = {
 				this->x - q.x,
@@ -396,7 +399,7 @@ namespace frea {
 			};
 			value_t sum = 0;
 			for(int i=0 ; i<4 ; i++)
-				sum += std::fabs(f[i]);
+				sum += std::abs(f[i]);
 			return sum;
 		}
 		exp_t asExpQuat() const {
