@@ -7,7 +7,7 @@ namespace frea {
 		using SqTypes_t = seq::ExpandTypes_t2<
 			types::SquareMat_t,
 			std::tuple<
-				types::Reg_t,
+				types::Value_t,
 				seq::Range_t<2,5>,
 				std::tuple<BConst<false>>
 			>

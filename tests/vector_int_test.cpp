@@ -5,7 +5,7 @@ namespace frea {
 		// 整数ベクトルテストケース
 		template <class T>
 		using IntVector = RVector<T>;
-		using ITypes = ToTestTypes_t<types::VectorRange_t<types::IReg_t>>;
+		using ITypes = ToTestTypes_t<types::VectorRange_t<types::Int_t>>;
 		TYPED_TEST_CASE(IntVector, ITypes);
 
 		// 整数の積算、除算に関するチェック

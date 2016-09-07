@@ -5,7 +5,7 @@ namespace frea {
 		// 浮動小数点数ベクトルテストケース
 		template <class T>
 		using FloatVector = RVector<T>;
-		using FTypes = ToTestTypes_t<types::VectorRange_t<types::FReg_t>>;
+		using FTypes = ToTestTypes_t<types::VectorRange_t<types::Float_t>>;
 		TYPED_TEST_CASE(FloatVector, FTypes);
 
 		namespace {

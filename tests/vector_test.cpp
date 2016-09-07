@@ -6,7 +6,7 @@ namespace frea {
 		// Int, Float両方のテストケース
 		template <class T>
 		using Vector = RVector<T>;
-		using Types = ToTestTypes_t<types::VectorRange_t<types::Reg_t>>;
+		using Types = ToTestTypes_t<types::VectorRange_t<types::Value_t>>;
 		TYPED_TEST_CASE(Vector, Types);
 
 		namespace {

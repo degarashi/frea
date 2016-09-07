@@ -331,21 +331,8 @@ namespace frea {
 		using ToTestTypes_t = decltype(ToTestTypes(std::declval<T>()));
 
 		namespace types {
-			using FElem_t = std::tuple<float, double>;
-			using IElem_t = std::tuple<int32_t>;
-			using Elem_t = seq::TupleCat_t<FElem_t, IElem_t>;
-
-			#if SSE>=2
-				using FReg_t = std::tuple<__m128, __m128d>;
-				using IReg_t = std::tuple<__m128i>;
-			#else
-				using FReg_t = std::tuple<>;
-				using IReg_t = std::tuple<>;
-			#endif
-			using Reg_t = seq::TupleCat_t<FReg_t, IReg_t>;
-
-			using Float_t = seq::TupleCat_t<Elem_t, Reg_t>;
-			using Int_t = seq::TupleCat_t<IElem_t, IReg_t>;
+			using Float_t = std::tuple<float, double>;
+			using Int_t = std::tuple<int32_t>;
 			using Value_t = seq::TupleCat_t<Float_t, Int_t>;
 
 			template <class E>
@@ -395,7 +382,7 @@ namespace frea {
 			using QTypes_t = seq::ExpandTypes_t2<
 				std::tuple,
 				std::tuple<
-					FElem_t,
+					Float_t,
 					seq::BoolSeq_t
 				>
 			>;
@@ -406,7 +393,7 @@ namespace frea {
 		#define USING(t) using t = typename TestFixture::t
 		template <class T>
 		using Matrix = RMatrix<T>;
-		using MTypes_t = types::MatrixRange_t<types::Reg_t, 3,5, 3,5>;
+		using MTypes_t = types::MatrixRange_t<types::Value_t, 3,5, 3,5>;
 		using MTypes = ToTestTypes_t<MTypes_t>;
 		TYPED_TEST_CASE(Matrix, MTypes);
 	}

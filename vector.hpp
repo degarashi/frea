@@ -26,6 +26,8 @@ namespace frea {
 			 int N,
 			 ENABLE_IF((info<R>::capacity >= N))>
 	auto DetectTup(const R&, IConst<N>) -> wrap_spec<R,N>;
+	template <class T, int N, bool A, int N2>
+	auto DetectTup(const Data<T,N,A>&, IConst<N2>) -> wrap_spec<Data<T,N2,A>,N2>;
 	template <class R, int N>
 	using Wrap_t = decltype(DetectTup(std::declval<R>(), IConst<N>()));
 
@@ -837,12 +839,14 @@ namespace frea{
 	template <class R, int N, bool A>
 	using SVec_t = VecT_spec<Wrap_t<R,N>, Data<typename info<R>::value_t, N, A>, N>;
 	template <class T, int N>
-	using RVec_t = VecT_spec<Data<T,N,false>, Data<T,N,false>, N>;
+	using RVec_t = VecT_spec<wrap_spec<Data<T,N,false>,N>, Data<T,N,false>, N>;
 
 	template <int N, bool A, class T>
 	RVec_t<T,N> info_detect(T);
 }
-#include "include/sse.hpp"
+#if SSE >= 2
+	#include "include/sse.hpp"
+#endif
 #include "include/raw.hpp"
 namespace frea {
 	template <class W, class D, class S>

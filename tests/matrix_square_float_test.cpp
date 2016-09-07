@@ -4,7 +4,7 @@ namespace frea {
 	namespace test {
 		template <class T>
 		using FSMatrix = RMatrix<T>;
-		using FSTypes_t = types::SMatrixRange_t<types::FReg_t, 2,5>;
+		using FSTypes_t = types::SMatrixRange_t<types::Float_t, 2,5>;
 		using FSTypes = ToTestTypes_t<FSTypes_t>;
 		TYPED_TEST_CASE(FSMatrix, FSTypes);
 		namespace {

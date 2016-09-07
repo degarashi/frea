@@ -31,7 +31,7 @@ namespace frea {
 					return deg_t(makeRF());
 				}
 		};
-		using Types = ToTestTypes_t<types::FElem_t>;
+		using Types = ToTestTypes_t<types::Float_t>;
 		TYPED_TEST_CASE(Angle, Types);
 
 		// ループ毎にsingleした値と独自にwhileで求めた値を比べる
