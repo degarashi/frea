@@ -11,19 +11,21 @@ namespace frea {
 		// 整数の積算、除算に関するチェック
 		TYPED_TEST(IntVector, MulDiv) {
 			USING(value_t);
-			using Lim = std::numeric_limits<value_t>;
-			const Range<value_t> range = {Lim::lowest()/2048, Lim::max()/2048};
-			const auto v0 = this->makeRVec(range);
-			const int n = this->mt().template getUniform<int>({1,8});
-			auto mul = v0 * n;
-			auto sum = v0;
-			for(int i=1 ; i<n ; i++)
-				sum += v0;
-			ASSERT_EQ(sum, mul);
-
 			USING(vec_t);
-			// 自身との除算は1
-			ASSERT_EQ(v0/v0, vec_t(1));
+			{
+				using Lim = std::numeric_limits<value_t>;
+				const Range<value_t> range = {Lim::lowest()/2048, Lim::max()/2048};
+				constexpr auto Th = Threshold<value_t>(0.4, 1);
+				const auto v0 = this->makeRVecNZ(Th, range);
+				const int n = this->mt().template getUniform<int>({1,8});
+				auto mul = v0 * n;
+				auto sum = v0;
+				for(int i=1 ; i<n ; i++)
+					sum += v0;
+				ASSERT_EQ(sum, mul);
+				// 自身との除算は1
+				ASSERT_EQ(v0/v0, vec_t(1));
+			}
 			{
 				// 乗算して同じ数で除算すれば元と同じになる
 				constexpr auto BitWidth = sizeof(value_t)*8;

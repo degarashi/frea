@@ -74,7 +74,11 @@ namespace frea {
 			EXPECT_EQ(m0+s, w0+s);
 			EXPECT_EQ(m0-s, w0-s);
 			EXPECT_EQ(m0*s, w0*s);
-			EXPECT_EQ(m0/s, w0/s);
+			// ゼロ除算避け
+			constexpr auto Th_z = Threshold<value_t>(0.4, 1);
+			if(std::abs(s) >= Th_z) {
+				EXPECT_EQ(m0/s, w0/s);
+			}
 			// (mat == mat) == (wrapM == wrapM)
 			EXPECT_EQ(m0==m0, w0==w0);
 			EXPECT_EQ(m0!=m0, w0!=w0);

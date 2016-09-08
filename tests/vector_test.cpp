@@ -571,29 +571,33 @@ namespace frea {
 			constexpr auto range = DefaultRange<value_t>;
 			const auto v0 = this->makeRVec(range),
 						v1 = this->makeRVec(range);
-			const auto check = [](auto v0, auto v1, const auto& op, const auto& ope) {
-				// 代入後の値チェック
-				auto tv0 = v0;
-				const auto tv1 = v1;
-				ASSERT_EQ(v0, tv0);
-				ASSERT_EQ(v1, tv1);
+			const auto check = [](const auto& v0, const auto& v1, const auto& op, const auto& ope) {
+				using v_t = std::decay_t<decltype(v0)>;
+				{
+					// 代入後の値チェック
+					v_t tv0 = v0,
+						tv1 = v1;
+					ASSERT_EQ(v0, tv0);
+					ASSERT_EQ(v1, tv1);
 
-				// 三項演算をどこにも代入しなければ値は変わらない
-				op(v0, v1);
-				ASSERT_EQ(tv0, v0);
-				ASSERT_EQ(tv1, v1);
-				// 二項演算と三項演算は一緒
-				const auto tv2 = v0;
-				tv0 = op(v0, v1);
-				ope(v0, v1);
-				ASSERT_EQ(tv0, v0);
-				// 複数の三項演算を二項演算に分けても結果は一緒
-				v0 = tv2;
-				tv0 = tv2;
-				v0 = op(op(v0, v0), v1);
-				ope(tv0, tv0);
-				ope(tv0, v1);
-				ASSERT_EQ(tv0, v0);
+					// 三項演算をどこにも代入しなければ値は変わらない
+					op(v0, v1);
+					ASSERT_EQ(tv0, v0);
+					ASSERT_EQ(tv1, v1);
+				}
+				{
+					// 二項演算と三項演算は一緒
+					v_t tv0 = op(v0, v1),
+						tv1 = v0;
+					ope(tv1, v1);
+					ASSERT_EQ(tv0, tv1);
+					// 複数の三項演算を二項演算に分けても結果は一緒
+					tv0 = op(op(v0, v0), v1);
+					tv1 = v0;
+					ope(tv1, v0);
+					ope(tv1, v1);
+					ASSERT_EQ(tv0, tv1);
+				}
 			};
 			#define DEF_TEST(op) \
 				ASSERT_NO_FATAL_FAILURE( \
@@ -607,7 +611,8 @@ namespace frea {
 			DEF_TEST(-)
 			DEF_TEST(*)
 			// Divideの場合は0除算を避ける
-			if(!HasZero(v1.m, Threshold<value_t>(0.4, 1))) {
+			constexpr auto Th = Threshold<value_t>(0.4, 1);
+			if(!HasZero(v0.m, Th) && !HasZero(v1.m, Th)) {
 				DEF_TEST(/)
 			}
 			#undef DEF_TEST
