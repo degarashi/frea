@@ -216,15 +216,18 @@ namespace frea {
 			} else {
 				// 3つの平面が一箇所で交わる点がない -> それぞれ2つを選んだ時の交点（直線）が平行になる
 				vec_t dir[3];
+				int ndir = 0;
 				for(int i=0 ; i<3 ; i++) {
 					const auto res = plane_t::CrossLine(p[i], p[(i+1)%3]);
-					ASSERT_TRUE(res.cross);
-					dir[i] = res.dir;
+					if(res.cross)
+						dir[ndir++] = res.dir;
 				}
 				constexpr auto Th = ThresholdF<value_t>(0.6);
-				ASSERT_LE(std::abs(dir[0].dot(dir[1]))-1, Th);
-				ASSERT_LE(std::abs(dir[0].dot(dir[2]))-1, Th);
-				ASSERT_LE(std::abs(dir[1].dot(dir[2]))-1, Th);
+				// 交わる平面の組み合わせが少なくとも2つはある
+				ASSERT_GE(ndir, 2);
+				for(int i=0 ; i<ndir-1 ; i++) {
+					ASSERT_LE(std::abs(dir[i].dot(dir[i+1]))-1, Th);
+				}
 			}
 		}
 	}
