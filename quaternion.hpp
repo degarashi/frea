@@ -413,7 +413,8 @@ namespace frea {
 
 	template <class T, bool A>
 	inline std::ostream& operator << (std::ostream& os, const QuatT<T,A>& q) {
-		return os << "Quat: [" << q.x << ", " << q.y << ", " << q.z << ", " << q.w << ']';
+		os << "Quat: ";
+		return q.asVec4().print(os);
 	}
 
 	using Quat = QuatT<float, false>;

@@ -835,6 +835,18 @@ namespace frea{
 		DEF_OP(|)
 		DEF_OP(^)
 		#undef DEF_OP
+
+		std::ostream& print(std::ostream& os) const {
+			os << '[';
+			bool bF = true;
+			for(int i=0 ; i<size ; i++) {
+				if(!bF)
+					os << ", ";
+				os << this->m[i];
+				bF = false;
+			}
+			return os << ']';
+		}
 	};
 	template <class R, int N, bool A>
 	using SVec_t = VecT_spec<Wrap_t<R,N>, Data<typename info<R>::value_t, N, A>, N>;
@@ -984,11 +996,6 @@ namespace frea {
 #include "include/vec_d3.hpp"
 #include "include/vec_d4.hpp"
 namespace frea {
-	template <class R, int D, class S>
-	inline std::ostream& operator << (std::ostream& os, const wrap<R,D,S>&) {
-		return os;
-	}
-
 	template <class W, class D, class S>
 	template <int N2,
 			 ENABLE_IF_I((N2>VecT<W,D,S>::size))>
@@ -1022,6 +1029,17 @@ namespace frea {
 	using info_detect_t = decltype(info_detect<N,A>(std::declval<T>()));
 	template <class T, int N, bool A>
 	using Vec_t = info_detect_t<T,N,A>;
+
+	template <class W, ENABLE_IF((is_wrap<W>{} || IsTuple_t<W>{}))>
+	inline std::ostream& operator << (std::ostream& os, const W& w) {
+		const Vec_t<typename W::value_t, W::size, true> v(w);
+		return os << v;
+	}
+	template <class V, ENABLE_IF((is_vector<V>{}))>
+	inline std::ostream& operator << (std::ostream& os, const V& v) {
+		os << "Vec" << V::size << ": ";
+		return v.print(os);
+	}
 }
 namespace frea {
 	#if SSE >= 2
