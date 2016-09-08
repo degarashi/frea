@@ -57,6 +57,7 @@ namespace frea {
 
 		template <int N>
 		static value_t Pick(const reg_t& t) noexcept {
+			static_assert(N>=0 && N<capacity, "invalid index");
 			const reg_t t2 = _mm_shuffle_ps(t, t, _MM_SHUFFLE(N,N,N,N));
 			value_t ret;
 			_mm_store_ss(&ret, t2);
@@ -323,6 +324,7 @@ namespace frea {
 		}
 		template <int N>
 		static value_t Pick(const reg_t& t) noexcept {
+			static_assert(N>=0 && N<capacity, "invalid index");
 			const reg_t t2 = _mm_shuffle_epi32(t, _MM_SHUFFLE(N,N,N,N));
 			value_t ret;
 			Store(&ret, t2, BConst<false>(), IConst<1>());
@@ -430,9 +432,10 @@ namespace frea {
 		}
 		template <int N>
 		static value_t Pick(const reg_t& t) noexcept {
-			const reg_t t2 = _mm_shuffle_pd(t, t, _MM_SHUFFLE(N,N,N,N));
+			static_assert(N>=0 && N<capacity, "invalid index");
+			const reg_t t2 = _mm_shuffle_pd(t, t, N);
 			value_t ret;
-			Store(&ret, t2, BConst<false>(), IConst<1>());
+			Store(&ret, t2, BConst<false>(), IConst<0>());
 			return ret;
 		}
 		static bool IsNaN(const reg_t& r0) noexcept {
