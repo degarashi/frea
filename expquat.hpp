@@ -84,6 +84,11 @@ namespace frea {
 			return ret;
 		}
 	};
+	template <class T, bool A>
+	inline std::ostream& operator << (std::ostream& os, const ExpQuatT<T,A>& q) {
+		os << "ExpQuat: ";
+		return q.asVec3().print(os);
+	}
 
 	using ExpQuat = ExpQuatT<float, false>;
 	using AExpQuat = ExpQuatT<float, true>;
