@@ -323,7 +323,9 @@ namespace frea {
 		private:
 			using base_t = wrapM<VW, S, wrapM_spec<VW,S,S>>;
 			using this_t = wrapM_spec;
+		public:
 			using value_t = typename base_t::value_t;
+		private:
 			using mat_t = Mat_t<value_t, base_t::dim_m, base_t::dim_n, true>;
 			// InfoにTranspose関数が用意されていればtrue
 			template <class VW2,
@@ -481,6 +483,17 @@ namespace frea {
 			// from 内部形式
 			DataM(const wrapM_spec<typename V::wrap_t, M, V::size>& w) noexcept {
 				w.store(m);
+			}
+			std::ostream& print(std::ostream& os) const {
+				os << '[';
+				bool bF = true;
+				for(int i=0 ; i<dim_m ; i++) {
+					if(!bF)
+						os << ", ";
+					this->m[i].print(os);
+					bF = false;
+				}
+				return os << ']';
 			}
 	};
 
@@ -838,6 +851,17 @@ namespace frea {
 		using base_t = MatT_dspec<V,M,N, MatT_spec<V,M,N>>;
 		using base_t::base_t;
 	};
+
+	template <class W, ENABLE_IF((is_wrapM<W>{}))>
+	inline std::ostream& operator << (std::ostream& os, const W& w) {
+		const Mat_t<typename W::value_t, W::dim_m, W::dim_n, true> m(w);
+		return os << m;
+	}
+	template <class M, ENABLE_IF((is_matrix<M>{}))>
+	inline std::ostream& operator << (std::ostream& os, const M& m) {
+		os << "Mat" << M::dim_m << M::dim_n << ": ";
+		return m.print(os);
+	}
 }
 #include "include/mat_d2.hpp"
 #include "include/mat_d3.hpp"
