@@ -49,11 +49,15 @@ namespace frea {
 				EXPECT_EQ(m0, m1);
 			}
 			{
-				// invert
-				auto m0 = this->makeRMat(range),
-					 m1 = m0.inversion();
-				m0.invert();
-				EXPECT_EQ(m0, m1);
+				try {
+					// invert
+					auto m0 = this->makeRMat(range),
+						 m1 = m0.inversion();
+					m0.invert();
+					EXPECT_EQ(m0, m1);
+				} catch(const NoInverseMatrix&) {
+					// 逆行列が存在しない場合は何もチェックしない
+				}
 			}
 		}
 	}
