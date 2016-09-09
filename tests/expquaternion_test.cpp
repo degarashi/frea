@@ -103,5 +103,8 @@ namespace frea {
 			err_sum /= NDiv+1;
 			EXPECT_LT(err_sum, Th);
 		}
+		TYPED_TEST(ExpQuaternion, Serialization) {
+			CheckSerialization(this->makeRQuat().asExpQuat());
+		}
 	}
 }

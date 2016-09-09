@@ -183,5 +183,11 @@ namespace frea {
 			ang1.single();
 			EXPECT_LT(AngleDiff(ang, ang1).get(), ThresholdF<TypeParam>(0.9));
 		}
+		TYPED_TEST(Angle, Serialization) {
+			USING(deg_t);
+			USING(rad_t);
+			CheckSerialization(deg_t(this->makeRF()));
+			CheckSerialization(rad_t(this->makeRF()));
+		}
 	}
 }

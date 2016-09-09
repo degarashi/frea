@@ -62,5 +62,8 @@ namespace frea {
 			USING(mat_t);
 			ASSERT_NO_FATAL_FAILURE(TranslationTest(*this, BConst<mat_t::dim_m == mat_t::dim_n+1>()));
 		}
+		TYPED_TEST(Matrix, Serialization) {
+			CheckSerialization(this->makeRMat());
+		}
 	}
 }

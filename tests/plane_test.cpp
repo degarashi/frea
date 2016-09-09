@@ -230,5 +230,8 @@ namespace frea {
 				}
 			}
 		}
+		TYPED_TEST(Plane, Serialization) {
+			CheckSerialization(this->makePlane());
+		}
 	}
 }

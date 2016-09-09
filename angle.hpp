@@ -202,6 +202,14 @@ namespace frea {
 			DEF_OP(>)
 			DEF_OP(>=)
 			#undef DEF_OP
+			template <class Ar>
+			value_t save_minimal(const Ar&) const {
+				return _angle;
+			}
+			template <class Ar>
+			void load_minimal(const Ar&, const value_t& v) {
+				_angle = v;
+			}
 	};
 	template <class TAG, class V>
 	constexpr V Angle<TAG,V>::OneRotationAng;

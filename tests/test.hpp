@@ -8,6 +8,9 @@
 #include "../meta/check_macro.hpp"
 #include "../ieee754.hpp"
 #include <gtest/gtest.h>
+#include <cereal/cereal.hpp>
+#include <cereal/archives/binary.hpp>
+#include <cereal/archives/json.hpp>
 
 namespace frea {
 	namespace test {
@@ -301,6 +304,10 @@ namespace frea {
 				using array_t = ArrayM<value_t, dim_m, dim_n>;
 				using rad_t = Radian<value_t>;
 			public:
+				auto makeRMat() {
+					auto rd = this->mt().template getUniformF<value_t>();
+					return random::GenMat<mat_t>(rd);
+				}
 				auto makeRMat(const Range<value_t>& r) {
 					auto rd = this->mt().template getUniformF<value_t>(r);
 					return random::GenMat<mat_t>(rd);
@@ -396,5 +403,36 @@ namespace frea {
 		using MTypes_t = types::MatrixRange_t<types::Value_t, 3,5, 3,5>;
 		using MTypes = ToTestTypes_t<MTypes_t>;
 		TYPED_TEST_CASE(Matrix, MTypes);
+
+		// ---- for serialization check ----
+		template <class OA, class IA, class T>
+		void _CheckSerialization(const T& src) {
+			std::stringstream buffer;
+			{
+				OA oa(buffer);
+				oa(CEREAL_NVP(src));
+			}
+			T loaded;
+			{
+				IA ia(buffer);
+				ia(cereal::make_nvp("src", loaded));
+			}
+			ASSERT_EQ(src, loaded);
+		}
+		template <class T>
+		void CheckSerializationBin(const T& src) {
+			_CheckSerialization<cereal::BinaryOutputArchive,
+								cereal::BinaryInputArchive>(src);
+		}
+		template <class T>
+		void CheckSerializationJSON(const T& src) {
+			_CheckSerialization<cereal::JSONOutputArchive,
+								cereal::JSONInputArchive>(src);
+		}
+		template <class T>
+		void CheckSerialization(const T& src) {
+			CheckSerializationBin(src);
+			CheckSerializationJSON(src);
+		}
 	}
 }

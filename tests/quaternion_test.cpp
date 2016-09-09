@@ -433,5 +433,8 @@ namespace frea {
 				EXPECT_EQ(q_0, q_1);
 			}
 		}
+		TYPED_TEST(Quaternion, Serialization) {
+			CheckSerialization(this->makeRQuat());
+		}
 	}
 }
