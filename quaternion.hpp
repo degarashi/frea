@@ -156,7 +156,7 @@ namespace frea {
 		}
 		static QuatT SetLookAt(const Axis::e targetAxis, const Axis::e baseAxis, const vec_t& baseVec, const vec_t& at, const vec_t& pos) {
 			if(targetAxis == baseAxis)
-				throw InvalidAxis("");
+				throw InvalidAxis();
 			// [0] = target
 			// [1] = right
 			// [2] = base
@@ -184,10 +184,10 @@ namespace frea {
 				&vBase = axis[axF[2]];
 			vTarget = at - pos;
 			if(vTarget.normalize() < ZeroLen_Th)
-				throw NoValidAxis("");
+				throw NoValidAxis();
 			vOther = baseVec.cross(vTarget);
 			if(vOther.normalize() < ZeroLen_Th)
-				throw NoValidAxis("");
+				throw NoValidAxis();
 			vBase = vTarget.cross(vOther);
 			const value_t b = (int(targetAxis) == (int(baseAxis)+1)%3) ? 1 : -1;
 			vOther *= b;
@@ -294,7 +294,7 @@ namespace frea {
 		vec_t getAxis() const {
 			auto s_theta = std::sqrt(1.0 - Square(this->w));
 			if(s_theta < ZeroLen_Th)
-				throw NoValidAxis("");
+				throw NoValidAxis();
 			s_theta = 1.0 / s_theta;
 			return vec_t(this->x*s_theta, this->y*s_theta, this->z*s_theta);
 		}

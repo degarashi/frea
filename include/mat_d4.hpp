@@ -18,7 +18,7 @@ namespace frea {
 				   yA;
 			if(xA.normalize() < Threshold<typename vec3_t::value_t>(0.3, 1) ||
 				xA.isNaN())
-				throw NoValidAxis("");
+				throw NoValidAxis();
 			yA = dir % xA;
 
 			return this_t(
@@ -37,7 +37,7 @@ namespace frea {
 		static this_t _PerspectiveFov(const Radian_t& fov, const value_t& aspect, const Range_t& z, const value_t& coeff) {
 			if(fov.get() <= 0 ||
 				fov.get() >= Radian_t::HalfRotationRange.to)
-				throw InvalidFov("");
+				throw InvalidFov();
 			value_t h = 1.0f / std::tan(fov.get()/2),
 					w = h / aspect,
 					f0 = z.to/(z.to-z.from),

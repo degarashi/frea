@@ -3,7 +3,7 @@
 
 namespace frea {
 	struct CantReachToPlane : std::runtime_error {
-		using std::runtime_error::runtime_error;
+		CantReachToPlane(): std::runtime_error("CantReachToPlane") {}
 	};
 
 	template <class T, bool A>
@@ -130,7 +130,7 @@ namespace frea {
 			const value_t r = dir.dot(getNormal());
 			if(std::abs(r) < 1e-6) {
 				// dirと法線がほぼ平行なので幾ら頂点を移動させても平面へ辿りつけない
-				throw CantReachToPlane("");
+				throw CantReachToPlane();
 			}
 			return -dot(src) / r;
 		}

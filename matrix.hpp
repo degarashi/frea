@@ -843,7 +843,7 @@ namespace frea {
 			spec_t inversion(const value_t& det) const {
 				constexpr auto Th = ZeroThreshold;
 				if(std::abs(det) < Th)
-					throw NoInverseMatrix("");
+					throw NoInverseMatrix();
 				return _inversion(1/det, IConst<base_t::dim_m>());
 			}
 			void invert() {
