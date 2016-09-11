@@ -51,7 +51,7 @@ namespace frea {
 		return ang0 + proc(diff);
 	}
 	//! 上方向を0度とし、反時計回り方向に指定角度回転したベクトルを返す
-	Vec_t<float,2,false> VectorFromAngle(const RadD& ang) {
+	inline Vec_t<float,2,false> VectorFromAngle(const RadD& ang) {
 		const auto angv = ang.get();
 		return {-std::sin(angv), std::cos(angv)};
 	}
