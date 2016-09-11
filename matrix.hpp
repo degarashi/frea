@@ -115,6 +115,12 @@ namespace frea {
 					src += A ? vec_t::capacity : vec_t::size;
 				}
 			}
+			decltype(auto) operator [] (const int n) noexcept {
+				return v[n];
+			}
+			decltype(auto) operator [] (const int n) const noexcept {
+				return v[n];
+			}
 
 			#define DEF_OP2(op) \
 				template <class T, \
