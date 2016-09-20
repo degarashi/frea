@@ -618,7 +618,7 @@ namespace frea {
 			#undef DEF_TEST
 		}
 		TYPED_TEST(Vector, Serialization) {
-			CheckSerialization(this->makeRVec());
+			lubee::CheckSerialization(this->makeRVec());
 		}
 	}
 }

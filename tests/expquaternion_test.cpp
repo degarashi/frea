@@ -104,7 +104,7 @@ namespace frea {
 			EXPECT_LT(err_sum, Th);
 		}
 		TYPED_TEST(ExpQuaternion, Serialization) {
-			CheckSerialization(this->makeRQuat().asExpQuat());
+			lubee::CheckSerialization(this->makeRQuat().asExpQuat());
 		}
 	}
 }

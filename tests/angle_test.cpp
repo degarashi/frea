@@ -186,8 +186,8 @@ namespace frea {
 		TYPED_TEST(Angle, Serialization) {
 			USING(deg_t);
 			USING(rad_t);
-			CheckSerialization(deg_t(this->makeRF()));
-			CheckSerialization(rad_t(this->makeRF()));
+			lubee::CheckSerialization(deg_t(this->makeRF()));
+			lubee::CheckSerialization(rad_t(this->makeRF()));
 		}
 	}
 }

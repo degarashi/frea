@@ -63,7 +63,7 @@ namespace frea {
 			ASSERT_NO_FATAL_FAILURE(TranslationTest(*this, lubee::BConst<mat_t::dim_m == mat_t::dim_n+1>()));
 		}
 		TYPED_TEST(Matrix, Serialization) {
-			CheckSerialization(this->makeRMat());
+			lubee::CheckSerialization(this->makeRMat());
 		}
 	}
 }

@@ -434,7 +434,7 @@ namespace frea {
 			}
 		}
 		TYPED_TEST(Quaternion, Serialization) {
-			CheckSerialization(this->makeRQuat());
+			lubee::CheckSerialization(this->makeRQuat());
 		}
 	}
 }

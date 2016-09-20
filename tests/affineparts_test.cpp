@@ -58,7 +58,7 @@ namespace frea {
 			EXPECT_LT(AbsMax(V3(dir0 - dir1)), Th);
 		}
 		TYPED_TEST(AffineParts, Serialization) {
-			CheckSerialization(this->makeAP());
+			lubee::CheckSerialization(this->makeAP());
 		}
 	}
 }

@@ -64,7 +64,7 @@ namespace frea {
 			ypd.yaw = random::GenAngle<rad_t>(mtf);
 			ypd.pitch = random::GenHalfAngle<rad_t>(mtf);
 			ypd.distance = mtf({1e-2, 1e2});
-			CheckSerialization(ypd);
+			lubee::CheckSerialization(ypd);
 		}
 	}
 }

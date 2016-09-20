@@ -231,7 +231,7 @@ namespace frea {
 			}
 		}
 		TYPED_TEST(Plane, Serialization) {
-			CheckSerialization(this->makePlane());
+			lubee::CheckSerialization(this->makePlane());
 		}
 	}
 }
