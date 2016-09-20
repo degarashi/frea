@@ -66,14 +66,14 @@ namespace frea {
 			const auto s = std::sqrt(1 - v.cos*v.cos);
 			const auto v2 = v.v0.cross(v.v1);
 			// 外積の長さはv0とv1のそれを掛けた値*sinθ
-			constexpr auto Th = Threshold<value_t>(0.7, 0);
+			constexpr auto Th = lubee::Threshold<value_t>(0.7, 0);
 			EXPECT_NEAR(v.v0.length()*v.v1.length()*s, v2.length(), Th);
 			// 生成元のベクトルと内積を取ると0
 			EXPECT_NEAR(v.v0.dot(v2), 0, Th);
 			EXPECT_NEAR(v.v1.dot(v2), 0, Th);
 			// operator % はcross()と同じ
 			const auto v3 = v.v0 % v.v1;
-			EXPECT_LE(AbsMax(vec_t(v2-v3)), Threshold<value_t>(0.3, 0));
+			EXPECT_LE(AbsMax(vec_t(v2-v3)), lubee::Threshold<value_t>(0.3, 0));
 		}
 		TYPED_TEST(VectorD_3, VerticalVector) {
 			USING(value_t);
@@ -82,9 +82,9 @@ namespace frea {
 			const auto v0 = random::GenVecUnit<vec_t>(mtf);
 			const auto v1 = v0.verticalVector();
 			// ゼロベクトルではない
-			EXPECT_GT(v1.length(), Threshold<value_t>(0.8,0));
+			EXPECT_GT(v1.length(), lubee::Threshold<value_t>(0.8,0));
 			// 元のベクトルとの内積は0
-			constexpr auto Th = Threshold<value_t>(0.2, 0);
+			constexpr auto Th = lubee::Threshold<value_t>(0.2, 0);
 			EXPECT_LE(std::abs(v0.dot(v1)), Th);
 			// 生成したベクトルと外積を取ると、先の2つのベクトルとどちらも内積が0
 			const auto v2 = (v1.cross(v0)).normalization();
@@ -94,7 +94,7 @@ namespace frea {
 		TYPED_TEST(VectorD_3, Flip) {
 			USING(value_t);
 			USING(vec_t);
-			constexpr Range<value_t> range{-1e2, 1e2};
+			constexpr lubee::Range<value_t> range{-1e2, 1e2};
 			const auto mtf = this->mt().template getUniformF<value_t>(range);
 			const auto p = random::GenPlane<PlaneT<value_t, false>>(mtf);
 			const auto v0 = random::GenVec<vec_t>(mtf);
@@ -103,7 +103,7 @@ namespace frea {
 			const auto v1 = p.flip(v0);
 			const auto d0 = p.dot(v0),
 						d1 = p.dot(v1);
-			constexpr auto Th = Threshold<value_t>(0.6, 0);
+			constexpr auto Th = lubee::Threshold<value_t>(0.6, 0);
 			EXPECT_NEAR(d0, -d1, Th);
 
 			// 二回反転すると元に戻る
@@ -114,15 +114,15 @@ namespace frea {
 			// 反転前と後を結ぶ方向は平面の法線と同一、または正対する
 			const vec_t dir = (v1 - v0).normalization();
 			const auto dd = dir.dot(p.getNormal());
-			EXPECT_LE(std::abs(dd)-1, Threshold<value_t>(0.8, 0));
+			EXPECT_LE(std::abs(dd)-1, lubee::Threshold<value_t>(0.8, 0));
 		}
 		TYPED_TEST(VectorD_3, CrossPoint) {
 			USING(value_t);
 			USING(vec_t);
-			constexpr Range<value_t> range{-1e2, 1e2};
+			constexpr lubee::Range<value_t> range{-1e2, 1e2};
 			const auto mtf = this->mt().template getUniformF<value_t>(range);
 			const auto p = random::GenPlane<PlaneT<value_t, false>>(mtf);
-			constexpr auto Th = Threshold<value_t>(0.6, 0);
+			constexpr auto Th = lubee::Threshold<value_t>(0.6, 0);
 			// 平面の両方側に位置するランダム頂点を生成
 			vec_t vf, vb;
 			// 表側に位置する頂点

@@ -1,8 +1,8 @@
 #pragma once
 #include "matrix.hpp"
-#include "error.hpp"
+#include "lubee/error.hpp"
 #include "compare.hpp"
-#include "ieee754.hpp"
+#include "lubee/ieee754.hpp"
 #include "exception.hpp"
 
 namespace frea {
@@ -21,8 +21,8 @@ namespace frea {
 		using mat4_t = Mat_t<T,4,4, A>;
 		using exp_t = ExpQuatT<value_t, A>;
 
-		constexpr static T ZeroLen_Th = ThresholdF<value_t>(0.2),
-							Theta_Th = ThresholdF<value_t>(0.8);
+		constexpr static T ZeroLen_Th = lubee::ThresholdF<value_t>(0.2),
+							Theta_Th = lubee::ThresholdF<value_t>(0.8);
 		QuatT() = default;
 		operator const base_t&() = delete;
 		// 違う要素Quatからの変換
@@ -124,7 +124,7 @@ namespace frea {
 			return QuatT(0, 0, std::sin(ang.get()), std::cos(ang.get()));
 		}
 		static QuatT Rotation(const vec_t& axis, const rad_t ang) noexcept {
-			D_Expect(std::abs(1-axis.length()) < ThresholdF<value_t>(0.4), "invalid axis")
+			D_Expect(std::abs(1-axis.length()) < lubee::ThresholdF<value_t>(0.4), "invalid axis")
 			D_Expect(std::abs(ang.get()) < rad_t::OneRotationAng, "invalid angle range")
 			const auto C = std::cos(ang.get()/2),
 						S = std::sin(ang.get()/2);

@@ -45,14 +45,14 @@ namespace frea {
 			return AsReg(m,m,m,m);
 		}
 		static auto One() noexcept { return AsReg(-1,-1,-1,-1); }
-		static auto MaskH(IConst<0>) noexcept { return AsReg(0,0,0,-1); }
-		static auto MaskH(IConst<1>) noexcept { return AsReg(0,0,-1,-1); }
-		static auto MaskH(IConst<2>) noexcept { return AsReg(0,-1,-1,-1); }
-		static auto MaskH(IConst<3>) noexcept { return AsReg(-1,-1,-1,-1); }
-		static auto PickAt(IConst<0>) noexcept { return AsReg(0,0,0,-1); }
-		static auto PickAt(IConst<1>) noexcept { return AsReg(0,0,-1,0); }
-		static auto PickAt(IConst<2>) noexcept { return AsReg(0,-1,0,0); }
-		static auto PickAt(IConst<3>) noexcept { return AsReg(-1,0,0,0); }
+		static auto MaskH(lubee::IConst<0>) noexcept { return AsReg(0,0,0,-1); }
+		static auto MaskH(lubee::IConst<1>) noexcept { return AsReg(0,0,-1,-1); }
+		static auto MaskH(lubee::IConst<2>) noexcept { return AsReg(0,-1,-1,-1); }
+		static auto MaskH(lubee::IConst<3>) noexcept { return AsReg(-1,-1,-1,-1); }
+		static auto PickAt(lubee::IConst<0>) noexcept { return AsReg(0,0,0,-1); }
+		static auto PickAt(lubee::IConst<1>) noexcept { return AsReg(0,0,-1,0); }
+		static auto PickAt(lubee::IConst<2>) noexcept { return AsReg(0,-1,0,0); }
+		static auto PickAt(lubee::IConst<3>) noexcept { return AsReg(-1,0,0,0); }
 		#undef AsReg
 
 		template <int N>
@@ -64,29 +64,29 @@ namespace frea {
 			return ret;
 		}
 		template <bool A>
-		static void Store(value_t* dst, const reg_t& t, BConst<A>, IConst<0>) noexcept {
+		static void Store(value_t* dst, const reg_t& t, lubee::BConst<A>, lubee::IConst<0>) noexcept {
 			_mm_store_ss(dst, t);
 		}
 		template <bool A>
-		static void Store(value_t* dst, const reg_t& t, BConst<A>, IConst<1>) noexcept {
+		static void Store(value_t* dst, const reg_t& t, lubee::BConst<A>, lubee::IConst<1>) noexcept {
 			_mm_storel_pi(reinterpret_cast<__m64*>(dst), t);
 		}
 		template <bool A>
-		static void Store(value_t* dst, const reg_t& t, BConst<A>, IConst<2>) noexcept {
+		static void Store(value_t* dst, const reg_t& t, lubee::BConst<A>, lubee::IConst<2>) noexcept {
 			_mm_storel_pi(reinterpret_cast<__m64*>(dst), t);
 			_mm_store_ss(dst+2, _mm_shuffle_ps(t, t, _MM_SHUFFLE(2,2,2,2)));
 		}
-		static void Store(value_t* dst, const reg_t& t, std::false_type, IConst<3>) noexcept {
+		static void Store(value_t* dst, const reg_t& t, std::false_type, lubee::IConst<3>) noexcept {
 			_mm_storeu_ps(dst, t);
 		}
-		static void Store(value_t* dst, const reg_t& t, std::true_type, IConst<3>) noexcept {
+		static void Store(value_t* dst, const reg_t& t, std::true_type, lubee::IConst<3>) noexcept {
 			_mm_store_ps(dst, t);
 		}
 		static value_t SumUp(const reg_t& r) noexcept {
 			auto tr = r;
 			SUMVEC(tr)
 			value_t tmp;
-			Store(&tmp, tr, std::false_type(), IConst<0>());
+			Store(&tmp, tr, std::false_type(), lubee::IConst<0>());
 			return tmp;
 		}
 		static reg_t Cast(const regI_t& t) noexcept {
@@ -141,7 +141,7 @@ namespace frea {
 		static value_t Reciprocal(const value_t& v) noexcept {
 			const reg_t r = Reciprocal(Set1(v));
 			value_t ret;
-			Store(&ret, r, BConst<false>(), IConst<0>());
+			Store(&ret, r, lubee::BConst<false>(), lubee::IConst<0>());
 			return ret;
 		}
 		static reg_t Reciprocal(reg_t r) noexcept {
@@ -176,7 +176,7 @@ namespace frea {
 			auto tmp2 = _mm_shuffle_ps(tmp, tmp, _MM_SHUFFLE(0,0,0,1));
 			tmp = func(tmp, tmp2);
 			value_t ret;
-			Store(&ret, tmp, std::false_type(), IConst<0>());
+			Store(&ret, tmp, std::false_type(), lubee::IConst<0>());
 			return ret;
 		}
 		static value_t GetMinValue(const reg_t& r) noexcept {
@@ -234,14 +234,14 @@ namespace frea {
 
 		#define AsReg(w,z,y,x)	_mm_set_epi32(w,z,y,x)
 		static auto One() noexcept { return AsReg(-1,-1,-1,-1); }
-		static auto MaskH(IConst<0>) noexcept { return AsReg(0,0,0,-1); }
-		static auto MaskH(IConst<1>) noexcept { return AsReg(0,0,-1,-1); }
-		static auto MaskH(IConst<2>) noexcept { return AsReg(0,-1,-1,-1); }
-		static auto MaskH(IConst<3>) noexcept { return AsReg(-1,-1,-1,-1); }
-		static auto PickAt(IConst<0>) noexcept { return AsReg(0,0,0,-1); }
-		static auto PickAt(IConst<1>) noexcept { return AsReg(0,0,-1,0); }
-		static auto PickAt(IConst<2>) noexcept { return AsReg(0,-1,0,0); }
-		static auto PickAt(IConst<3>) noexcept { return AsReg(-1,0,0,0); }
+		static auto MaskH(lubee::IConst<0>) noexcept { return AsReg(0,0,0,-1); }
+		static auto MaskH(lubee::IConst<1>) noexcept { return AsReg(0,0,-1,-1); }
+		static auto MaskH(lubee::IConst<2>) noexcept { return AsReg(0,-1,-1,-1); }
+		static auto MaskH(lubee::IConst<3>) noexcept { return AsReg(-1,-1,-1,-1); }
+		static auto PickAt(lubee::IConst<0>) noexcept { return AsReg(0,0,0,-1); }
+		static auto PickAt(lubee::IConst<1>) noexcept { return AsReg(0,0,-1,0); }
+		static auto PickAt(lubee::IConst<2>) noexcept { return AsReg(0,-1,0,0); }
+		static auto PickAt(lubee::IConst<3>) noexcept { return AsReg(-1,0,0,0); }
 		#undef AsReg
 
 		template <__m128i (*Cmp)(reg_t, reg_t)>
@@ -254,37 +254,37 @@ namespace frea {
 		}
 
 		template <bool A>
-		static void Store(value_t* dst, const reg_t& t, BConst<A>, IConst<0>) noexcept {
+		static void Store(value_t* dst, const reg_t& t, lubee::BConst<A>, lubee::IConst<0>) noexcept {
 			alignas(16) value_t tmp[capacity];
 			_mm_store_si128(reinterpret_cast<reg_t*>(tmp), t);
 			dst[0] = tmp[0];
 		}
 		template <bool A>
-		static void Store(value_t* dst, const reg_t& t, BConst<A>, IConst<1>) noexcept {
+		static void Store(value_t* dst, const reg_t& t, lubee::BConst<A>, lubee::IConst<1>) noexcept {
 			alignas(16) value_t tmp[capacity];
 			_mm_store_si128(reinterpret_cast<reg_t*>(tmp), t);
 			dst[0] = tmp[0];
 			dst[1] = tmp[1];
 		}
 		template <bool A>
-		static void Store(value_t* dst, const reg_t& t, BConst<A>, IConst<2>) noexcept {
+		static void Store(value_t* dst, const reg_t& t, lubee::BConst<A>, lubee::IConst<2>) noexcept {
 			alignas(16) value_t tmp[capacity];
 			_mm_store_si128(reinterpret_cast<reg_t*>(tmp), t);
 			dst[0] = tmp[0];
 			dst[1] = tmp[1];
 			dst[2] = tmp[2];
 		}
-		static void Store(value_t* dst, const reg_t& t, std::false_type, IConst<3>) noexcept {
+		static void Store(value_t* dst, const reg_t& t, std::false_type, lubee::IConst<3>) noexcept {
 			_mm_storeu_si128(reinterpret_cast<reg_t*>(dst), t);
 		}
-		static void Store(value_t* dst, const reg_t& t, std::true_type, IConst<3>) noexcept {
+		static void Store(value_t* dst, const reg_t& t, std::true_type, lubee::IConst<3>) noexcept {
 			_mm_store_si128(reinterpret_cast<reg_t*>(dst), t);
 		}
 		static value_t SumUp(const reg_t& r) noexcept {
 			auto tr = r;
 			SUMVEC(tr)
 			value_t tmp;
-			Store(&tmp, tr, std::false_type(), IConst<0>());
+			Store(&tmp, tr, std::false_type(), lubee::IConst<0>());
 			return tmp;
 		}
 		static reg_t Cast(const regF_t& t) noexcept {
@@ -327,7 +327,7 @@ namespace frea {
 			static_assert(N>=0 && N<capacity, "invalid index");
 			const reg_t t2 = _mm_shuffle_epi32(t, _MM_SHUFFLE(N,N,N,N));
 			value_t ret;
-			Store(&ret, t2, BConst<false>(), IConst<1>());
+			Store(&ret, t2, lubee::BConst<false>(), lubee::IConst<1>());
 			return ret;
 		}
 		static bool IsNaN(const reg_t&) noexcept {
@@ -348,7 +348,7 @@ namespace frea {
 			auto tmp2 = _mm_shuffle_epi32(tmp, _MM_SHUFFLE(0,0,0,1));
 			tmp = func(tmp, tmp2);
 			value_t ret;
-			Store(&ret, tmp, std::false_type(), IConst<0>());
+			Store(&ret, tmp, std::false_type(), lubee::IConst<0>());
 			return ret;
 		}
 		static value_t GetMinValue(const reg_t& r) noexcept {
@@ -389,26 +389,26 @@ namespace frea {
 			return AsReg(m7f, mff, m7f, mff);
 		}
 		static auto One() noexcept { return AsReg(-1,-1,-1,-1); }
-		static auto MaskH(IConst<0>) noexcept { return AsReg(0,0,-1,-1); }
-		static auto MaskH(IConst<1>) noexcept { return AsReg(-1,-1,-1,-1); }
-		static auto PickAt(IConst<0>) noexcept { return AsReg(0,0,-1,-1); }
-		static auto PickAt(IConst<1>) noexcept { return AsReg(-1,-1,0,0); }
+		static auto MaskH(lubee::IConst<0>) noexcept { return AsReg(0,0,-1,-1); }
+		static auto MaskH(lubee::IConst<1>) noexcept { return AsReg(-1,-1,-1,-1); }
+		static auto PickAt(lubee::IConst<0>) noexcept { return AsReg(0,0,-1,-1); }
+		static auto PickAt(lubee::IConst<1>) noexcept { return AsReg(-1,-1,0,0); }
 		#undef AsReg
 		template <bool A>
-		static void Store(value_t* dst, const reg_t& t, BConst<A>, IConst<0>) noexcept {
+		static void Store(value_t* dst, const reg_t& t, lubee::BConst<A>, lubee::IConst<0>) noexcept {
 			_mm_store_sd(dst, t);
 		}
-		static void Store(value_t* dst, const reg_t& t, std::true_type, IConst<1>) noexcept {
+		static void Store(value_t* dst, const reg_t& t, std::true_type, lubee::IConst<1>) noexcept {
 			_mm_store_pd(dst, t);
 		}
-		static void Store(value_t* dst, const reg_t& t, std::false_type, IConst<1>) noexcept {
+		static void Store(value_t* dst, const reg_t& t, std::false_type, lubee::IConst<1>) noexcept {
 			_mm_storeu_pd(dst, t);
 		}
 		static value_t SumUp(const reg_t& r) noexcept {
 			auto tr = _mm_shuffle_pd(r, r, 0b11);
 			tr = Add(tr, r);
 			value_t ret;
-			Store(&ret, tr, std::false_type(), IConst<0>());
+			Store(&ret, tr, std::false_type(), lubee::IConst<0>());
 			return ret;
 		}
 
@@ -435,7 +435,7 @@ namespace frea {
 			static_assert(N>=0 && N<capacity, "invalid index");
 			const reg_t t2 = _mm_shuffle_pd(t, t, N);
 			value_t ret;
-			Store(&ret, t2, BConst<false>(), IConst<0>());
+			Store(&ret, t2, lubee::BConst<false>(), lubee::IConst<0>());
 			return ret;
 		}
 		static bool IsNaN(const reg_t& r0) noexcept {
@@ -472,7 +472,7 @@ namespace frea {
 			auto tmp = _mm_shuffle_pd(r, r, 0b11);
 			tmp = func(r, tmp);
 			value_t ret;
-			Store(&ret, tmp, std::false_type(), IConst<0>());
+			Store(&ret, tmp, std::false_type(), lubee::IConst<0>());
 			return ret;
 		}
 		static value_t GetMinValue(const reg_t& r) noexcept {

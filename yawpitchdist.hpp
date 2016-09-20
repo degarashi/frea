@@ -29,7 +29,7 @@ namespace frea {
 
 			// Yaw
 			Vec3 xzvec(v.x, 0, v.z);
-			if(xzvec.len_sq() < ThresholdF<T>(0.4))
+			if(xzvec.len_sq() < lubee::ThresholdF<T>(0.4))
 				ypd.yaw.set(0);
 			else {
 				xzvec.normalize();

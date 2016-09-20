@@ -1,8 +1,8 @@
 #pragma once
 #include "constant.hpp"
-#include "meta/enable_if.hpp"
-#include "meta/check_macro.hpp"
-#include "range.hpp"
+#include "lubee/meta/enable_if.hpp"
+#include "lubee/meta/check_macro.hpp"
+#include "lubee/range.hpp"
 #include <cmath>
 
 namespace frea {
@@ -80,12 +80,12 @@ namespace frea {
 			}
 			template <class V2>
 			static auto Mod(const V2& f, const V2& m) noexcept {
-				return _Mod(f, m, HasOp_Mod_t<V2,V2>());
+				return _Mod(f, m, lubee::HasOp_Mod_t<V2,V2>());
 			}
 
 		public:
 			constexpr static value_t OneRotationAng = AngleInfo<tag_type>::template one_rotation<value_t>;
-			constexpr static Range<value_t> OneRotationRange = {0, OneRotationAng},
+			constexpr static lubee::Range<value_t> OneRotationRange = {0, OneRotationAng},
 											HalfRotationRange = {-OneRotationAng/2, OneRotationAng/2};
 
 			Angle() = default;
@@ -142,14 +142,14 @@ namespace frea {
 				_angle = ang;
 			}
 			//! 角度を一定の範囲に制限(直の値)
-			void rangeValue(const Range<value_t>& r) noexcept {
+			void rangeValue(const lubee::Range<value_t>& r) noexcept {
 				if(_angle < r.from)
 					_angle = r.from;
 				else if(_angle > r.to)
 					_angle = r.to;
 			}
 			//! 角度を一定の範囲に制限(直の値)
-			void range(const Range<Angle>& r) noexcept {
+			void range(const lubee::Range<Angle>& r) noexcept {
 				rangeValue({r.from.get(), r.to.get()});
 			}
 
@@ -214,9 +214,9 @@ namespace frea {
 	template <class TAG, class V>
 	constexpr V Angle<TAG,V>::OneRotationAng;
 	template <class TAG, class V>
-	constexpr Range<V> Angle<TAG,V>::OneRotationRange;
+	constexpr lubee::Range<V> Angle<TAG,V>::OneRotationRange;
 	template <class TAG, class V>
-	constexpr Range<V> Angle<TAG,V>::HalfRotationRange;
+	constexpr lubee::Range<V> Angle<TAG,V>::HalfRotationRange;
 
 	template <class T>
 	using Degree = Angle<Degree_t, T>;

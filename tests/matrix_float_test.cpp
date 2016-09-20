@@ -13,7 +13,7 @@ namespace frea {
 			USING(mat_t);
 			USING(vec_t);
 
-			constexpr auto range = Range<value_t>{-1e2, 1e2};
+			constexpr auto range = lubee::Range<value_t>{-1e2, 1e2};
 			const auto m = this->makeRMat(range),
 						mn0 = m.linearNormalization();
 			value_t r[mat_t::dim_m];
@@ -23,15 +23,15 @@ namespace frea {
 			for(int i=0 ; i<mat_t::dim_m ; i++) {
 				const vec_t& v0 = m.m[i];
 				const vec_t v1 = mn0.m[i] * r[i];
-				EXPECT_LE(AbsMax(vec_t(v1-v0)), ThresholdF<value_t>(0.3));
+				EXPECT_LE(AbsMax(vec_t(v1-v0)), lubee::ThresholdF<value_t>(0.3));
 			}
 		}
 		TYPED_TEST(FMatrix, RowReduce) {
 			USING(mat_t);
 			USING(value_t);
 
-			constexpr auto Th = ThresholdF<value_t>(0.1);
-			constexpr auto range = Range<value_t>{1e2};
+			constexpr auto Th = lubee::ThresholdF<value_t>(0.1);
+			constexpr auto range = lubee::Range<value_t>{1e2};
 			constexpr auto dim_m = mat_t::dim_m,
 						dim_n = mat_t::dim_n;
 			{
@@ -49,7 +49,7 @@ namespace frea {
 			if(dim_n == dim_m+1) {
 				// 連立一次方程式を解いてみる
 				auto m = this->makeRMat(range);
-				const auto mtf = this->mt().template getUniformF<value_t>(Range<value_t>{1e1});
+				const auto mtf = this->mt().template getUniformF<value_t>(lubee::Range<value_t>{1e1});
 				// 変数値を適当に決める
 				value_t var[dim_m];
 				for(int i=0 ; i<dim_m ; i++)
@@ -64,7 +64,7 @@ namespace frea {
 
 				const int zr = m.rowReduce(Th);
 				if(zr == 0) {
-					constexpr auto Th = ThresholdF<value_t>(0.9);
+					constexpr auto Th = lubee::ThresholdF<value_t>(0.9);
 					// 解が一意に定まる場合はチェックする
 					for(int i=0 ; i<dim_m ; i++)
 						EXPECT_NEAR(m[i][dim_n-1], var[i], Th);

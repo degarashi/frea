@@ -12,7 +12,7 @@ namespace frea {
 			USING(vec_t);
 			USING(value_t);
 
-			constexpr auto range = Range<value_t>({-1e2, 1e2});
+			constexpr auto range = lubee::Range<value_t>({-1e2, 1e2});
 			const auto angle = this->makeRadian();
 			const auto m = mat_t::Rotation(angle);
 			const auto v0 = this->makeRVec(range);
@@ -22,7 +22,7 @@ namespace frea {
 			};
 			const vec_t v1a = v0 * m,
 						v1b = fnRot(v0, angle.get());
-			EXPECT_LE(AbsMax(vec_t(v1a-v1b)), ThresholdF<value_t>(0.5));
+			EXPECT_LE(AbsMax(vec_t(v1a-v1b)), lubee::ThresholdF<value_t>(0.5));
 		}
 	}
 }

@@ -1,5 +1,5 @@
 #pragma once
-#include "../meta/enable_if.hpp"
+#include "../lubee/meta/enable_if.hpp"
 #include "../angle.hpp"
 
 namespace frea {
@@ -18,7 +18,7 @@ namespace frea {
 		}
 		//! ランダムなベクトル (但し全ての成分の絶対値がそれぞれ基準範囲内)
 		template <class V, class RD>
-		auto GenVec(RD&& rd, const Range<typename V::value_t>& rTh) {
+		auto GenVec(RD&& rd, const lubee::Range<typename V::value_t>& rTh) {
 			V ret;
 			for(auto& v : ret.m)
 				v = rd(rTh);

@@ -24,7 +24,7 @@ namespace frea {
 		auto asVec3Coord() const noexcept {
 			using v3 = typename base_t::template type_cn<3>;
 			alignas(16) value_t tmp[4];
-			this->template store<true>(tmp, IConst<3>());
+			this->template store<true>(tmp, lubee::IConst<3>());
 			const value_t div = base_t::I::Reciprocal(tmp[3]);
 			for(int i=0 ; i<3 ; i++)
 				tmp[i] *= div;

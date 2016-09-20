@@ -21,8 +21,8 @@ namespace frea {
 				using array33_t = ArrayM<value_t, 3, 3>;
 				using array44_t = ArrayM<value_t, 4, 4>;
 			private:
-				constexpr static Range<value_t> DefaultRange{-1e3, 1e3};
-				constexpr static Range<value_t> DefaultAngleRange{-Radian<value_t>::OneRotationAng/2, Radian<value_t>::OneRotationAng/2};
+				constexpr static lubee::Range<value_t> DefaultRange{-1e3, 1e3};
+				constexpr static lubee::Range<value_t> DefaultAngleRange{-Radian<value_t>::OneRotationAng/2, Radian<value_t>::OneRotationAng/2};
 				using RD = decltype(std::declval<Random>().mt().template getUniformF<value_t>(DefaultRange));
 				RD	_rd;
 
@@ -30,7 +30,7 @@ namespace frea {
 				Quaternion():
 					_rd(mt().template getUniformF<value_t>(DefaultRange))
 				{}
-				value_t makeRF(const Range<value_t>& r) {
+				value_t makeRF(const lubee::Range<value_t>& r) {
 					return mt().template getUniform<value_t>(r);
 				}
 				rad_t makeRadian() {
@@ -47,7 +47,7 @@ namespace frea {
 				}
 		};
 		template <class T>
-		constexpr Range<typename Quaternion<T>::value_t> Quaternion<T>::DefaultRange;
+		constexpr lubee::Range<typename Quaternion<T>::value_t> Quaternion<T>::DefaultRange;
 
 		TYPED_TEST_CASE(Quaternion, types::QTypes);
 
@@ -60,7 +60,7 @@ namespace frea {
 							qi = quat_t::Identity();
 				const auto q1 = qi * q0,
 							q2 = q0 * qi;
-				constexpr auto Th = ThresholdF<value_t>(0.1);
+				constexpr auto Th = lubee::ThresholdF<value_t>(0.1);
 				ASSERT_LE(q0.distance(q1), Th);
 				ASSERT_LE(q0.distance(q2), Th);
 			}
@@ -83,7 +83,7 @@ namespace frea {
 			const auto q0 = this->makeRQuat(),
 						q1 = q0.inversion(),
 						qi = quat_t::Identity();
-			constexpr auto Th = ThresholdF<value_t>(0.3);
+			constexpr auto Th = lubee::ThresholdF<value_t>(0.3);
 			ASSERT_LE((q0*q1).distance(qi), Th);
 			ASSERT_LE((q1*q0).distance(qi), Th);
 		}
@@ -103,7 +103,7 @@ namespace frea {
 			auto v = this->makeVec3();
 			const auto v0 = vec_t(v * q),
 						v1 = vec_t(v * m);
-			constexpr auto Th = ThresholdF<value_t>(0.7);
+			constexpr auto Th = lubee::ThresholdF<value_t>(0.7);
             EXPECT_LT(AbsMax(vec_t(v0-v1)), Th);
 			const array33_t ar0(m);
 			// クォータニオンを行列に変換した結果が一致するか
@@ -203,7 +203,7 @@ namespace frea {
 			q[2] = q[1] * q[0];
 			q[2].normalize();
 			m[2] = m[0] * m[1];
-			ASSERT_LT(AbsMax(array33_t(q[2].asMat33()) - m[2]), ThresholdF<value_t>(0.8));
+			ASSERT_LT(AbsMax(array33_t(q[2].asMat33()) - m[2]), lubee::ThresholdF<value_t>(0.8));
 		}
 		TYPED_TEST(Quaternion, Rotation) {
 			USING(quat_t);
@@ -220,7 +220,7 @@ namespace frea {
 			const auto q = quat_t::Rotation(axis, ang);
 			const auto m = q.asMat33();
 
-			constexpr auto Th = ThresholdF<value_t>(0.1);
+			constexpr auto Th = lubee::ThresholdF<value_t>(0.1);
 			EXPECT_LT(AbsMax(vec_t(vec_t(1,0,0)*m - q.getRight())), Th);
 			EXPECT_LT(AbsMax(vec_t(vec_t(0,1,0)*m - q.getUp())), Th);
 			EXPECT_LT(AbsMax(vec_t(vec_t(0,0,1)*m - q.getDir())), Th);
@@ -266,7 +266,7 @@ namespace frea {
 					 ang1 = ang.get();
 				const auto axis0 = q.getAxis(),
 					  axis1 = axis;
-				constexpr auto Th = ThresholdF<value_t>(0.8);
+				constexpr auto Th = lubee::ThresholdF<value_t>(0.8);
 				if(ang0 * ang1 < 0) {
 					EXPECT_NEAR(axis0.dot(axis1), -1, Th);
 					ang1 *= -1;
@@ -283,7 +283,7 @@ namespace frea {
 
 				const auto q = quat_t::Rotation(dir0, dir1);
 				const vec_t vdir = dir0 * q;
-				constexpr auto Th = ThresholdF<value_t>(0.8);
+				constexpr auto Th = lubee::ThresholdF<value_t>(0.8);
 				// Fromベクトルを変換したらToベクトルになる
 				EXPECT_LE(AbsMax(vec_t(dir1-vdir)), Th);
 				// 回転軸に平行なベクトルを回転させても値が変わらない
@@ -312,7 +312,7 @@ namespace frea {
 			USING(quat_t);
 			// Z,Y軸方向のベクトルをLookAt(dir,up)で算出したクォータニオンで回転させ、それがdir,upと同一か確認
 			const auto dir = this->makeDir();
-			constexpr auto Th = ThresholdF<value_t>(0.5);
+			constexpr auto Th = lubee::ThresholdF<value_t>(0.5);
 			vec_t up;
 			do {
 				up = this->makeDir();
@@ -336,7 +336,7 @@ namespace frea {
 			// 重複しない位置座標をランダム生成
 			vec_t pos = this->makeVec3(),
 				  at, baseVec;
-			constexpr auto Th = ThresholdF<value_t>(0.7);
+			constexpr auto Th = lubee::ThresholdF<value_t>(0.7);
 			do {
 				at = this->makeVec3();
 			} while(pos.distance(at) < Th);
@@ -422,7 +422,7 @@ namespace frea {
 				const vec_t v0 = v * q2;
 				const vec_t v1 = v * m1;
 
-				constexpr auto Th = ThresholdF<value_t>(0.9);
+				constexpr auto Th = lubee::ThresholdF<value_t>(0.9);
 				EXPECT_LT(AbsMax(vec_t(v0 - v1)), Th);
 			}
 			{

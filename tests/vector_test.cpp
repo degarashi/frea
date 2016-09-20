@@ -11,7 +11,7 @@ namespace frea {
 
 		namespace {
 			template <class T>
-			constexpr Range<T> DefaultRange{-1e3, 1e3};
+			constexpr lubee::Range<T> DefaultRange{-1e3, 1e3};
 		}
 		TYPED_TEST(Vector, Wrap_Equality) {
 			USING(value_t);
@@ -31,7 +31,7 @@ namespace frea {
 			EXPECT_EQ(v0-v1, w0-w1);
 			EXPECT_EQ(v0*v1, w0*w1);
 			// ゼロ除算避け
-			constexpr auto Th_z = Threshold<value_t>(0.4, 1);
+			constexpr auto Th_z = lubee::Threshold<value_t>(0.4, 1);
 			if(!HasZero(v1.m, Th_z)) {
 				EXPECT_EQ(v0/v1, w0/w1);
 			}
@@ -127,7 +127,7 @@ namespace frea {
 			for(auto& a : ar.m)
 				a = -a;
 			vec = -vec;
-			constexpr auto Th = Threshold<value_t>(0.1, 0);
+			constexpr auto Th = lubee::Threshold<value_t>(0.1, 0);
 			ASSERT_LE(AbsMax(ar - vec), Th);			// Check: Vectorクラス
 			ASSERT_LE(AbsMax(ar - vec_t(vec+0)), Th);	// Check: Wrapクラス
 		}
@@ -140,18 +140,18 @@ namespace frea {
 				);
 			}
 			template <class Tup, class Func, class... Args>
-			void _Proc(const Func&, IConst<-1>, Args&&...) {}
+			void _Proc(const Func&, lubee::IConst<-1>, Args&&...) {}
 			template <class Tup, class Func, int N, class... Args>
-			void _Proc(const Func& func, IConst<N>, Args&&... args) {
+			void _Proc(const Func& func, lubee::IConst<N>, Args&&... args) {
 				using Cur = std::tuple_element_t<N, Tup>;
 				__Proc<Cur>(std::make_index_sequence<std::tuple_size<Cur>{}>(), func, std::forward<Args>(args)...);
-				_Proc<Tup>(func, IConst<N-1>(), std::forward<Args>(args)...);
+				_Proc<Tup>(func, lubee::IConst<N-1>(), std::forward<Args>(args)...);
 			}
 			template <class Tup, class Func, class... Args>
 			void Proc(const Func& func, Args&&... args) {
 				_Proc<Tup>(
 					func,
-					IConst<std::tuple_size<Tup>{}-1>(),
+					lubee::IConst<std::tuple_size<Tup>{}-1>(),
 					std::forward<Args>(args)...
 				);
 			}
@@ -160,7 +160,7 @@ namespace frea {
 				static void _Proc(const V& src, const CB0& cb0, const CB1& cb1) {
 					using value_t = typename V::value_t;
 					Array<value_t, To> ar = {};
-					using Cmp = Arithmetic<V::size, To>;
+					using Cmp = lubee::Arithmetic<V::size, To>;
 					for(int i=V::size ; i<To ; i++)
 						ar[i] = 0;
 					cb0(ar);
@@ -170,12 +170,12 @@ namespace frea {
 					using vec2_t = typename V::template type_cn<To>;
 					const vec2_t v0(cb1(src)),
 								v1(cb1(src.asInternal()));
-					constexpr auto Th = Threshold<value_t>(0.1, 0);
+					constexpr auto Th = lubee::Threshold<value_t>(0.1, 0);
 					ASSERT_LE(AbsMax(ar - v0), Th);
 					ASSERT_LE(AbsMax(ar - v1), Th);
 				}
 				template <int To, class V>
-				void operator()(IConst<To>, const V& src) const {
+				void operator()(lubee::IConst<To>, const V& src) const {
 					_Proc<To>(
 						src,
 						[](auto&) {},
@@ -185,9 +185,9 @@ namespace frea {
 					);
 				}
 				template <int To, int Pos, class V, class I, ENABLE_IF((Pos>=To))>
-				void operator()(IConst<To>, IConst<Pos>, const V&, const I&) const {}
+				void operator()(lubee::IConst<To>, lubee::IConst<Pos>, const V&, const I&) const {}
 				template <int To, int Pos, class V, class I, ENABLE_IF((Pos<To))>
-				void operator()(IConst<To>, IConst<Pos>, const V& src, const I& val) const {
+				void operator()(lubee::IConst<To>, lubee::IConst<Pos>, const V& src, const I& val) const {
 					_Proc<To>(
 						src,
 						[val](auto& ar) {
@@ -201,11 +201,11 @@ namespace frea {
 			};
 		}
 		TYPED_TEST(Vector, ConvertI) {
-			using ConvertSeq_t = seq::ExpandTypes_t2<
+			using ConvertSeq_t = lubee::seq::ExpandTypes_t2<
 				std::tuple,
 				std::tuple<
-					seq::Range_t<2,5>,
-					seq::Range_t<2,5>
+					lubee::seq::Range_t<2,5>,
+					lubee::seq::Range_t<2,5>
 				>
 			>;
 			USING(value_t);
@@ -214,10 +214,10 @@ namespace frea {
 			ASSERT_NO_FATAL_FAILURE((Proc<ConvertSeq_t>(CheckConvert(), v, val)));
 		}
 		TYPED_TEST(Vector, Convert) {
-			using ConvertSeq_t = seq::ExpandTypes_t2<
+			using ConvertSeq_t = lubee::seq::ExpandTypes_t2<
 				std::tuple,
 				std::tuple<
-					seq::Range_t<2,5>
+					lubee::seq::Range_t<2,5>
 				>
 			>;
 			USING(value_t);
@@ -225,11 +225,11 @@ namespace frea {
 			ASSERT_NO_FATAL_FAILURE((Proc<ConvertSeq_t>(CheckConvert(), v)));
 		}
 		namespace {
-			template <class T, class V, ENABLE_IF(!(HasIndex_t<T,int>{}))>
+			template <class T, class V, ENABLE_IF(!(lubee::HasIndex_t<T,int>{}))>
 			bool IsInRange(const T& val, const V& tMin, const V& tMax) {
 				return val>= tMin && val<=tMax;
 			}
-			template <class T, class V, ENABLE_IF((HasIndex_t<T,int>{}))>
+			template <class T, class V, ENABLE_IF((lubee::HasIndex_t<T,int>{}))>
 			bool IsInRange(const T& val, const V& tMin, const V& tMax) {
 				for(auto& v : val) {
 					if(!IsInRange(v, tMin, tMax))
@@ -244,11 +244,11 @@ namespace frea {
 			USING(vec_t);
 
 			const auto vec = this->makeRVec(DefaultRange<value_t>);
-			const auto range = random::GenRange<value_t>(this->mt().template getUniformF<value_t>());
+			const auto range = lubee::random::GenRange<value_t>(this->mt().template getUniformF<value_t>());
 			array_t ar(vec);
 			for(auto& a : ar)
 				a = Saturate(a, range.from, range.to);
-			constexpr auto Th = Threshold<value_t>(0.2, 0);
+			constexpr auto Th = lubee::Threshold<value_t>(0.2, 0);
 			const vec_t v0 = vec.saturation(range.from, range.to),
 						v1 = vec.asInternal().saturation(range.from, range.to);
 			ASSERT_LE(AbsMax(ar-v0), Th);
@@ -259,7 +259,7 @@ namespace frea {
 		namespace {
 			struct Check_Equality {
 				template <int Pos, class V>
-				void operator()(IConst<Pos>, const V& src) const {
+				void operator()(lubee::IConst<Pos>, const V& src) const {
 					Array<typename V::value_t, V::size> ar(src);
 					for(int i=0 ; i<V::size ; i++)
 						ar[i] = ar[Pos];
@@ -267,13 +267,13 @@ namespace frea {
 					tmp.template makeEquality<Pos>();
 
 					using value_t = typename V::value_t;
-					constexpr auto Th = Threshold<value_t>(0.1, 0);
+					constexpr auto Th = lubee::Threshold<value_t>(0.1, 0);
 					ASSERT_LE(AbsMax(ar-V(tmp)), Th);
 				}
 			};
 			struct Check_MaskL {
 				template <int Pos, class V>
-				void operator()(IConst<Pos>, const V& src) const {
+				void operator()(lubee::IConst<Pos>, const V& src) const {
 					Array<typename V::value_t, V::size> ar(src);
 					for(int i=0 ; i<Pos+1 ; i++)
 						ar[i] = 0;
@@ -281,13 +281,13 @@ namespace frea {
 					auto tmp = tmp0.template maskL<Pos>();
 
 					using value_t = typename V::value_t;
-					constexpr auto Th = Threshold<value_t>(0.1, 0);
+					constexpr auto Th = lubee::Threshold<value_t>(0.1, 0);
 					ASSERT_LE(AbsMax(ar-V(tmp)), Th);
 				}
 			};
 			struct Check_MaskH {
 				template <int Pos, class V>
-				void operator()(IConst<Pos>, const V& src) const {
+				void operator()(lubee::IConst<Pos>, const V& src) const {
 					Array<typename V::value_t, V::size> ar(src);
 					for(int i=Pos+1 ; i<V::size ; i++)
 						ar[i] = 0;
@@ -295,22 +295,22 @@ namespace frea {
 					auto tmp = tmp0.template maskH<Pos>();
 
 					using value_t = typename V::value_t;
-					constexpr auto Th = Threshold<value_t>(0.1, 0);
+					constexpr auto Th = lubee::Threshold<value_t>(0.1, 0);
 					ASSERT_LE(AbsMax(ar-V(tmp)), Th);
 				}
 			};
 			struct Check_PickAt {
 				template <int Pos, class V>
-				void operator()(IConst<Pos>, const V& src) const {
+				void operator()(lubee::IConst<Pos>, const V& src) const {
 					using value_t = typename V::value_t;
 					const Array<value_t, V::size> ar(src);
-					constexpr auto Th = Threshold<value_t>(0.1, 0);
+					constexpr auto Th = lubee::Threshold<value_t>(0.1, 0);
 					ASSERT_LE(std::abs(ar[Pos] - src.asInternal().template pickAt<Pos>()), Th);
 				}
 			};
 			struct Check_InitAt {
 				template <int Pos, class V, class I>
-				void operator()(IConst<Pos>, const V& src, const I& val) const {
+				void operator()(lubee::IConst<Pos>, const V& src, const I& val) const {
 					Array<typename V::value_t, V::size> ar;
 					for(auto& a : ar)
 						a = 0;
@@ -322,10 +322,10 @@ namespace frea {
 		}
 		TYPED_TEST(Vector, InternalFunc) {
 			USING(vec_t);
-			using Types = seq::ExpandTypes_t2<
+			using Types = lubee::seq::ExpandTypes_t2<
 				std::tuple,
 				std::tuple<
-					seq::Range_t<0, vec_t::size-1>
+					lubee::seq::Range_t<0, vec_t::size-1>
 				>
 			>;
 			USING(value_t);
@@ -345,7 +345,7 @@ namespace frea {
 			const auto vec = this->makeRVec(DefaultRange<value_t>);
 			const value_t a0 = vec.average(),
 							a1 = vec.asInternal().average();
-			constexpr auto Th = Threshold<value_t>(0.7, 0);
+			constexpr auto Th = lubee::Threshold<value_t>(0.7, 0);
 			ASSERT_NEAR(a0, a1, Th);
 
 			value_t avg = 0;
@@ -361,7 +361,7 @@ namespace frea {
 			USING(vec_t);
 
 			// 配列で計算した場合と比較
-			constexpr Range<value_t> range{1e2};
+			constexpr lubee::Range<value_t> range{1e2};
 			const vec_t v0 = this->makeRVec(range),
 						v1 = this->makeRVec(range);
 			const array_t ar0(v0),
@@ -373,12 +373,12 @@ namespace frea {
 			for(auto& a : ar2)
 				sum += a;
 
-			constexpr auto Th = Threshold<value_t>(0.8, 0);
+			constexpr auto Th = lubee::Threshold<value_t>(0.8, 0);
 			ASSERT_NEAR(sum, res0, Th);
 			ASSERT_NEAR(sum, res1, Th);
 
 			// ベクトルを反転したらDotProductの結果の符号も反転
-			constexpr auto ThInv = Threshold<value_t>(0.1, 0);
+			constexpr auto ThInv = lubee::Threshold<value_t>(0.1, 0);
 			const vec_t vi = -v0;
 			const value_t res2 = vi.dot(v1);
 			ASSERT_NEAR(-res2, res0, ThInv);
@@ -412,7 +412,7 @@ namespace frea {
 		TYPED_TEST(Vector, IsZero) {
 			USING(value_t);
 			USING(vec_t);
-			constexpr auto Td = Threshold<value_t>(0.1, 1);
+			constexpr auto Td = lubee::Threshold<value_t>(0.1, 1);
 			const value_t Th = this->mt().template getUniform<value_t>({Td, 1e3});
 			vec_t v;
 			for(int i=0 ; i<vec_t::size ; i++)
@@ -439,7 +439,7 @@ namespace frea {
 				aMin[i] = std::min(vt[i], v[i]);
 				aMax[i] = std::max(vt[i], v[i]);
 			}
-			constexpr auto Th = Threshold<value_t>(0.1, 0);
+			constexpr auto Th = lubee::Threshold<value_t>(0.1, 0);
 			ASSERT_LE(AbsMax(aMin - vMin), Th);
 			ASSERT_LE(AbsMax(aMax - vMax), Th);
 
@@ -461,7 +461,7 @@ namespace frea {
 			for(int i=0 ; i<array_t::size ; i++)
 				sum0 += ar[i];
 			const value_t sum1 = (vec+0).sumUp();
-			constexpr auto Th = Threshold<value_t>(0.8, 0);
+			constexpr auto Th = lubee::Threshold<value_t>(0.8, 0);
 			ASSERT_LE(sum0-sum1, Th);
 		}
 		// 内部表現による演算結果の差異をチェック
@@ -611,7 +611,7 @@ namespace frea {
 			DEF_TEST(-)
 			DEF_TEST(*)
 			// Divideの場合は0除算を避ける
-			constexpr auto Th = Threshold<value_t>(0.4, 1);
+			constexpr auto Th = lubee::Threshold<value_t>(0.4, 1);
 			if(!HasZero(v0.m, Th) && !HasZero(v1.m, Th)) {
 				DEF_TEST(/)
 			}

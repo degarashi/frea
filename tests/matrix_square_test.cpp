@@ -4,12 +4,12 @@ namespace frea {
 	namespace test {
 		template <class T>
 		using SMatrix = RMatrix<T>;
-		using SqTypes_t = seq::ExpandTypes_t2<
+		using SqTypes_t = lubee::seq::ExpandTypes_t2<
 			types::SquareMat_t,
 			std::tuple<
 				types::Value_t,
-				seq::Range_t<2,5>,
-				std::tuple<BConst<false>>
+				lubee::seq::Range_t<2,5>,
+				std::tuple<lubee::BConst<false>>
 			>
 		>;
 		using SqTypes = ToTestTypes_t<SqTypes_t>;
@@ -20,13 +20,13 @@ namespace frea {
 			USING(mat_t);
 
 			// 転置行列を二次元配列で計算した結果と比較
-			constexpr auto range = Range<value_t>{-1e3, 1e3};
+			constexpr auto range = lubee::Range<value_t>{-1e3, 1e3};
 			auto mat = this->makeRMat(range);
 			array_t raw(mat);
 
 			raw.transpose();
 			mat.transpose();
-			constexpr auto Th = Threshold<value_t>(0.1, 0);
+			constexpr auto Th = lubee::Threshold<value_t>(0.1, 0);
 			ASSERT_LE(AbsMax(raw - mat), Th);
 
 			// (AB)t と (B)t(A)tの結果は同じ
@@ -40,7 +40,7 @@ namespace frea {
 		}
 		TYPED_TEST(SMatrix, FunctionEquality_Method) {
 			USING(value_t);
-			constexpr auto range = Range<value_t>{1e3};
+			constexpr auto range = lubee::Range<value_t>{1e3};
 			{
 				// transpose
 				auto m0 = this->makeRMat(range),

@@ -1,12 +1,12 @@
 #pragma once
-#include "../random.hpp"
+#include "../lubee/random.hpp"
 #include "../matrix.hpp"
 #include "../random/vector.hpp"
 #include "../random/matrix.hpp"
-#include "../random/range.hpp"
+#include "../lubee/random/range.hpp"
 #include "../random/quaternion.hpp"
-#include "../meta/check_macro.hpp"
-#include "../ieee754.hpp"
+#include "../lubee/meta/check_macro.hpp"
+#include "../lubee/ieee754.hpp"
 #include <gtest/gtest.h>
 #include <cereal/cereal.hpp>
 #include <cereal/archives/binary.hpp>
@@ -50,11 +50,11 @@ namespace frea {
 			_Fill(dst, rdf, nullptr);
 		}
 
-		template <class T, class OP, ENABLE_IF(!(HasIndex_t<T,int>{}))>
+		template <class T, class OP, ENABLE_IF(!(lubee::HasIndex_t<T,int>{}))>
 		auto Op(const T& t, const OP&) {
 			return t;
 		}
-		template <class T, class OP, ENABLE_IF((HasIndex_t<T,int>{}))>
+		template <class T, class OP, ENABLE_IF((lubee::HasIndex_t<T,int>{}))>
 		auto Op(const T& t, const OP& op) {
 			auto ret = Op(t[0], op);
 			for(int i=0 ; i<int(T::size) ; i++)
@@ -72,9 +72,9 @@ namespace frea {
 		}
 
 		template <class T>
-		auto LowerSize(std::decay_t<decltype(T::size)>*) -> IConst<T::size>;
+		auto LowerSize(std::decay_t<decltype(T::size)>*) -> lubee::IConst<T::size>;
 		template <class T>
-		auto LowerSize(...) -> IConst<1>;
+		auto LowerSize(...) -> lubee::IConst<1>;
 
 		template <class T, int N>
 		class Array {
@@ -89,7 +89,7 @@ namespace frea {
 						return *this = *this op r; \
 					} \
 					template <class V, \
-							ENABLE_IF((HasIndex_t<V,int>{}))> \
+							ENABLE_IF((lubee::HasIndex_t<V,int>{}))> \
 					Array operator op (const V& r) const { \
 						static_assert(V::size==size, ""); \
 						Array ret; \
@@ -98,7 +98,7 @@ namespace frea {
 						return ret; \
 					} \
 					template <class V, \
-							ENABLE_IF(!(HasIndex_t<V,int>{}))> \
+							ENABLE_IF(!(lubee::HasIndex_t<V,int>{}))> \
 					Array operator op (const V& r) const { \
 						Array ret; \
 						for(int i=0 ; i<size ; i++) \
@@ -127,12 +127,12 @@ namespace frea {
 						m[i] = v;
 				}
 				template <class V,
-						 ENABLE_IF((HasIndex_t<V,int>{}))>
+						 ENABLE_IF((lubee::HasIndex_t<V,int>{}))>
 				Array(const V& v) {
 					*this = v;
 				}
 				template <class V,
-						 ENABLE_IF((HasIndex_t<V,int>{}))>
+						 ENABLE_IF((lubee::HasIndex_t<V,int>{}))>
 				Array& operator = (const V& r) {
 					for(int i=0 ; i<size ; i++)
 						m[i] = r[i];
@@ -174,9 +174,9 @@ namespace frea {
 		};
 		class Random : public ::testing::Test {
 			private:
-				RandomMT	_mt;
+				lubee::RandomMT	_mt;
 			public:
-				Random(): _mt(RandomMT::Make<4>()) {}
+				Random(): _mt(lubee::RandomMT::Make<4>()) {}
 				auto& mt() {
 					return _mt;
 				}
@@ -198,10 +198,10 @@ namespace frea {
 				auto makeRVec() {
 					return random::GenVec<vec_t>(this->mt().template getUniformF<value_t>());
 				}
-				auto makeRVec(const Range<value_t>& r) {
+				auto makeRVec(const lubee::Range<value_t>& r) {
 					return random::GenVec<vec_t>(this->mt().template getUniformF<value_t>(r));
 				}
-				auto makeRVecNZ(const value_t& th, const Range<value_t>& r) {
+				auto makeRVecNZ(const value_t& th, const lubee::Range<value_t>& r) {
 					auto rd = this->mt().template getUniformF<value_t>(r);
 					auto ret = random::GenVec<vec_t>(rd);
 					for(auto& v : ret) {
@@ -273,7 +273,7 @@ namespace frea {
 			}
 			template <class A2>
 			auto operator * (const A2& m) const {
-				return mul(m, HasIndex_t<A2,int>());
+				return mul(m, lubee::HasIndex_t<A2,int>());
 			}
 			explicit ArrayM(const T& v): base_t(Array<T,N>(v)) {}
 			template <class A2>
@@ -292,9 +292,9 @@ namespace frea {
 			\tparam tuple<レジスタタイプ, 要素数M, 要素数N, アラインメント>
 		*/
 		template <class T>
-		class RMatrix : public RVector<seq::StripAt_t<T,1>> {
+		class RMatrix : public RVector<lubee::seq::StripAt_t<T,1>> {
 			public:
-				using base_t = RVector<seq::StripAt_t<T,1>>;
+				using base_t = RVector<lubee::seq::StripAt_t<T,1>>;
 				constexpr static int dim_m = std::tuple_element_t<1,T>::value,
 									dim_n = std::tuple_element_t<2,T>::value;
 				using value_t = typename base_t::value_t;
@@ -308,7 +308,7 @@ namespace frea {
 					auto rd = this->mt().template getUniformF<value_t>();
 					return random::GenMat<mat_t>(rd);
 				}
-				auto makeRMat(const Range<value_t>& r) {
+				auto makeRMat(const lubee::Range<value_t>& r) {
 					auto rd = this->mt().template getUniformF<value_t>(r);
 					return random::GenMat<mat_t>(rd);
 				}
@@ -340,57 +340,57 @@ namespace frea {
 		namespace types {
 			using Float_t = std::tuple<float, double>;
 			using Int_t = std::tuple<int32_t>;
-			using Value_t = seq::TupleCat_t<Float_t, Int_t>;
+			using Value_t = lubee::seq::TupleCat_t<Float_t, Int_t>;
 
 			template <class E>
-			using VectorRange_t = seq::ExpandTypes_t2<
+			using VectorRange_t = lubee::seq::ExpandTypes_t2<
 				std::tuple,
 				std::tuple<
 					E,
-					seq::Range_t<2,5>,
-					seq::BoolSeq_t
+					lubee::seq::Range_t<2,5>,
+					lubee::seq::BoolSeq_t
 				>
 			>;
 
 			// 浮動小数点数ベクトル
 			// 各要素数固有の関数テスト用
 			template <class E, int N>
-			using VectorRangeD_t = seq::ExpandTypes_t2<
+			using VectorRangeD_t = lubee::seq::ExpandTypes_t2<
 				std::tuple,
 				std::tuple<
 					E,
-					std::tuple<IConst<N>>,
-					std::tuple<BConst<false>>
+					std::tuple<lubee::IConst<N>>,
+					std::tuple<lubee::BConst<false>>
 				>
 			>;
 
 			template <class R, class S, class A>
 			using SquareMat_t = std::tuple<R, S, S, A>;
 			template <class E, int S0, int S1>
-			using SMatrixRange_t = seq::ExpandTypes_t2<
+			using SMatrixRange_t = lubee::seq::ExpandTypes_t2<
 				SquareMat_t,
 				std::tuple<
 					E,
-					seq::Range_t<S0,S1>,
-					seq::BoolSeq_t
+					lubee::seq::Range_t<S0,S1>,
+					lubee::seq::BoolSeq_t
 				>
 			>;
 			template <class E, int M0, int M1, int N0, int N1>
-			using MatrixRange_t = seq::ExpandTypes_t2<
+			using MatrixRange_t = lubee::seq::ExpandTypes_t2<
 				std::tuple,
 				std::tuple<
 					E,
-					seq::Range_t<M0,M1>,
-					seq::Range_t<N0,N1>,
-					seq::BoolSeq_t
+					lubee::seq::Range_t<M0,M1>,
+					lubee::seq::Range_t<N0,N1>,
+					lubee::seq::BoolSeq_t
 				>
 			>;
 
-			using QTypes_t = seq::ExpandTypes_t2<
+			using QTypes_t = lubee::seq::ExpandTypes_t2<
 				std::tuple,
 				std::tuple<
 					Float_t,
-					seq::BoolSeq_t
+					lubee::seq::BoolSeq_t
 				>
 			>;
 			using QTypes = ToTestTypes_t<QTypes_t>;

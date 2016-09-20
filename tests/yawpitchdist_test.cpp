@@ -23,7 +23,7 @@ namespace frea {
 			const auto res = ypd.toOffsetRot();
 			const auto nzv2 = -res.rot.getDir() * ypd.distance;
 
-			constexpr auto Th = ThresholdF<value_t>(0.8);
+			constexpr auto Th = lubee::ThresholdF<value_t>(0.8);
 			EXPECT_LT(AbsMax(V3(res.pos - nzv)), Th);
 			// rotation + distanceから復元した元座標ベクトル
 			EXPECT_LT(AbsMax(V3(nzv2 - nzv)), Th);
@@ -53,7 +53,7 @@ namespace frea {
 				auto pos = ya.dir;
 				pos.y = mtf();	// Pitchはランダムな値
 				const auto ypd = ::frea::YawPitchDist<value_t>::FromPos(pos);
-				EXPECT_NEAR(deg_t(ya.angle).get(), deg_t(ypd.yaw).get(), ThresholdF<value_t>(0.8));
+				EXPECT_NEAR(deg_t(ya.angle).get(), deg_t(ypd.yaw).get(), lubee::ThresholdF<value_t>(0.8));
 			}
 		}
 		TYPED_TEST(YawPitchDist, Serialization) {

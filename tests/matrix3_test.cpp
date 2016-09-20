@@ -13,7 +13,7 @@ namespace frea {
 			using quat_t = QuatT<value_t, TestFixture::align>;
 
 			const auto angle = this->makeRadian();
-			constexpr auto Th = ThresholdF<value_t>(0.1);
+			constexpr auto Th = lubee::ThresholdF<value_t>(0.1);
 			{
 				// RotationX(ang) -> Rotation({1,0,0}, ang)
 				const auto m0 = mat_t::RotationX(angle),
@@ -37,7 +37,7 @@ namespace frea {
 				const auto axis = this->makeDir();
 				const auto m0 = mat_t::RotationAxis(axis, angle),
 							m1 = quat_t::Rotation(axis, angle).asMat33();
-				EXPECT_LE(AbsMax(mat_t(m0-m1)), ThresholdF<value_t>(0.5));
+				EXPECT_LE(AbsMax(mat_t(m0-m1)), lubee::ThresholdF<value_t>(0.5));
 			}
 		}
 	}

@@ -16,7 +16,7 @@ namespace frea {
 		static this_t LookDir(const vec3_t& pos, const vec3_t& dir, const vec3_t& up) {
 			vec3_t xA(up % dir),
 				   yA;
-			if(xA.normalize() < Threshold<typename vec3_t::value_t>(0.3, 1) ||
+			if(xA.normalize() < lubee::Threshold<typename vec3_t::value_t>(0.3, 1) ||
 				xA.isNaN())
 				throw NoValidAxis();
 			yA = dir % xA;
@@ -28,7 +28,7 @@ namespace frea {
 				-pos.dot(xA), -pos.dot(yA), -pos.dot(dir), 1
 			);
 		}
-		using Range_t = Range<value_t>;
+		using Range_t = lubee::Range<value_t>;
 		using Radian_t = Radian<value_t>;
 		//! 透視変換行列
 		static this_t PerspectiveFov(const Radian_t& fov, const value_t& aspect, const Range_t& z) {

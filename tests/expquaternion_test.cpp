@@ -14,7 +14,7 @@ namespace frea {
 				using array_t = Array<value_t, 3>;
 
 			private:
-				constexpr static Range<value_t> DefaultRange{-1e3, 1e3};
+				constexpr static lubee::Range<value_t> DefaultRange{-1e3, 1e3};
 				using RD = decltype(std::declval<Random>().mt().template getUniformF<value_t>(DefaultRange));
 				RD	_rd;
 
@@ -51,7 +51,7 @@ namespace frea {
 			const vec_t v1 = v0 * q0,
 						v2 = v0 * q1,
 						v3 = v0 * q2;
-            constexpr value_t Th = ThresholdF<value_t>(0.9);
+            constexpr value_t Th = lubee::ThresholdF<value_t>(0.9);
 			EXPECT_LT(AbsMax(vec_t(v1-v2)), Th);
 			EXPECT_LT(AbsMax(vec_t(v1-v3)), Th);
 		}
@@ -64,8 +64,8 @@ namespace frea {
 			const auto qv = q.getAxis();
 			const auto qa = q.angle();
 			const auto ei = e.getAngAxis();
-			if(qa.get() > ThresholdF<value_t>(0.8)) {
-				constexpr auto Th = ThresholdF<value_t>(0.8);
+			if(qa.get() > lubee::ThresholdF<value_t>(0.8)) {
+				constexpr auto Th = lubee::ThresholdF<value_t>(0.8);
 				EXPECT_LT(AbsMax(vec_t(qv-ei.axis)), Th);
 				EXPECT_LT(Radian<value_t>(qa-ei.angle).get(), Th);
 			}
@@ -83,7 +83,7 @@ namespace frea {
 			}
 			const eq_t eq0(q0),
 						eq1(q1);
-			constexpr value_t Th = ThresholdF<value_t>(1.0);
+			constexpr value_t Th = lubee::ThresholdF<value_t>(1.0);
 			constexpr int NDiv = 8;
 			value_t err_sum = 0;
 			const auto v0 = this->makeDir();

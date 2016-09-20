@@ -1,12 +1,11 @@
 #pragma once
 #include <algorithm>
-#include "error.hpp"
-#include "meta/size.hpp"
-#include "meta/enable_if.hpp"
-#include "meta/check_macro.hpp"
-#include "meta/mask.hpp"
+#include "lubee/error.hpp"
+#include "lubee/meta/enable_if.hpp"
+#include "lubee/meta/check_macro.hpp"
+#include "lubee/meta/mask.hpp"
 #include "compare.hpp"
-#include "ieee754.hpp"
+#include "lubee/ieee754.hpp"
 
 namespace frea {
 	namespace ulps {
@@ -16,7 +15,7 @@ namespace frea {
 			return (i0<0) ? -i0 : i0;
 		}
 		template <class T,
-				class Int = typename IEEE754<T>::Integral_t>
+				class Int = typename lubee::IEEE754<T>::Integral_t>
 		Int AsIntegral(const T& v0) {
 			return *reinterpret_cast<const Int*>(&v0);
 		}
@@ -34,7 +33,7 @@ namespace frea {
 				return i1 - i0;
 			}
 			template <class T,
-						class I = typename IEEE754<T>::Integral_t,
+						class I = typename lubee::IEEE754<T>::Integral_t,
 						ENABLE_IF((std::is_floating_point<T>{}
 									&& std::is_integral<I>{}
 									&& std::is_signed<I>{}
@@ -61,9 +60,9 @@ namespace frea {
 		/*! NaNやInf, -Inf, Denormalizedな値は対応しない
 			実行時に読み替えたい場合はreinterpret_castを使う */
 		template <class T,
-				  class Int=typename IEEE754<T>::Integral_t>
+				  class Int=typename lubee::IEEE754<T>::Integral_t>
 		constexpr Int AsIntegral_C(T v0) {
-			using Helper = IEEE754<T>;
+			using Helper = lubee::IEEE754<T>;
 			if(v0 == 0)
 				return 0;
 			// 符号部
@@ -109,9 +108,9 @@ namespace frea {
 				class I,
 				ENABLE_IF((std::is_floating_point<T>{}))>
 		auto Move(const T& f, const I& m) {
-			using Int = typename IEEE754<T>::Integral_t;
+			using Int = typename lubee::IEEE754<T>::Integral_t;
 			auto v = *reinterpret_cast<const Int*>(&f);
-			const Int mask = SignMask(v);
+			const Int mask = lubee::SignMask(v);
 			v += ((m ^ mask) + (mask & Int(1)));
 			return *reinterpret_cast<const T*>(&v);
 		}
@@ -150,18 +149,18 @@ namespace frea {
 		//! ULPs(Units in the Last Place)の計算 (実行時バージョン)
 		template <
 			class T,
-			class I = typename IEEE754<T>::Integral_t,
-			ENABLE_IF(!(HasIndex_t<T,int>{}))
+			class I = typename lubee::IEEE754<T>::Integral_t,
+			ENABLE_IF(!(lubee::HasIndex_t<T,int>{}))
 		>
 		bool Equal(const T& v0, const T& v1, const I maxUlps) {
 			D_Expect(maxUlps >= 0, "ulps must not negative value")
 			const auto fnCmp = [maxUlps](const auto& v0, const auto& v1){ return Diff(v0,v1) <= maxUlps; };
-			return _EqFunc(v0, v1, fnCmp, decltype(GetWidthHeightT<T>())());
+			return fnCmp(v0, v1);
 		}
 		template <
 			class T,
-			class I = typename IEEE754<T>::Integral_t,
-			ENABLE_IF((HasIndex_t<T,int>{}))
+			class I = typename lubee::IEEE754<T>::Integral_t,
+			ENABLE_IF((lubee::HasIndex_t<T,int>{}))
 		>
 		bool Equal(const T& v0, const T& v1, const I maxUlps) {
 			for(int i=0 ; i<T::size ; i++) {
@@ -176,13 +175,13 @@ namespace frea {
 		}
 		// v0 <= v1 + thresholdUlps
 		template <class T,
-				class I = typename IEEE754<T>::Integral_t>
+				class I = typename lubee::IEEE754<T>::Integral_t>
 		bool LessEqual(const T& v0, const T& v1, const I thresholdUlps) {
 			return inner::CmpULPs(v0, v1, thresholdUlps, std::less_equal<>(), std::plus<>());
 		}
 		// v0 >= v1 - thresholdUlps
 		template <class T,
-				class I = typename IEEE754<T>::Integral_t>
+				class I = typename lubee::IEEE754<T>::Integral_t>
 		bool GreaterEqual(const T& v0, const T& v1, const I thresholdUlps) {
 			return inner::CmpULPs(v0, v1, thresholdUlps, std::greater_equal<>(), std::minus<>());
 		}

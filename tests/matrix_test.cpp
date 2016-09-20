@@ -6,24 +6,24 @@ namespace frea {
 	namespace test {
 		namespace check {
 			template <class M, class W>
-			void GetRow(const M&, const W&, IConst<-1>) {}
+			void GetRow(const M&, const W&, lubee::IConst<-1>) {}
 			template <class M, class W, int N>
-			void GetRow(const M& m, const W& w, IConst<N>) {
+			void GetRow(const M& m, const W& w, lubee::IConst<N>) {
 				ASSERT_EQ(m.template getRow<N>(), w.template getRow<N>());
-				ASSERT_NO_FATAL_FAILURE(GetRow(m, w, IConst<N-1>()));
+				ASSERT_NO_FATAL_FAILURE(GetRow(m, w, lubee::IConst<N-1>()));
 			}
 			template <class M, class W>
-			void GetColumn(const M&, const W&, IConst<-1>) {}
+			void GetColumn(const M&, const W&, lubee::IConst<-1>) {}
 			template <class M, class W, int N>
-			void GetColumn(const M& m, const W& w, IConst<N>) {
+			void GetColumn(const M& m, const W& w, lubee::IConst<N>) {
 				ASSERT_EQ(m.template getColumn<N>(), w.template getColumn<N>());
-				ASSERT_NO_FATAL_FAILURE(GetColumn(m, w, IConst<N-1>()));
+				ASSERT_NO_FATAL_FAILURE(GetColumn(m, w, lubee::IConst<N-1>()));
 			}
 
 			template <class M, class W, class V>
-			void SetRow(M&, W&, const V&, IConst<-1>) {}
+			void SetRow(M&, W&, const V&, lubee::IConst<-1>) {}
 			template <class M, class W, class V, int N>
-			void SetRow(M& m, W& w, const V& r, IConst<N>) {
+			void SetRow(M& m, W& w, const V& r, lubee::IConst<N>) {
 				const auto tmp0 = m.template getRow<N>();
 				const auto tmp1 = w.template getRow<N>();
 				m.template setRow<N>(r);
@@ -31,12 +31,12 @@ namespace frea {
 				ASSERT_EQ(m, w);
 				m.template setRow<N>(tmp0);
 				w.template setRow<N>(tmp1);
-				ASSERT_NO_FATAL_FAILURE(SetRow(m, w, r, IConst<N-1>()));
+				ASSERT_NO_FATAL_FAILURE(SetRow(m, w, r, lubee::IConst<N-1>()));
 			}
 			template <class M, class W, class V>
-			void SetColumn(M&, W&, const V&, IConst<-1>) {}
+			void SetColumn(M&, W&, const V&, lubee::IConst<-1>) {}
 			template <class M, class W, class V, int N>
-			void SetColumn(M& m, W& w, const V& c, IConst<N>) {
+			void SetColumn(M& m, W& w, const V& c, lubee::IConst<N>) {
 				const auto tmp0 = m.template getColumn<N>();
 				const auto tmp1 = w.template getColumn<N>();
 				m.template setColumn<N>(c);
@@ -44,7 +44,7 @@ namespace frea {
 				ASSERT_EQ(m, w);
 				m.template setColumn<N>(tmp0);
 				w.template setColumn<N>(tmp1);
-				ASSERT_NO_FATAL_FAILURE(SetColumn(m, w, c, IConst<N-1>()));
+				ASSERT_NO_FATAL_FAILURE(SetColumn(m, w, c, lubee::IConst<N-1>()));
 			}
 		}
 		TYPED_TEST(Matrix, Wrap_Equality) {
@@ -53,7 +53,7 @@ namespace frea {
 			USING(vec_t);
 			using wrap_t = typename mat_t::wrap_t;
 			using column_t = typename mat_t::column_t;
-			constexpr auto range = Range<value_t>{1e3};
+			constexpr auto range = lubee::Range<value_t>{1e3};
 			mat_t m0 = this->makeRMat(range),
 					m1 = this->makeRMat(range);
 			const auto mtf = this->mt().template getUniformF<value_t>(range);
@@ -75,7 +75,7 @@ namespace frea {
 			EXPECT_EQ(m0-s, w0-s);
 			EXPECT_EQ(m0*s, w0*s);
 			// ゼロ除算避け
-			constexpr auto Th_z = Threshold<value_t>(0.4, 1);
+			constexpr auto Th_z = lubee::Threshold<value_t>(0.4, 1);
 			if(std::abs(s) >= Th_z) {
 				EXPECT_EQ(m0/s, w0/s);
 			}
@@ -93,14 +93,14 @@ namespace frea {
 			// linearNormalization
 			EXPECT_EQ(m0.linearNormalization(), w0.linearNormalization());
 
-			check::GetRow(m0, w0, IConst<mat_t::dim_m-1>());
-			check::GetColumn(m0, w0, IConst<mat_t::dim_n-1>());
-			check::SetRow(m0, w0, vr, IConst<mat_t::dim_m-1>());
-			check::SetColumn(m0, w0, vc, IConst<mat_t::dim_n-1>());
+			check::GetRow(m0, w0, lubee::IConst<mat_t::dim_m-1>());
+			check::GetColumn(m0, w0, lubee::IConst<mat_t::dim_n-1>());
+			check::SetRow(m0, w0, vr, lubee::IConst<mat_t::dim_m-1>());
+			check::SetColumn(m0, w0, vc, lubee::IConst<mat_t::dim_n-1>());
 		}
 		TYPED_TEST(Matrix, FunctionEquality_Method) {
 			USING(value_t);
-			constexpr auto range = Range<value_t>{1e3};
+			constexpr auto range = lubee::Range<value_t>{1e3};
 			// linearNormalize
 			auto m0 = this->makeRMat(range),
 				 m1 = m0.linearNormalization();
@@ -109,7 +109,7 @@ namespace frea {
 		}
 		TYPED_TEST(Matrix, Iterator) {
 			USING(value_t);
-			constexpr auto range = Range<value_t>{-1e3, 1e3};
+			constexpr auto range = lubee::Range<value_t>{-1e3, 1e3};
 			// イテレータを介して値を加算した場合とインデックスを介した場合で比べる　
 			auto m0 = this->makeRMat(range);
 			auto m1 = m0;
@@ -151,9 +151,9 @@ namespace frea {
 							dim_n = mat_t::dim_n;
 			mat_t m;
 			const auto rI = this->mt().template getUniformF<int>();
-			constexpr auto range = Range<value_t>{1e2};
+			constexpr auto range = lubee::Range<value_t>{1e2};
 			const auto rV = this->mt().template getUniformF<value_t>(range);
-			const auto th = Threshold<value_t>(0.1, 1);
+			const auto th = lubee::Threshold<value_t>(0.1, 1);
 			int edge[mat_t::dim_m];
 			int curN = 0;
 			for(int curM=0 ; curM<dim_m ; curM++) {
@@ -213,7 +213,7 @@ namespace frea {
 			// 全ての要素がThreshold未満ならTrue
 			const auto mtf = this->mt().template getUniformF<value_t>();
 			const auto Th = mtf({ulps::Increment(value_t(0)), 1e3});
-			const auto range = Range<value_t>{ulps::Increment(-Th), ulps::Decrement(Th)};
+			const auto range = lubee::Range<value_t>{ulps::Increment(-Th), ulps::Decrement(Th)};
 			auto m = this->makeRMat(range);
 			ASSERT_TRUE(m.isZero(Th));
 		
@@ -236,9 +236,9 @@ namespace frea {
 			USING(mat_t);
 		
 			// 逆数を掛けることで除算としていたりx86の場合内部精度がvalue_tと違うかも知れないのである程度のマージンを設ける
-			constexpr auto Th = Threshold<value_t>(0.1, 2);		// 除算以外
-			constexpr auto ThD = Threshold<value_t>(0.8, 2);	// 除算
-			constexpr auto range = Range<value_t>{-1e3, 1e3};
+			constexpr auto Th = lubee::Threshold<value_t>(0.1, 2);		// 除算以外
+			constexpr auto ThD = lubee::Threshold<value_t>(0.8, 2);	// 除算
+			constexpr auto range = lubee::Range<value_t>{-1e3, 1e3};
 			auto mat = this->makeRMat(range);
 			const array_t raw(mat);
 

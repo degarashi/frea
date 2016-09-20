@@ -71,18 +71,18 @@ namespace frea {
 		static auto Set(const Ts&... ts) noexcept {
 			// 一旦配列に格納して順序を逆転
 			const value_t tmp[sizeof...(Ts)] = {static_cast<value_t>(ts)...};
-			return _Set(seq::Reverse_t<std::make_index_sequence<sizeof...(Ts)>>(), tmp);
+			return _Set(lubee::seq::Reverse_t<std::make_index_sequence<sizeof...(Ts)>>(), tmp);
 		}
 		template <class... Ts>
 		static auto SetR(const Ts&... ts) noexcept { return reg_t(ts...); }
 		template <int Pos>
-		static auto MaskH(IConst<Pos>) noexcept { return reg_t(TagMask, IConst<Pos>(), base_t::OneV()); }
+		static auto MaskH(lubee::IConst<Pos>) noexcept { return reg_t(TagMask, lubee::IConst<Pos>(), base_t::OneV()); }
 		template <int Pos>
-		static auto PickAt(IConst<Pos>) noexcept { return reg_t(TagSet, IConst<Pos>(), base_t::OneV()); }
+		static auto PickAt(lubee::IConst<Pos>) noexcept { return reg_t(TagSet, lubee::IConst<Pos>(), base_t::OneV()); }
 		template <int Pos>
 		static value_t Pick(const reg_t& t) noexcept { return t.m[Pos]; }
 		template <bool A2, int N2>
-		static void Store(value_t* dst, const reg_t& t, BConst<A2>, IConst<N2>) noexcept {
+		static void Store(value_t* dst, const reg_t& t, lubee::BConst<A2>, lubee::IConst<N2>) noexcept {
 			static_assert(N2<N, "");
 			for(int i=0 ; i<N2+1 ; i++)
 				*dst++ = t.m[i];

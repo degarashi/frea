@@ -12,7 +12,7 @@ namespace frea {
 			USING(value_t);
 			using vec3_t = typename mat_t::vec3_t;
 
-			constexpr auto range = Range<value_t>{-1e2, 1e2};
+			constexpr auto range = lubee::Range<value_t>{-1e2, 1e2};
 			const auto mtf = this->mt().template getUniformF<value_t>(range);
 			// {pos, at}
 			const auto pos = MakePos<2, vec3_t>(mtf, 1e-2);
@@ -24,7 +24,7 @@ namespace frea {
 			up.normalize();
 			const auto m0 = mat_t::LookAt(pos[0], pos[1], up),
 						m1 = mat_t::LookDir(pos[0], dir, up);
-			constexpr auto Th = ThresholdF<value_t>(0.7);
+			constexpr auto Th = lubee::ThresholdF<value_t>(0.7);
 			// ビュー行列で変換した座標点(at)はZ軸上にある(X==0, Y==0, Z=distance(v - pos))
 			const vec3_t v_at[2] = {
 				(pos[1].template convertI<4,3>(1)*m0).template convert<3>(),
@@ -36,7 +36,7 @@ namespace frea {
 				EXPECT_NEAR(vp.z, pos[1].distance(pos[0]), Th);
 			}
 			// 任意のビュー行列を2通りの方法で作っても結果は同じ
-			EXPECT_LE(AbsMax(mat_t(m1-m0)), ThresholdF<value_t>(0.3));
+			EXPECT_LE(AbsMax(mat_t(m1-m0)), lubee::ThresholdF<value_t>(0.3));
 			// AtとPosが同一座標の場合はNoValidAxis例外を送出
 			EXPECT_THROW(mat_t::LookAt(pos[0], pos[0], up), NoValidAxis);
 			// upとdirの内積が1または-1の場合、NoValidAxis例外を送出

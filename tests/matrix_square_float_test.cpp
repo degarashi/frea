@@ -23,9 +23,9 @@ namespace frea {
 		TYPED_TEST(FSMatrix, Inverse) {
 			USING(value_t);
 			USING(mat_t);
-			constexpr auto Th = ThresholdF<value_t>(0.9);
+			constexpr auto Th = lubee::ThresholdF<value_t>(0.9);
 
-			constexpr auto range = Range<value_t>{-1, 1};
+			constexpr auto range = lubee::Range<value_t>{-1, 1};
 			const auto mat = this->makeRMat(range);
 			try {
 				const auto mati = mat.inversion();

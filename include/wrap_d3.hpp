@@ -26,7 +26,7 @@ namespace frea {
 				 ENABLE_IF(is_quaternion<Q>{})>
 		auto operator * (const Q& q) const noexcept {
 			QuatT<typename Q::value_t, true> q0;
-			this->template store<true>((typename Q::value_t*)&q0, IConst<2>());
+			this->template store<true>((typename Q::value_t*)&q0, lubee::IConst<2>());
 			q0.w = 0;
 			return (q * q0 * q.inversion()).getVector();
 		}
@@ -51,7 +51,7 @@ namespace frea {
 				 ENABLE_IF(is_quaternion<Q>{})>
 		auto operator * (const Q& q) const noexcept {
 			QuatT<typename Q::value_t, true> q0;
-			this->template store<true>(reinterpret_cast<typename Q::value_t*>(&q0), IConst<2>());
+			this->template store<true>(reinterpret_cast<typename Q::value_t*>(&q0), lubee::IConst<2>());
 			q0.w = 0;
 			return (q * q0 * q.inversion()).getVector();
 		}
@@ -60,12 +60,12 @@ namespace frea {
 			alignas(16) value_t a[3],
 								b[3],
 								c[3];
-			this->template store<true>(a, IConst<2>());
-			t.template store<true>(b, IConst<2>());
+			this->template store<true>(a, lubee::IConst<2>());
+			t.template store<true>(b, lubee::IConst<2>());
 			c[0] = a[1]*b[2] - a[2]*b[1];
 			c[1] = a[2]*b[0] - a[0]*b[2];
 			c[2] = a[0]*b[1] - a[1]*b[0];
-			return this_t(c, BConst<true>());
+			return this_t(c, lubee::BConst<true>());
 		}
 		this_t operator % (const this_t& w) const noexcept {
 			return cross(w);

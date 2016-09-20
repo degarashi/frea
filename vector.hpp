@@ -1,13 +1,13 @@
 #pragma once
-#include "error.hpp"
-#include "meta/enable_if.hpp"
+#include "lubee/error.hpp"
+#include "lubee/meta/enable_if.hpp"
 #include "detect_type.hpp"
-#include "index_sequence.hpp"
+#include "lubee/meta/index_sequence.hpp"
 #include <type_traits>
 #include <algorithm>
-#include "meta/check_macro.hpp"
-#include "meta/boolean.hpp"
-#include "meta/compare.hpp"
+#include "lubee/meta/check_macro.hpp"
+#include "lubee/meta/boolean.hpp"
+#include "lubee/meta/compare.hpp"
 #include "operators.hpp"
 #include <cereal/cereal.hpp>
 
@@ -22,15 +22,15 @@ namespace frea {
 	template <class R,
 			 int N,
 			 ENABLE_IF((info<R>::capacity < N))>
-	auto DetectTup(const R&, IConst<N>) -> tup_spec<wrap_spec<R,info<R>::capacity>, N>;
+	auto DetectTup(const R&, lubee::IConst<N>) -> tup_spec<wrap_spec<R,info<R>::capacity>, N>;
 	template <class R,
 			 int N,
 			 ENABLE_IF((info<R>::capacity >= N))>
-	auto DetectTup(const R&, IConst<N>) -> wrap_spec<R,N>;
+	auto DetectTup(const R&, lubee::IConst<N>) -> wrap_spec<R,N>;
 	template <class T, int N, bool A, int N2>
-	auto DetectTup(const Data<T,N,A>&, IConst<N2>) -> wrap_spec<Data<T,N2,A>,N2>;
+	auto DetectTup(const Data<T,N,A>&, lubee::IConst<N2>) -> wrap_spec<Data<T,N2,A>,N2>;
 	template <class R, int N>
-	using Wrap_t = decltype(DetectTup(std::declval<R>(), IConst<N>()));
+	using Wrap_t = decltype(DetectTup(std::declval<R>(), lubee::IConst<N>()));
 
 	//! 演算レジスタラッパー
 	/*!
@@ -137,24 +137,24 @@ namespace frea {
 		template <int N>
 		spec_t maskH() const noexcept {
 			static_assert(N<size, "");
-			return I::And(m, I::MaskH(IConst<N>()));
+			return I::And(m, I::MaskH(lubee::IConst<N>()));
 		}
 		template <int N>
-		static auto MaskL(IConst<N>) noexcept {
-			return I::Xor(I::MaskH(IConst<N>()), I::One());
+		static auto MaskL(lubee::IConst<N>) noexcept {
+			return I::Xor(I::MaskH(lubee::IConst<N>()), I::One());
 		}
 		//! 下位要素をマスク(=0)する
 		template <int N>
 		spec_t maskL() const noexcept {
 			static_assert(N<size, "");
-			return I::And(m, MaskL(IConst<N>()));
+			return I::And(m, MaskL(lubee::IConst<N>()));
 		}
 
 		//! 指定要素に任意の値をセット(他はいじらない)
 		template <int N>
 		void setAt(const value_t& v) noexcept {
 			static_assert(N<size, "");
-			const auto mask = I::PickAt(IConst<N>());
+			const auto mask = I::PickAt(lubee::IConst<N>());
 			const auto maskInv = I::Xor(I::One(), mask);
 			m = I::Or(I::And(m, maskInv), I::And(mask, I::Set1(v)));
 		}
@@ -162,7 +162,7 @@ namespace frea {
 		//! 指定要素へ引数の値をセット
 		template <int N>
 		void initAt(const value_t& v) noexcept {
-			m = I::And(I::PickAt(IConst<N>()), I::Set1(v));
+			m = I::And(I::PickAt(lubee::IConst<N>()), I::Set1(v));
 		}
 		//! 指定要素の取得
 		template <int N, ENABLE_IF((N<size))>
@@ -252,9 +252,9 @@ namespace frea {
 			\tparam N	書き出す要素数(0=最下位要素のみ)
 		*/
 		template <bool A, int N>
-		void store(value_t* dst, IConst<N>) const noexcept {
+		void store(value_t* dst, lubee::IConst<N>) const noexcept {
 			static_assert(N<size, "");
-			I::Store(dst, m, BConst<A>(), IConst<N>());
+			I::Store(dst, m, lubee::BConst<A>(), lubee::IConst<N>());
 		}
 		//! レジスタ型の読み替え
 		template <class R2>
@@ -308,14 +308,14 @@ namespace frea {
 		auto getMinValue() const noexcept {
 			return I::GetMinValue(
 				maskH<size-1>() |
-				spec_t(I::And(I::Set1(std::numeric_limits<value_t>::max()), MaskL(IConst<size-1>())))
+				spec_t(I::And(I::Set1(std::numeric_limits<value_t>::max()), MaskL(lubee::IConst<size-1>())))
 			);
 		}
 		//! 要素の中で最大の値
 		auto getMaxValue() const noexcept {
 			return I::GetMaxValue(
 				maskH<size-1>() |
-				spec_t(I::And(I::Set1(std::numeric_limits<value_t>::lowest()), MaskL(IConst<size-1>())))
+				spec_t(I::And(I::Set1(std::numeric_limits<value_t>::lowest()), MaskL(lubee::IConst<size-1>())))
 			);
 		}
 		//! 要素の最大値で他を除算
@@ -385,7 +385,7 @@ namespace frea{
 		template <
 			class... Ts,
 			ENABLE_IF((
-				 And<std::is_convertible<Ts,value_t>...>{} &&
+				 lubee::And<std::is_convertible<Ts,value_t>...>{} &&
 					sizeof...(Ts)==capacity
 			))
 		>
@@ -407,8 +407,8 @@ namespace frea{
 			tup(std::make_index_sequence<capacity-2-sizeof...(Ts)>(), t0, t1, ts...) {}
 		//! メモリ配列から値を読み込む
 		template <bool A>
-		tup(const value_t* src, BConst<A>) noexcept {
-			load(src, BConst<A>());
+		tup(const value_t* src, lubee::BConst<A>) noexcept {
+			load(src, lubee::BConst<A>());
 		}
 
 		//! 要素数の読み替え
@@ -510,9 +510,9 @@ namespace frea{
 		}
 		//! メモリからの読み込み
 		template <bool A>
-		void load(const value_t* src, BConst<A>) noexcept {
+		void load(const value_t* src, lubee::BConst<A>) noexcept {
 			for(auto& d : this->data) {
-				d = wrap_t(src, BConst<A>());
+				d = wrap_t(src, lubee::BConst<A>());
 				src += w_capacity;
 			}
 		}
@@ -521,7 +521,7 @@ namespace frea{
 		explicit tup(const W2& w) noexcept {
 			// 一度メモリへ展開
 			alignas(16) value_t tmp[W2::capacity];
-			w.template store<true>(tmp, IConst<W2::size-1>());
+			w.template store<true>(tmp, lubee::IConst<W2::size-1>());
 			const auto* src = tmp;
 			for(auto& d : this->data) {
 				d = wrap_t(src, std::true_type());
@@ -530,12 +530,12 @@ namespace frea{
 		}
 		//! メモリへの書き出し
 		template <bool A>
-		void store(value_t* dst, IConst<N-1>) const noexcept {
+		void store(value_t* dst, lubee::IConst<N-1>) const noexcept {
 			for(int i=0 ; i<a_size-1 ; i++) {
-				this->data[i].template store<A>(dst, IConst<w_capacity-1>());
+				this->data[i].template store<A>(dst, lubee::IConst<w_capacity-1>());
 				dst += w_capacity;
 			}
-			getTail().template store<A>(dst, IConst<Rem-1>());
+			getTail().template store<A>(dst, lubee::IConst<Rem-1>());
 		}
 		bool operator == (const tup& t) const noexcept {
 			for(int i=0 ; i<a_size-1 ; i++) {
@@ -711,7 +711,7 @@ namespace frea{
 				}; \
 			}; \
 			Data_spec() = default; \
-			template <class... Ts, ENABLE_IF((And<std::is_convertible<Ts,T>...>{} && sizeof...(Ts)>1))> \
+			template <class... Ts, ENABLE_IF((lubee::And<std::is_convertible<Ts,T>...>{} && sizeof...(Ts)>1))> \
 			constexpr Data_spec(const Ts&... ts) noexcept: m{static_cast<T>(ts)...} {} \
 		};
 	DEF_DATA(2, x,y)
@@ -753,7 +753,7 @@ namespace frea{
 
 		Data() = default;
 		template <bool A2>
-		constexpr Data(const value_t* src, BConst<A2>) noexcept {
+		constexpr Data(const value_t* src, lubee::BConst<A2>) noexcept {
 			for(auto& dst : base_t::m)
 				dst = *src++;
 		}
@@ -761,7 +761,7 @@ namespace frea{
 		value_t& operator [](const int n) noexcept { return this->m[n]; }
 		//! 複数要素での初期化
 		template <class... Ts,
-				 ENABLE_IF((And<std::is_convertible<Ts,value_t>...>{} && sizeof...(Ts)>1))>
+				 ENABLE_IF((lubee::And<std::is_convertible<Ts,value_t>...>{} && sizeof...(Ts)>1))>
 		constexpr Data(const Ts&... ts) noexcept: base_t{static_cast<value_t>(ts)...} {}
 		//! 1要素での初期化(内部呼び出し用)
 		template <std::size_t... Idx, class T2>
@@ -769,10 +769,10 @@ namespace frea{
 			base_t{static_cast<value_t>(t0[Idx])...} {}
 		//! 1要素での初期化
 		explicit constexpr Data(const value_t& t0) noexcept:
-			Data(seq::Repeat_t<0,size>(), &t0) {}
+			Data(lubee::seq::Repeat_t<0,size>(), &t0) {}
 		//! 指定要素以前をt0, 以降はゼロで初期化
 		template <int Pos, class T2>
-		Data(Mask_t, IConst<Pos>, const T2& t0) noexcept {
+		Data(Mask_t, lubee::IConst<Pos>, const T2& t0) noexcept {
 			for(int i=0 ; i<=Pos ; i++)
 				this->m[i] = t0;
 			for(int i=Pos+1 ; i<size ; i++)
@@ -780,20 +780,20 @@ namespace frea{
 		}
 		//! 指定要素のみt0, 他はゼロで初期化
 		template <int Pos, class T2>
-		Data(Set_t, IConst<Pos>, const T2& t0) noexcept: base_t{} {
+		Data(Set_t, lubee::IConst<Pos>, const T2& t0) noexcept: base_t{} {
 			this->m[Pos] = t0;
 		}
 		//! 内部形式からの初期化(wrap or tuple)
 		template <class W,
-				 class=decltype(std::declval<W>().template store<A>(base_t::m, IConst<size-1>()))>
+				 class=decltype(std::declval<W>().template store<A>(base_t::m, lubee::IConst<size-1>()))>
 		Data(const W& w) noexcept {
-			constexpr int S = Arithmetic<size, W::size>::less;
-			w.template store<A>(base_t::m, IConst<S-1>());
+			constexpr int S = lubee::Arithmetic<size, W::size>::less;
+			w.template store<A>(base_t::m, lubee::IConst<S-1>());
 			for(int i=S ; i<size ; i++)
 				base_t::m[i] = 0;
 		}
 		template <bool A2, int N2>
-		void store(value_t* dst, IConst<N2>) const noexcept {
+		void store(value_t* dst, lubee::IConst<N2>) const noexcept {
 			const auto* src = base_t::m;
 			int n = N2+1;
 			while(--n >= 0) {
@@ -803,12 +803,12 @@ namespace frea{
 
 		template <int S,
 				 ENABLE_IF(S<8)>
-		static int32_t ToInt(IConst<S>);
+		static int32_t ToInt(lubee::IConst<S>);
 		template <int S,
 				 ENABLE_IF(S==8)>
-		static int64_t ToInt(IConst<S>);
+		static int64_t ToInt(lubee::IConst<S>);
 		template <class Typ>
-		using ToInt_t = decltype(ToInt(IConst<sizeof(Typ)>()));
+		using ToInt_t = decltype(ToInt(lubee::IConst<sizeof(Typ)>()));
 
 		#define DEF_OP(op) \
 			template <class T2, bool A2> \
@@ -886,7 +886,7 @@ namespace frea {
 		using type_cn = VecT_spec<Wrap_t<reg_t, N2>, typename base_t::template type_cn<N2,A2>, N2>;
 
 		auto _asInternal(std::false_type) const noexcept {
-			return wrap_t(base_t::m, BConst<align>());
+			return wrap_t(base_t::m, lubee::BConst<align>());
 		}
 		decltype(auto) _asInternal(std::true_type) const noexcept {
 			return static_cast<const D&>(*this);
@@ -910,7 +910,7 @@ namespace frea {
 				 ENABLE_IF((is_wrap<T>{} || IsTuple_t<T>{}) && T::size==size)>
 		VecT(const T& t) noexcept {
 			alignas(16) typename T::value_t tmp[size];
-			t.template store<true>(tmp, IConst<size-1>());
+			t.template store<true>(tmp, lubee::IConst<size-1>());
 			for(int i=0 ; i<size ; i++)
 				this->m[i] = tmp[i];
 		}

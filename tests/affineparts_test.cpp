@@ -8,7 +8,7 @@ namespace frea {
 			using value_t = T;
 			using AP = ::frea::AffineParts<value_t>;
 
-			auto makeAP(const Range<value_t>& rt, const Range<value_t>& rs) {
+			auto makeAP(const lubee::Range<value_t>& rt, const lubee::Range<value_t>& rs) {
 				AP ap;
 				using Vec = Vec_t<value_t, 3, true>;
 				ap.offset = random::GenVec<Vec>(mt().template getUniformF<value_t>(rt));
@@ -24,7 +24,7 @@ namespace frea {
 				return ap;
 			}
 			auto makeAP() {
-				const Range<value_t> r{-1e3, 1e3};
+				const lubee::Range<value_t> r{-1e3, 1e3};
 				return makeAP(r,r);
 			}
 		};
@@ -52,7 +52,7 @@ namespace frea {
 				dir1 = dir0;
 			dir0 *= ap.rotation;
 			dir1 *= ap2.rotation;
-			constexpr auto Th = ThresholdF<value_t>(0.5);
+			constexpr auto Th = lubee::ThresholdF<value_t>(0.5);
 			EXPECT_LT(AbsMax(V3(ap.offset - ap2.offset)), Th);
 			EXPECT_LT(AbsMax(V3(ap.scale - ap2.scale)), Th);
 			EXPECT_LT(AbsMax(V3(dir0 - dir1)), Th);

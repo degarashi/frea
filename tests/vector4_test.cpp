@@ -25,7 +25,7 @@ namespace frea {
 				// asVec3Coord
 				const auto v = MakeWVec<vec_t>(
 					this->mt().template getUniformF<value_t>({-1e2, 1e2}),
-					ThresholdF<value_t>(0.5)
+					lubee::ThresholdF<value_t>(0.5)
 				);
 				const auto w = v.asInternal();
 				EXPECT_EQ(v.asVec3Coord(), w.asVec3Coord());
@@ -36,12 +36,12 @@ namespace frea {
 			USING(value_t);
 			const auto v = MakeWVec<vec_t>(
 				this->mt().template getUniformF<value_t>({-1e2, 1e2}),
-				ThresholdF<value_t>(0.5)
+				lubee::ThresholdF<value_t>(0.5)
 			);
 			using vec3_t = typename vec_t::template type_cn<3>;
 			const vec3_t v0 = v.asVec3Coord();
 			const vec3_t v1(v.x/v.w, v.y/v.w, v.z/v.w);
-			EXPECT_LE(AbsMax(vec3_t(v0-v1)), ThresholdF<value_t>(0.8));
+			EXPECT_LE(AbsMax(vec3_t(v0-v1)), lubee::ThresholdF<value_t>(0.8));
 		}
 	}
 }

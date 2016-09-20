@@ -1,8 +1,8 @@
 #pragma once
 #include "vector.hpp"
 #include "angle.hpp"
-#include "meta/compare.hpp"
-#include "ieee754.hpp"
+#include "lubee/meta/compare.hpp"
+#include "lubee/ieee754.hpp"
 #include "exception.hpp"
 #include <cereal/cereal.hpp>
 
@@ -23,7 +23,7 @@ namespace frea {
 			constexpr static bool is_integral = VW::is_integral;
 			constexpr static int dim_m = M,
 								dim_n = VW::size,
-								dim_min = Arithmetic<dim_m, dim_n>::less,
+								dim_min = lubee::Arithmetic<dim_m, dim_n>::less,
 								bit_width = VW::bit_width;
 			using spec_t = S;
 			using vec_t = VW;
@@ -34,13 +34,13 @@ namespace frea {
 			using type_cn = wrapM_t<typename vec_t::template type_cn<N2>, M2>;
 		private:
 			template <class Vec, class WM, int N>
-			static void _MultipleLine(vec_t&, const Vec&, const WM&, IConst<N>, IConst<N>) noexcept {}
+			static void _MultipleLine(vec_t&, const Vec&, const WM&, lubee::IConst<N>, lubee::IConst<N>) noexcept {}
 			template <class Vec, class WM, int N, int Z>
-			static void _MultipleLine(vec_t& dst, const Vec& v, const WM& m, IConst<N>, IConst<Z>) noexcept {
+			static void _MultipleLine(vec_t& dst, const Vec& v, const WM& m, lubee::IConst<N>, lubee::IConst<Z>) noexcept {
 				const auto val = v.template pickAt<N>();
 				const vec_t tv(val);
 				dst += tv * m.v[N];
-				_MultipleLine(dst, v, m, IConst<N+1>(), IConst<Z>());
+				_MultipleLine(dst, v, m, lubee::IConst<N+1>(), lubee::IConst<Z>());
 			}
 			template <int At, std::size_t... Idx>
 			auto _getColumn(std::index_sequence<Idx...>) const noexcept {
@@ -68,12 +68,12 @@ namespace frea {
 				// 一旦メモリに展開する(m -> other)
 				value_t other[WM::dim_m][WM::dim_n];
 				for(int i=0 ; i<WM::dim_m ; i++)
-					m.v[i].template store<false>(other[i], IConst<WM::dim_n-1>());
+					m.v[i].template store<false>(other[i], lubee::IConst<WM::dim_n-1>());
 				for(int i=0 ; i<dim_m ; i++) {
 					value_t result[WM::dim_n] = {},
 							ths[dim_n];
 					// メモリに展開(this[i] -> ths)
-					v[i].template store<false>(ths, IConst<dim_n-1>());
+					v[i].template store<false>(ths, lubee::IConst<dim_n-1>());
 					for(int j=0 ; j<WM::dim_n ; j++) {
 						auto& dst = result[j];
 						for(int k=0 ; k<dim_n ; k++)
@@ -90,7 +90,7 @@ namespace frea {
 				static_assert(WM::dim_m == dim_n, "");
 				wrapM_t<VW2, dim_m> ret;
 				for(int i=0 ; i<dim_m ; i++) {
-					_MultipleLine(ret.v[i] = vec_t::Zero(), v[i], m, IConst<0>(), IConst<WM::dim_m>());
+					_MultipleLine(ret.v[i] = vec_t::Zero(), v[i], m, lubee::IConst<0>(), lubee::IConst<WM::dim_m>());
 				}
 				return ret;
 			}
@@ -101,7 +101,7 @@ namespace frea {
 			template <std::size_t... Idx, ENABLE_IF(sizeof...(Idx) == dim_n)>
 			auto _mul_vecL(std::index_sequence<Idx...>, const column_t& vc) const noexcept {
 				vec_t ret = vec_t::Zero();
-				_MultipleLine(ret, vc, *this, IConst<0>(), IConst<dim_m>());
+				_MultipleLine(ret, vc, *this, lubee::IConst<0>(), lubee::IConst<dim_m>());
 				return ret;
 			}
 		public:
@@ -109,9 +109,9 @@ namespace frea {
 
 			wrapM() = default;
 			template <bool A>
-			wrapM(const value_t* src, BConst<A>) noexcept {
+			wrapM(const value_t* src, lubee::BConst<A>) noexcept {
 				for(int i=0 ; i<dim_m ; i++) {
-					v[i] = vec_t(src, BConst<A>());
+					v[i] = vec_t(src, lubee::BConst<A>());
 					src += A ? vec_t::capacity : vec_t::size;
 				}
 			}
@@ -203,7 +203,7 @@ namespace frea {
 			template <class VD>
 			void store(VD* dst) const noexcept {
 				for(auto& t : v) {
-					t.template store<VD::align>(dst->m, IConst<dim_n-1>());
+					t.template store<VD::align>(dst->m, lubee::IConst<dim_n-1>());
 					++dst;
 				}
 			}
@@ -355,7 +355,7 @@ namespace frea {
 			auto _transposition(std::false_type, std::index_sequence<Idx...>) const noexcept {
 				typename base_t::value_t tmp[S][S];
 				const auto dummy = [](auto...) {};
-				dummy((base_t::v[Idx].template store<false>(tmp[Idx], IConst<base_t::dim_n-1>()), 0)...);
+				dummy((base_t::v[Idx].template store<false>(tmp[Idx], lubee::IConst<base_t::dim_n-1>()), 0)...);
 				dummy(([&tmp](const int i){
 					for(int j=i+1 ; j<base_t::dim_n ; j++) {
 						std::swap(tmp[i][j], tmp[j][i]);
@@ -512,7 +512,7 @@ namespace frea {
 			}
 	};
 
-	#define AsI(t) wrap_t(reinterpret_cast<const value_t*>((t).m), BConst<align>())
+	#define AsI(t) wrap_t(reinterpret_cast<const value_t*>((t).m), lubee::BConst<align>())
 	template <class V, int M, class S>
 	struct MatT : DataM<V,M>, op::Operator_Ne<S> {
 		using op_t = op::Operator_Ne<S>;
@@ -524,7 +524,7 @@ namespace frea {
 		using value_t = typename V::value_t;
 		constexpr static int dim_m = base_t::dim_m,
 							dim_n = base_t::dim_n,
-							dim_min = Arithmetic<dim_m,dim_n>::less;
+							dim_min = lubee::Arithmetic<dim_m,dim_n>::less;
 		constexpr static int size = dim_m,
 							lower_size = dim_n;
 		constexpr static bool align = base_t::align;
@@ -799,13 +799,13 @@ namespace frea {
 			using value_t = typename V::value_t;
 			using this_t = MatT_dspec;
 		private:
-			value_t _calcDeterminant(IConst<2>) const noexcept {
+			value_t _calcDeterminant(lubee::IConst<2>) const noexcept {
 				// 公式で計算
 				const Mat_t<value_t, 2, 2, false> m(*this);
 				return m[0][0]*m[1][1] - m[0][1]*m[1][0];
 			}
 			template <int N2, ENABLE_IF((N2>2))>
-			value_t _calcDeterminant(IConst<N2>) const noexcept {
+			value_t _calcDeterminant(lubee::IConst<N2>) const noexcept {
 				value_t res = 0,
 						s = 1;
 				// 部分行列を使って計算
@@ -816,7 +816,7 @@ namespace frea {
 				}
 				return res;
 			}
-			spec_t  _inversion(const value_t& di, IConst<2>) const noexcept {
+			spec_t  _inversion(const value_t& di, lubee::IConst<2>) const noexcept {
 				spec_t ret;
 				ret.m[0][0] = this->m[1][1] * di;
 				ret.m[1][0] = -this->m[1][0] * di;
@@ -825,7 +825,7 @@ namespace frea {
 				return ret;
 			}
 			template <int N2, ENABLE_IF((N2>2))>
-			spec_t _inversion(const value_t& di, IConst<N2>) const noexcept {
+			spec_t _inversion(const value_t& di, lubee::IConst<N2>) const noexcept {
 				spec_t ret;
 				const value_t c_val[2] = {1,-1};
 				for(int i=0 ; i<base_t::dim_m ; i++) {
@@ -837,11 +837,11 @@ namespace frea {
 				}
 				return ret;
 			}
-			constexpr static auto ZeroThreshold = Threshold<value_t>(0.6, 1);
+			constexpr static auto ZeroThreshold = lubee::Threshold<value_t>(0.6, 1);
 
 		public:
 			value_t calcDeterminant() const noexcept {
-				return _calcDeterminant(IConst<base_t::dim_m>());
+				return _calcDeterminant(lubee::IConst<base_t::dim_m>());
 			}
 			spec_t inversion() const {
 				return inversion(calcDeterminant());
@@ -850,7 +850,7 @@ namespace frea {
 				constexpr auto Th = ZeroThreshold;
 				if(std::abs(det) < Th)
 					throw NoInverseMatrix();
-				return _inversion(1/det, IConst<base_t::dim_m>());
+				return _inversion(1/det, lubee::IConst<base_t::dim_m>());
 			}
 			void invert() {
 				*this = inversion();

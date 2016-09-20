@@ -14,7 +14,7 @@ namespace frea {
 			struct D2 {
 				value_t x,y;
 			} ret;
-			this->template store<false>(reinterpret_cast<value_t*>(&ret), IConst<1>());
+			this->template store<false>(reinterpret_cast<value_t*>(&ret), lubee::IConst<1>());
 			return ret;
 		}
 		//! counter clockwise
