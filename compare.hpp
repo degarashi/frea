@@ -55,39 +55,6 @@ namespace frea {
 		return EqAbsT<T>(tup0, tup1, epsilon, (lubee::IConst<sizeof...(Ts)-1>*)nullptr);
 	}
 
-	//! 浮動少数点数の値がNaNになっているか
-	template <class T, ENABLE_IF((std::is_floating_point<T>{}))>
-	bool IsNaN(const T& val) {
-		return !(val>=T(0)) && !(val<T(0));
-	}
-	//! 浮動少数点数の値がNaN又は無限大になっているか
-	template <class T, ENABLE_IF((std::is_floating_point<T>{}))>
-	bool IsOutstanding(const T& val) {
-		auto valA = std::fabs(val);
-		return valA==std::numeric_limits<T>::infinity() || IsNaN(valA);
-	}
-	//! 値飽和
-	template <class T>
-	T Saturate(const T& val, const T& minV, const T& maxV) {
-		if(val > maxV)
-			return maxV;
-		if(val < minV)
-			return minV;
-		return val;
-	}
-	template <class T>
-	T Saturate(const T& val, const T& range) {
-		return Saturate(val, -range, range);
-	}
-	//! 値の範囲判定
-	template <class T>
-	bool IsInRange(const T& val, const T& vMin, const T& vMax) {
-		return val>=vMin && val<=vMax;
-	}
-	template <class T>
-	bool IsInRange(const T& val, const T& vMin, const T& vMax, const T& vEps) {
-		return IsInRange(val, vMin-vEps, vMax+vEps);
-	}
 	//! std::tupleの要素ごとの距離(EqAbs)比較
 	template <class T, int NPow>
 	struct TupleNear {

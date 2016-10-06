@@ -71,14 +71,14 @@ namespace frea {
 			USING(deg_t);
 			deg_t degf(this->makeRF());
 			auto r = this->makeRange();
-			auto val = Saturate(degf.get(), r.from, r.to);
+			auto val = lubee::Saturate(degf.get(), r.from, r.to);
 			degf.range({Degree<TypeParam>(r.from), Degree<TypeParam>(r.to)});
 			EXPECT_EQ(degf.get(), val);
 		
 			// rangeValueテスト
 			degf.set(this->makeRF());
 			r = this->makeRange();
-			val = Saturate(degf.get(), r.from, r.to);
+			val = lubee::Saturate(degf.get(), r.from, r.to);
 			degf.rangeValue(r);
 			EXPECT_EQ(degf.get(), val);
 		}

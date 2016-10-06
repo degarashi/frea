@@ -247,7 +247,7 @@ namespace frea {
 			const auto range = lubee::random::GenRange<value_t>(this->mt().template getUniformF<value_t>());
 			array_t ar(vec);
 			for(auto& a : ar)
-				a = Saturate(a, range.from, range.to);
+				a = lubee::Saturate(a, range.from, range.to);
 			constexpr auto Th = lubee::Threshold<value_t>(0.2, 0);
 			const vec_t v0 = vec.saturation(range.from, range.to),
 						v1 = vec.asInternal().saturation(range.from, range.to);

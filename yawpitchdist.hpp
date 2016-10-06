@@ -33,7 +33,7 @@ namespace frea {
 				ypd.yaw.set(0);
 			else {
 				xzvec.normalize();
-				T ac = std::acos(Saturate<T>(xzvec.z, 1));
+				T ac = std::acos(lubee::Saturate<T>(xzvec.z, 1));
 				if(xzvec.x < 0)
 					ac = 2*Pi<T> - ac;
 				ypd.yaw.set(ac);
@@ -41,7 +41,7 @@ namespace frea {
 
 			// Pitch
 			constexpr T h = AngleInfo<Radian_t>::one_rotation<T> / 2;
-			ypd.pitch.set(Saturate(std::asin(Saturate<T>(v.y, 1)), -h, h));
+			ypd.pitch.set(lubee::Saturate(std::asin(lubee::Saturate<T>(v.y, 1)), -h, h));
 			return ypd;
 		}
 		//! YawPitchDistの位置から座標原点を見る姿勢

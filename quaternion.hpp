@@ -4,6 +4,7 @@
 #include "compare.hpp"
 #include "lubee/ieee754.hpp"
 #include "exception.hpp"
+#include "lubee/compare.hpp"
 
 namespace frea {
 	template <class T, bool A>
@@ -151,7 +152,7 @@ namespace frea {
 			if(rAxis.len_sq() < ZeroLen_Th)
 				return QuatT::Identity();
 			rAxis.normalize();
-			const value_t d = std::acos(Saturate<value_t>(from.dot(to), 1.0));
+			const value_t d = std::acos(lubee::Saturate<value_t>(from.dot(to), 1.0));
 			return Rotation(rAxis, rad_t(d));
 		}
 		static QuatT SetLookAt(const Axis::e targetAxis, const Axis::e baseAxis, const vec_t& baseVec, const vec_t& at, const vec_t& pos) {
@@ -286,7 +287,7 @@ namespace frea {
 			return asVec4().length();
 		}
 		rad_t angle() const noexcept {
-			return rad_t(std::acos(Saturate<value_t>(this->w, 1.0))*2);
+			return rad_t(std::acos(lubee::Saturate<value_t>(this->w, 1.0))*2);
 		}
 		const vec_t& getVector() const noexcept {
 			return reinterpret_cast<const vec_t&>(*this);
@@ -307,7 +308,7 @@ namespace frea {
 		}
 		//! 球面線形補間
 		QuatT slerp(const QuatT& q, const value_t& t) const noexcept {
-			const auto ac = Saturate<value_t>(dot(q), 0.0, 1.0);
+			const auto ac = lubee::Saturate<value_t>(dot(q), 0.0, 1.0);
 			const auto theta = std::acos(ac),
 						S = std::sin(theta);
 			if(std::abs(S) < Theta_Th)

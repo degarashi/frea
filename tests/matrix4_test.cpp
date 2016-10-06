@@ -68,9 +68,9 @@ namespace frea {
 
 			// (X,Y,Z,1) -> (dir.x*aspect*tan(fov/2), dir.y*tan(fov/2), [0->W], W)
 			const vec3_t v2 = v1.asVec3Coord();
-			EXPECT_TRUE(IsInRange<value_t>(v2.x, -1, 1));
-			EXPECT_TRUE(IsInRange<value_t>(v2.y, -1, 1));
-			EXPECT_TRUE(IsInRange<value_t>(v2.z, 0, 1));
+			EXPECT_TRUE(lubee::IsInRange<value_t>(v2.x, -1, 1));
+			EXPECT_TRUE(lubee::IsInRange<value_t>(v2.y, -1, 1));
+			EXPECT_TRUE(lubee::IsInRange<value_t>(v2.z, 0, 1));
 			// fovがDegree:180以上の場合はInvalidFov例外を送出
 			constexpr Radian<value_t> hfov(Degree<value_t>::HalfRotationRange.to);
 			EXPECT_THROW(mat_t::PerspectiveFov(hfov, aspect, {nz, fz}), InvalidFov);
