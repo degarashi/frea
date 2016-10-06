@@ -17,9 +17,9 @@ namespace frea {
 		\tparam	S		本来の型
 	*/
 	template <class VW, int M, class S>
-	class wrapM : public op::PlusMinus<S>, public op::Ne<S> {
+	class wrapM : public lubee::op::PlusMinus<S>, public lubee::op::Ne<S> {
 		public:
-			using op_t = op::PlusMinus<S>;
+			using op_t = lubee::op::PlusMinus<S>;
 			constexpr static bool is_integral = VW::is_integral;
 			constexpr static int dim_m = M,
 								dim_n = VW::size,
@@ -514,8 +514,8 @@ namespace frea {
 
 	#define AsI(t) wrap_t(reinterpret_cast<const value_t*>((t).m), lubee::BConst<align>())
 	template <class V, int M, class S>
-	struct MatT : DataM<V,M>, op::Operator_Ne<S> {
-		using op_t = op::Operator_Ne<S>;
+	struct MatT : DataM<V,M>, lubee::op::Operator_Ne<S> {
+		using op_t = lubee::op::Operator_Ne<S>;
 		using spec_t = S;
 		using base_t = DataM<V,M>;
 		using base_t::base_t;

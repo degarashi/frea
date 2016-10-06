@@ -9,8 +9,8 @@ namespace frea {
 	template <class T, bool A>
 	struct ExpQuatT;
 	template <class T, bool A>
-	struct QuatT : Data<T,4,A>, op::Operator_Ne<QuatT<T,A>> {
-		using op_t = op::Operator_Ne<QuatT<T,A>>;
+	struct QuatT : Data<T,4,A>, lubee::op::Operator_Ne<QuatT<T,A>> {
+		using op_t = lubee::op::Operator_Ne<QuatT<T,A>>;
 		using base_t = Data<T,4,A>;
 		using base_t::base_t;
 		using vec_t = Vec_t<T,3,A>;

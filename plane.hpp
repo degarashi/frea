@@ -9,10 +9,10 @@ namespace frea {
 	template <class T, bool A>
 	struct PlaneT :
 		Data<T,4,A>,
-		op::Mul<PlaneT<T,A>>,
-		op::Ne<PlaneT<T,A>>
+		lubee::op::Mul<PlaneT<T,A>>,
+		lubee::op::Ne<PlaneT<T,A>>
 	{
-		using op_m = op::Mul<PlaneT<T,A>>;
+		using op_m = lubee::op::Mul<PlaneT<T,A>>;
 		using base_t = Data<T,4,A>;
 		using base_t::base_t;
 		using value_t = typename base_t::value_t;

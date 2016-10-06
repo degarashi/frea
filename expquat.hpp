@@ -5,8 +5,8 @@
 
 namespace frea {
 	template <class T, bool A>
-	struct ExpQuatT : Data<T,3,A>, op::Operator_Ne<ExpQuatT<T,A>> {
-		using op_t = op::Operator_Ne<ExpQuatT<T,A>>;
+	struct ExpQuatT : Data<T,3,A>, lubee::op::Operator_Ne<ExpQuatT<T,A>> {
+		using op_t = lubee::op::Operator_Ne<ExpQuatT<T,A>>;
 		using base_t = Data<T,3,A>;
 		using base_t::base_t;
 		using rad_t = Radian<T>;

@@ -3,7 +3,7 @@
 
 namespace frea {
 	template <class T>
-	struct AffineParts : op::Ne<AffineParts<T>> {
+	struct AffineParts : lubee::op::Ne<AffineParts<T>> {
 		using Vec = Vec_t<T,3,true>;
 		using Quat = QuatT<T,true>;
 		Vec		offset,

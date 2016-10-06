@@ -3,7 +3,7 @@
 
 namespace frea {
 	template <class T>
-	struct YawPitchDist : op::Ne<YawPitchDist<T>> {
+	struct YawPitchDist : lubee::op::Ne<YawPitchDist<T>> {
 		using Rad = Radian<T>;
 		using Vec3 = Vec_t<T,3,true>;
 		using Quat = QuatT<T,true>;
