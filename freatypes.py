@@ -2,6 +2,7 @@
 # QtCreator Debugger用のpretty-printer
 from dumper import *
 import math
+from lubee.lubeetypes import *
 
 Fr_ElementName = ["x", "y", "z", "w"]
 Fr_ElementIndex = []
@@ -218,13 +219,6 @@ def qdump__frea__MatT_spec(d, value):
     fr_DumpMData(d, value, "MatT(s)")
 def qdump__frea__MatT(d, value):
     fr_DumpMData(d, value, "MatT")
-
-# ------------------------------------------------------------
-# Range
-def qdump__frea__Range(d, value):
-    d.putValue("[" + str(value["from"]) + " | " + str(value["to"]) + "]")
-    d.putType("Range")
-    d.putNumChild(0)
 
 # ------------------------------------------------------------
 # Quaternion
