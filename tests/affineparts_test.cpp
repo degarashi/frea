@@ -1,5 +1,6 @@
 #include "test.hpp"
 #include "../affine_parts.hpp"
+#include "../serialization/affine_parts.hpp"
 
 namespace frea {
 	namespace test {

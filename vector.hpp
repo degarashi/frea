@@ -9,7 +9,6 @@
 #include "lubee/meta/boolean.hpp"
 #include "lubee/meta/compare.hpp"
 #include "lubee/operators.hpp"
-#include <cereal/cereal.hpp>
 
 DEF_HASMETHOD(asInternal)
 
@@ -837,13 +836,9 @@ namespace frea{
 		DEF_OP(^)
 		#undef DEF_OP
 
-		template <class Ar>
-		void serialize(Ar& ar) {
-			std::size_t sz = size;
-			ar(cereal::make_size_tag(sz));
-			for(std::size_t i=0 ; i<sz ; i++)
-				ar(this->m[i]);
-		}
+		template <class Ar, class T2, int N2, bool A2>
+		friend void serialize(Ar&, Data<T2,N2,A2>&);
+
 		std::ostream& print(std::ostream& os) const {
 			os << '[';
 			bool bF = true;

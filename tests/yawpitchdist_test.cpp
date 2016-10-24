@@ -1,5 +1,6 @@
 #include "test.hpp"
 #include "../yawpitchdist.hpp"
+#include "../serialization/yawpitchdist.hpp"
 
 namespace frea {
 	namespace test {

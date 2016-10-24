@@ -4,7 +4,6 @@
 #include "lubee/meta/compare.hpp"
 #include "lubee/ieee754.hpp"
 #include "exception.hpp"
-#include <cereal/cereal.hpp>
 
 namespace frea {
 	template <class VW, int M>
@@ -450,14 +449,8 @@ namespace frea {
 					src += dim_n;
 				}
 			}
-			friend class cereal::access;
-			template <class Ar>
-			void serialize(Ar& ar) {
-				std::size_t sz = dim_m;
-				ar(cereal::make_size_tag(sz));
-				for(std::size_t i=0 ; i<sz ; i++)
-					ar(m[i]);
-			}
+			template <class Ar, class V2, int M2>
+			friend void serialize(Ar&, DataM<V2,M2>&);
 		public:
 			vec_t	m[dim_m];
 			DataM() = default;

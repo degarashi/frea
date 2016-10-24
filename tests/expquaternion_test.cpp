@@ -1,5 +1,6 @@
 #include "test.hpp"
 #include "../expquat.hpp"
+#include "../serialization/vector.hpp"
 
 namespace frea {
 	namespace test {

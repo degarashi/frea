@@ -2,6 +2,7 @@
 #include "../quaternion.hpp"
 #include "../matrix.hpp"
 #include "../random/angle.hpp"
+#include "../serialization/vector.hpp"
 
 namespace frea {
 	namespace test {

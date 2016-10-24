@@ -1,4 +1,5 @@
 #include "test.hpp"
+#include "../serialization/matrix.hpp"
 
 namespace frea {
 	namespace test {

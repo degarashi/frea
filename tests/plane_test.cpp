@@ -1,6 +1,7 @@
 #include "test.hpp"
 #include "../plane.hpp"
 #include "../random/plane.hpp"
+#include "../serialization/vector.hpp"
 
 namespace frea {
 	namespace test {

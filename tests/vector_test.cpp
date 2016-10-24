@@ -1,5 +1,6 @@
 #include "test.hpp"
 #include "../lubee/compiler_macro.hpp"
+#include "../serialization/vector.hpp"
 
 namespace frea {
 	namespace test {

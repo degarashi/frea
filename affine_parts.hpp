@@ -10,10 +10,9 @@ namespace frea {
 				scale;
 		Quat	rotation;
 
-		template <class Ar>
-		void serialize(Ar& ar) {
-			ar(CEREAL_NVP(offset), CEREAL_NVP(scale), CEREAL_NVP(rotation));
-		}
+		template <class Ar, class T2>
+		friend void serialize(Ar&, AffineParts<T2>&);
+
 		bool operator == (const AffineParts& ap) const noexcept {
 			return offset == ap.offset &&
 				scale == ap.scale &&

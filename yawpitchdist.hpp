@@ -9,10 +9,10 @@ namespace frea {
 		using Quat = QuatT<T,true>;
 		Rad		yaw, pitch;
 		T		distance;
-		template <class Ar>
-		void serialize(Ar& ar) {
-			ar(CEREAL_NVP(yaw), CEREAL_NVP(pitch), CEREAL_NVP(distance));
-		}
+
+		template <class Ar, class T2>
+		friend void serialize(Ar&, YawPitchDist<T2>&);
+
 		bool operator == (const YawPitchDist& ypd) const noexcept {
 			return yaw==ypd.yaw &&
 					pitch==ypd.pitch &&
