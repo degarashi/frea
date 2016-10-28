@@ -1,12 +1,11 @@
 #pragma once
 
 namespace frea {
-	#define countof(a) (sizeof(a)/sizeof(a[0]))
 	#define DEF_OP(func, op) \
 		template <class R> \
 		static auto func(const R& t0, const R& t1) noexcept { \
 			R ret; \
-			for(int i=0 ; i<int(countof(t0.m)) ; i++) \
+			for(int i=0 ; i<int(sizeof(t0.m)/sizeof(t0.m[0])) ; i++) \
 				ret.m[i] = t0.m[i] op t1.m[i]; \
 			return ret; \
 		}
@@ -34,7 +33,7 @@ namespace frea {
 			template <class R> \
 			static auto func(const R& t0, const R& t1) noexcept { \
 				R ret; \
-				for(int i=0 ; i<int(countof(t0.m)) ; i++) { \
+				for(int i=0 ; i<int(sizeof(t0.m)/sizeof(t0.m[0])) ; i++) { \
 					const i_type tmp = *reinterpret_cast<const i_type*>(&t0.m[i]) op \
 										*reinterpret_cast<const i_type*>(&t1.m[i]); \
 					ret.m[i] = *reinterpret_cast<const f_type*>(&tmp); \
