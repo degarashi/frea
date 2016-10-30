@@ -1,5 +1,5 @@
 #pragma once
-#include "../lubee/range.hpp"
+#include "lubee/range.hpp"
 #include "vector.hpp"
 
 namespace frea {

@@ -1,5 +1,5 @@
 #pragma once
-#include "../lubee/meta/enable_if.hpp"
+#include "lubee/meta/enable_if.hpp"
 #include "../angle.hpp"
 
 namespace frea {

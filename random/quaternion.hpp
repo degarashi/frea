@@ -1,7 +1,7 @@
 #pragma once
 #include "angle.hpp"
 #include "vector.hpp"
-#include "../lubee/error.hpp"
+#include "lubee/error.hpp"
 #include "../quaternion.hpp"
 
 namespace frea {
