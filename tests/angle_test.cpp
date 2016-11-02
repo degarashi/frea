@@ -74,7 +74,7 @@ namespace frea {
 			auto val = lubee::Saturate(degf.get(), r.from, r.to);
 			degf.range({Degree<TypeParam>(r.from), Degree<TypeParam>(r.to)});
 			EXPECT_EQ(degf.get(), val);
-		
+
 			// rangeValueテスト
 			degf.set(this->makeRF());
 			r = this->makeRange();
@@ -105,7 +105,7 @@ namespace frea {
 			EXPECT_EQ((degf - degf2).get(), degf.get() - degf2.get());
 			EXPECT_EQ((degf * 2).get(), degf.get() * 2);
 			EXPECT_EQ((degf / 2).get(), degf.get() / 2);
-		
+
 			auto val = static_cast<TypeParam>(degf) + static_cast<TypeParam>(degf2);
 			EXPECT_EQ((degf += degf2).get(), val);
 			val = static_cast<TypeParam>(degf) - static_cast<TypeParam>(degf2);

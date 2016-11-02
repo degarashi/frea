@@ -366,7 +366,7 @@ namespace frea {
 			using vec_t = typename base_t::vec_t;
 			using base_t::base_t;
 			wrapM_spec() = default;
-	
+
 			auto transposition() const& noexcept {
 				const auto idx = std::make_index_sequence<S>();
 				return _transposition(decltype(this->hasmem<VW, base_t>(idx))(), idx);

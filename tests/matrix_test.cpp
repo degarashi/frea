@@ -216,14 +216,14 @@ namespace frea {
 			const auto range = lubee::Range<value_t>{ulps::Increment(-Th), ulps::Decrement(Th)};
 			auto m = this->makeRMat(range);
 			ASSERT_TRUE(m.isZero(Th));
-		
+
 			// どこか一つ値をゼロ以外に変更すればFalse
 			const auto idx = this->mt().template getUniformF<int>();
 			const int idxM = idx({0, mat_t::dim_m-1}),
 					idxN = idx({0, mat_t::dim_n-1});
 			m[idxM][idxN] += Th*3;
 			ASSERT_FALSE(m.isZero(Th));
-		
+
 			// 変更した行のみisZeroRowがFalse
 			for(int i=0 ; i<mat_t::dim_m ; i++) {
 				ASSERT_EQ(i!=idxM, m.isZeroRow(i, Th));
@@ -234,7 +234,7 @@ namespace frea {
 			USING(value_t);
 			USING(array_t);
 			USING(mat_t);
-		
+
 			// 逆数を掛けることで除算としていたりx86の場合内部精度がvalue_tと違うかも知れないのである程度のマージンを設ける
 			constexpr auto Th = lubee::Threshold<value_t>(0.1, 2);		// 除算以外
 			constexpr auto ThD = lubee::Threshold<value_t>(0.8, 2);	// 除算
@@ -259,7 +259,7 @@ namespace frea {
 					/* 結果がほぼ一致することを確認 */ \
 					ASSERT_LT(AbsMax(raw0 - mat0), th); \
 					break; }
-			
+
 			// ランダムで四則演算
 			switch(this->mt().template getUniform<int>({0,6})) {
 				DEF_TEST(0, +, s, Th)		// スカラとの和

@@ -23,7 +23,7 @@ namespace frea {
 			USING(value_t);
 			using vecmin_t = typename vec_t::template type_cn<mat_t::dim_min>;
 			using column_t = typename mat_t::column_t;
-		
+
 			constexpr auto range = lubee::Range<value_t>{-1e2, 1e2};
 			const auto mtf = this->mt().template getUniformF<value_t>(range);
 			const column_t v0 = random::GenVec<vecmin_t>(mtf).template convert<mat_t::dim_m>(),
