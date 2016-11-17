@@ -423,3 +423,13 @@ namespace frea {
 	using DQuat = QuatT<double, false>;
 	using ADQuat = QuatT<double, true>;
 }
+namespace std {
+	template <class T, bool A>
+	struct hash<frea::QuatT<T,A>> {
+		using quat_t = frea::QuatT<T,A>;
+		std::size_t operator()(const quat_t& q) const noexcept {
+			using base_t = typename quat_t::base_t;
+			return hash<base_t>()(static_cast<const base_t&>(q));
+		}
+	};
+}

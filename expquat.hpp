@@ -95,3 +95,13 @@ namespace frea {
 	using DExpQuat = ExpQuatT<double, false>;
 	using ADExpQuat = ExpQuatT<double, true>;
 }
+namespace std {
+	template <class T, bool A>
+	struct hash<frea::ExpQuatT<T,A>> {
+		using eq_t = frea::ExpQuatT<T,A>;
+		std::size_t operator()(const eq_t& q) const noexcept {
+			using base_t = typename eq_t::base_t;
+			return hash<base_t>()(static_cast<const base_t&>(q));
+		}
+	};
+}

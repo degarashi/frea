@@ -183,3 +183,13 @@ namespace frea {
 	using DPlane = PlaneT<double, false>;
 	using ADPlane = PlaneT<double, true>;
 }
+namespace std {
+	template <class T, bool A>
+	struct hash<frea::PlaneT<T,A>> {
+		using plane_t = frea::PlaneT<T,A>;
+		std::size_t operator()(const plane_t& p) const noexcept {
+			using base_t = typename plane_t::base_t;
+			return hash<base_t>()(static_cast<const base_t&>(p));
+		}
+	};
+}
