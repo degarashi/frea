@@ -1044,6 +1044,25 @@ namespace frea {
 		return v.print(os);
 	}
 }
+namespace std {
+	template <class T, int N, bool A>
+	struct hash<frea::Data<T,N,A>> {
+		std::size_t operator()(const frea::Data<T,N,A>& d) const noexcept {
+			std::size_t ret = 0;
+			for(int i=0 ; i<N ; i++)
+				ret ^= *reinterpret_cast<const uint32_t*>(d.m+i);
+			return ret;
+		}
+	};
+	template <class W, class D, int N>
+	struct hash<frea::VecT_spec<W,D,N>> {
+		using vec_t = frea::VecT_spec<W,D,N>;
+		std::size_t operator()(const vec_t& d) const noexcept {
+			using base_t = typename vec_t::base_t::base_t;
+			return hash<base_t>()(static_cast<const base_t&>(d));
+		}
+	};
+}
 namespace frea {
 	#if SSE >= 2
 		#define DEF_RV(n) \

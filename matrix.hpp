@@ -871,6 +871,26 @@ namespace frea {
 		return m.print(os);
 	}
 }
+namespace std {
+	template <class V, int M>
+	struct hash<frea::DataM<V,M>> {
+		std::size_t operator()(const frea::DataM<V,M>& d) const noexcept {
+			const std::hash<typename frea::DataM<V,M>::vec_t> h;
+			std::size_t ret = 0;
+			for(int i=0 ; i<M ; i++)
+				ret ^= h(d.m[i]);
+			return ret;
+		}
+	};
+	template <class V, int M, int N>
+	struct hash<frea::MatT_spec<V,M,N>> {
+		using mat_t = frea::MatT_spec<V,M,N>;
+		std::size_t operator()(const mat_t& m) const noexcept {
+			using base_t = typename mat_t::base_t::base_t::base_t;
+			return hash<base_t>()(static_cast<const base_t&>(m));
+		}
+	};
+}
 #include "include/mat_d2.hpp"
 #include "include/mat_d3.hpp"
 #include "include/mat_d4.hpp"
