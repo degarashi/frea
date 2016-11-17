@@ -4,6 +4,7 @@
 #include "../random/vector.hpp"
 #include "../random/matrix.hpp"
 #include "lubee/random/range.hpp"
+#include "lubee/meta/countof.hpp"
 #include "../random/quaternion.hpp"
 #include "lubee/meta/check_macro.hpp"
 #include "lubee/ieee754.hpp"
