@@ -35,12 +35,24 @@ namespace frea {
 	// (quaternion.hpp)
 	template <class T, bool A>
 	struct QuatT;
+	using Quat = QuatT<float, false>;
+	using AQuat = QuatT<float, true>;
+	using DQuat = QuatT<double, false>;
+	using ADQuat = QuatT<double, true>;
 
 	// (expquat.hpp)
 	template <class T, bool A>
 	struct ExpQuatT;
+	using ExpQuat = ExpQuatT<float, false>;
+	using AExpQuat = ExpQuatT<float, true>;
+	using DExpQuat = ExpQuatT<double, false>;
+	using ADExpQuat = ExpQuatT<double, true>;
 
 	// (plane.hpp)
 	template <class T, bool A>
 	struct PlaneT;
+	using Plane = PlaneT<float, false>;
+	using APlane = PlaneT<float, true>;
+	using DPlane = PlaneT<double, false>;
+	using ADPlane = PlaneT<double, true>;
 }

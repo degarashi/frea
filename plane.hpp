@@ -177,11 +177,6 @@ namespace frea {
 			return res;
 		}
 	};
-
-	using Plane = PlaneT<float, false>;
-	using APlane = PlaneT<float, true>;
-	using DPlane = PlaneT<double, false>;
-	using ADPlane = PlaneT<double, true>;
 }
 namespace std {
 	template <class T, bool A>

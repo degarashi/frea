@@ -2,6 +2,7 @@
 #include "vector.hpp"
 #include "angle.hpp"
 #include "quaternion.hpp"
+#include "fwd.hpp"
 
 namespace frea {
 	template <class T, bool A>
@@ -89,11 +90,6 @@ namespace frea {
 		os << "ExpQuat: ";
 		return q.asVec3().print(os);
 	}
-
-	using ExpQuat = ExpQuatT<float, false>;
-	using AExpQuat = ExpQuatT<float, true>;
-	using DExpQuat = ExpQuatT<double, false>;
-	using ADExpQuat = ExpQuatT<double, true>;
 }
 namespace std {
 	template <class T, bool A>

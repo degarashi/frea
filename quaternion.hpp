@@ -5,10 +5,9 @@
 #include "lubee/ieee754.hpp"
 #include "exception.hpp"
 #include "lubee/compare.hpp"
+#include "fwd.hpp"
 
 namespace frea {
-	template <class T, bool A>
-	struct ExpQuatT;
 	template <class T, bool A>
 	struct QuatT : Data<T,4,A>, lubee::op::Operator_Ne<QuatT<T,A>> {
 		using op_t = lubee::op::Operator_Ne<QuatT<T,A>>;
@@ -417,11 +416,6 @@ namespace frea {
 		os << "Quat: ";
 		return q.asVec4().print(os);
 	}
-
-	using Quat = QuatT<float, false>;
-	using AQuat = QuatT<float, true>;
-	using DQuat = QuatT<double, false>;
-	using ADQuat = QuatT<double, true>;
 }
 namespace std {
 	template <class T, bool A>
