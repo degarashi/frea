@@ -9,6 +9,7 @@
 #include "lubee/meta/boolean.hpp"
 #include "lubee/meta/compare.hpp"
 #include "lubee/operators.hpp"
+#include "lubee/tostring.hpp"
 
 DEF_HASMETHOD(asInternal)
 
@@ -986,6 +987,32 @@ namespace frea {
 				 int Pos,
 				 ENABLE_IF((N2<=size))>
 		decltype(auto) convertI(const value_t&) const noexcept;
+
+		// -------- Luaへのエクスポート用 --------
+		VecT luaAddV(const VecT& v) const noexcept {
+			return *this + v;
+		}
+		VecT luaSubV(const VecT& v) const noexcept {
+			return *this - v;
+		}
+		VecT luaMulF(const float s) const noexcept {
+			return *this * s;
+		}
+		VecT luaMulM(const MatT_spec<VecT,size,align>& m) const noexcept {
+			return *this * m;
+		}
+		VecT divF(const float s) const noexcept {
+			return *this / s;
+		}
+		VecT invert() const noexcept {
+			return -(*this);
+		}
+		bool luaEqual(const VecT& v) const noexcept {
+			return *this == v;
+		}
+		std::string luaToString() const {
+			return lubee::ToString(*this);
+		}
 	};
 	template <class W, class D, int N>
 	struct VecT_spec : VecT<W,D, VecT_spec<W,D,N>> {

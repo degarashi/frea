@@ -167,7 +167,22 @@ namespace frea {
 			}
 			return res;
 		}
+		// -------- Luaへのエクスポート用 --------
+		bool luaEqual(const PlaneT& p) const noexcept {
+			return *this == p;
+		}
+		PlaneT luaMulM(const Mat4& m) const {
+			return *this * m;
+		}
+		std::string luaToString() const {
+			return lubee::ToString(*this);
+		}
 	};
+	template <class T, bool A>
+	inline std::ostream& operator << (std::ostream& os, const PlaneT<T,A>& p) {
+		os << "Plane: ";
+		return p.asVec4().print(os);
+	}
 }
 namespace std {
 	template <class T, bool A>

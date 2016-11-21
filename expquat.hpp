@@ -81,6 +81,13 @@ namespace frea {
 			}
 			return ret;
 		}
+		// -------- Luaへのエクスポート用 --------
+		bool luaEqual(const ExpQuat& q) const noexcept {
+			return *this == q;
+		}
+		std::string luaToString() const {
+			return lubee::ToString(*this);
+		}
 	};
 	template <class T, bool A>
 	inline std::ostream& operator << (std::ostream& os, const ExpQuatT<T,A>& q) {

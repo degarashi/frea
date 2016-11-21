@@ -775,6 +775,39 @@ namespace frea {
 		auto convertI(const value_t& vi) const noexcept {
 			return AsI(*this).template convertI<M2,N2,Pos>(vi);
 		}
+		// -------- Luaへのエクスポート用 --------
+		MatT luaAddF(const float s) const noexcept {
+			return *this + s;
+		}
+		MatT luaAddM(const MatT& m) const noexcept {
+			return *this * m;
+		}
+		MatT luaSubF(const float s) const noexcept {
+			return *this - s;
+		}
+		MatT luaSubM(const MatT& m) const noexcept {
+			return *this - m;
+		}
+		MatT luaMulF(const float s) const noexcept {
+			return *this * s;
+		}
+		MatT luaMulM(const MatT& m) const noexcept {
+			return *this * m;
+		}
+		typename vec_t::template type_cn<dim_m> luaMulV(const vec_t& v) const noexcept {
+			return *this * v;
+		}
+		MatT luaDivF(const float s) const noexcept {
+			return *this / s;
+		}
+		MatT luaInvert() const {
+			MatT ret;
+			inversion(ret);
+			return ret;
+		}
+		std::string luaToString() const {
+			return lubee::ToString(*this);
+		}
 	};
 	#undef AsI
 	template <class V, int M, int N, class S>

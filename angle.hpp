@@ -3,6 +3,7 @@
 #include "lubee/meta/enable_if.hpp"
 #include "lubee/meta/check_macro.hpp"
 #include "lubee/range.hpp"
+#include "lubee/tostring.hpp"
 #include <cmath>
 
 namespace frea {
@@ -209,6 +210,49 @@ namespace frea {
 			template <class Ar>
 			void load_minimal(const Ar&, const value_t& v) {
 				_angle = v;
+			}
+
+			// -------- Luaへのエクスポート用 --------
+			using Deg_t = Angle<Degree_t, value_t>;
+			using Rad_t = Angle<Radian_t, value_t>;
+			Angle luaAddD(const Deg_t& a) const {
+				return *this + a;
+			}
+			Angle luaAddR(const Rad_t& a) const {
+				return *this + a;
+			}
+			Angle luaSubD(const Deg_t& a) const {
+				return *this - a;
+			}
+			Angle luaSubR(const Rad_t& a) const {
+				return *this - a;
+			}
+			Deg_t luaToDegree() const {
+				return *this;
+			}
+			Rad_t luaToRadian() const {
+				return *this;
+			}
+			Angle luaMulF(const float s) const {
+				return *this * s;
+			}
+			Angle luaDivF(const float s) const {
+				return *this / s;
+			}
+			Angle luaInvert() const {
+				return -*this;
+			}
+			bool luaLessthan(const Angle& a) const {
+				return *this < a;
+			}
+			bool luaLessequal(const Angle& a) const {
+				return *this <= a;
+			}
+			bool luaEqual(const Angle& a) const {
+				return *this == a;
+			}
+			std::string luaToString() const {
+				return lubee::ToString(*this);
 			}
 	};
 	template <class TAG, class V>

@@ -405,6 +405,28 @@ namespace frea {
 		exp_t asExpQuat() const {
 			return exp_t(*this);
 		}
+		// -------- Luaへのエクスポート用 --------
+		QuatT luaAddQ(const QuatT& q) const noexcept {
+			return *this + q;
+		}
+		QuatT luaSubQ(const QuatT& q) const noexcept {
+			return *this - q;
+		}
+		QuatT luaMulQ(const QuatT& q) const noexcept {
+			return *this * q;
+		}
+		QuatT luaMulF(const float s) const noexcept {
+			return *this * s;
+		}
+		QuatT luaDivF(const float s) const noexcept {
+			return *this / s;
+		}
+		bool luaEqual(const QuatT& q) const noexcept {
+			return *this == q;
+		}
+		std::string luaToString() const {
+			return lubee::ToString(*this);
+		}
 	};
 	template <class T, bool A>
 	const T QuatT<T,A>::ZeroLen_Th;
