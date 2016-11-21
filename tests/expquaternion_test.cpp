@@ -67,8 +67,8 @@ namespace frea {
 			const auto ei = e.getAngAxis();
 			if(qa.get() > lubee::ThresholdF<value_t>(0.8)) {
 				constexpr auto Th = lubee::ThresholdF<value_t>(0.8);
-				EXPECT_LT(AbsMax(vec_t(qv-ei.axis)), Th);
-				EXPECT_LT(Radian<value_t>(qa-ei.angle).get(), Th);
+				EXPECT_LT(AbsMax(vec_t(qv-ei.second)), Th);
+				EXPECT_LT(Radian<value_t>(qa-ei.first).get(), Th);
 			}
 		}
 		TYPED_TEST(ExpQuaternion, Lerp) {

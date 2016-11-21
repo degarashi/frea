@@ -35,7 +35,7 @@ namespace frea {
 		{}
 		quat_t asQuat() const noexcept {
 			const auto ret = getAngAxis();
-			return quat_t::Rotation(ret.axis, ret.angle);
+			return quat_t::Rotation(ret.second, ret.first);
 		}
 
 		#define DEF_OP(op)	\
@@ -68,19 +68,16 @@ namespace frea {
 			return reinterpret_cast<const vec_t&>(*this);
 		}
 		auto getAngAxis() const noexcept {
-			struct {
-				rad_t	angle;
-				vec_t	axis;
-			} ret;
-			ret.axis = asVec3();
-			const value_t theta = ret.axis.length();		// = (angle/2)
+			std::pair<rad_t, vec_t> ret;
+			ret.second = asVec3();
+			const value_t theta = ret.second.length();		// = (angle/2)
 			if(theta < lubee::ThresholdF<value_t>(0.1)) {
 				// 無回転クォータニオンとする
-				ret.angle = rad_t(0);
-				ret.axis = vec_t(1,0,0);
+				ret.first = rad_t(0);
+				ret.second = vec_t(1,0,0);
 			} else {
-				ret.axis /= theta;
-				ret.angle = rad_t(theta*2);
+				ret.second /= theta;
+				ret.first = rad_t(theta*2);
 			}
 			return ret;
 		}

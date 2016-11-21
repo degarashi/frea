@@ -135,14 +135,14 @@ namespace frea {
 			} while(p.dot(vb) >= -Th);
 			const auto res0 = p.crosspoint(vf, vb);
 			// 交差フラグはTrueである
-			ASSERT_TRUE(res0.cross);
+			ASSERT_TRUE(res0.second);
 			// 交点は面上にある
-			ASSERT_LE(std::abs(p.dot(res0.point)), Th);
+			ASSERT_LE(std::abs(p.dot(res0.first)), Th);
 			// 逆順で計算しても結果は同じ
 			const auto res1 = p.crosspoint(vb, vf);
-			ASSERT_TRUE(res1.cross);
+			ASSERT_TRUE(res1.second);
 			// 最初の交点と同じ位置
-			ASSERT_LE(AbsMax(vec_t(res1.point - res0.point)), Th);
+			ASSERT_LE(AbsMax(vec_t(res1.first - res0.first)), Th);
 		}
 	}
 }

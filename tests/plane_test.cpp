@@ -175,12 +175,12 @@ namespace frea {
 
 			// 交差する部分は直線になるので、その上で点を移動させつつ双方の面上にあるか確認
 			const auto res = plane_t::CrossLine(p0, p1);
-			ASSERT_TRUE(res.cross);
+			ASSERT_TRUE(std::get<2>(res));
 
 			// チェックする終端を適当に決める
 			constexpr int NDiv = 8;
 			for(int i=0 ; i<NDiv ; i++) {
-				const auto pos = res.pt + res.dir * value_t(i)/NDiv;
+				const auto pos = std::get<0>(res) + std::get<1>(res) * value_t(i)/NDiv;
 				constexpr auto Th = lubee::ThresholdF<value_t>(0.8);
 				ASSERT_LE(std::abs(p0.dot(pos)), Th);
 				ASSERT_LE(std::abs(p1.dot(pos)), Th);
@@ -209,19 +209,19 @@ namespace frea {
 			}
 
 			const auto res = plane_t::ChokePoint(p[0], p[1], p[2]);
-			if(res.cross) {
+			if(res.second) {
 				// 交差する部分は点になるので、その点が全ての面上にあるか確認
-				const auto Th = res.pt.length() / 4096;
+				const auto Th = res.first.length() / 4096;
 				for(auto& pt : p)
-					ASSERT_LE(std::abs(pt.dot(res.pt)), Th);
+					ASSERT_LE(std::abs(pt.dot(res.first)), Th);
 			} else {
 				// 3つの平面が一箇所で交わる点がない -> それぞれ2つを選んだ時の交点（直線）が平行になる
 				vec_t dir[3];
 				int ndir = 0;
 				for(int i=0 ; i<3 ; i++) {
 					const auto res = plane_t::CrossLine(p[i], p[(i+1)%3]);
-					if(res.cross)
-						dir[ndir++] = res.dir;
+					if(std::get<2>(res))
+						dir[ndir++] = std::get<1>(res);
 				}
 				constexpr auto Th = lubee::ThresholdF<value_t>(0.6);
 				// 交わる平面の組み合わせが少なくとも2つはある

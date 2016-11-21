@@ -46,17 +46,14 @@ namespace frea {
 		}
 		//! YawPitchDistの位置から座標原点を見る姿勢
 		auto toOffsetRot() const {
-			struct {
-				Vec3	pos;
-				Quat	rot;
-			} ret;
+			std::pair<Vec3, Quat> ret;
 			// Z軸をYaw/Pitch/Roll傾けた方向に対してDist距離進んだ場所がカメラの位置
 			// カメラの方向は変換済みZ軸と逆
 			const Quat q = Quat::RotationYPR(yaw, pitch, RadF(0));
 			const Vec3 z = q.getDir();
-			ret.pos = z*distance;
+			ret.first = z*distance;
 			const Vec3 vd = -(z*distance).normalization();
-			ret.rot = Quat::LookAt(vd, Vec3(0,1,0));
+			ret.second = Quat::LookAt(vd, Vec3(0,1,0));
 			return ret;
 		}
 	};

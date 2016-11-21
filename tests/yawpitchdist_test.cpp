@@ -22,10 +22,10 @@ namespace frea {
 			} while(nzv.length() < 1e-2);
 			const auto ypd = ::frea::YawPitchDist<value_t>::FromPos(nzv);
 			const auto res = ypd.toOffsetRot();
-			const auto nzv2 = -res.rot.getDir() * ypd.distance;
+			const auto nzv2 = -res.second.getDir() * ypd.distance;
 
 			constexpr auto Th = lubee::ThresholdF<value_t>(0.8);
-			EXPECT_LT(AbsMax(V3(res.pos - nzv)), Th);
+			EXPECT_LT(AbsMax(V3(res.first - nzv)), Th);
 			// rotation + distanceから復元した元座標ベクトル
 			EXPECT_LT(AbsMax(V3(nzv2 - nzv)), Th);
 		}

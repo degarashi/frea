@@ -41,11 +41,8 @@ namespace frea {
 		}
 		//! 3つの平面が交差する地点を算出
 		static auto ChokePoint(const PlaneT& p0, const PlaneT& p1, const PlaneT& p2) noexcept {
-			struct {
-				vec_t	pt;
-				bool	cross;
-			} ret;
-			ret.cross = false;
+			std::pair<vec_t, bool> ret;
+			ret.second = false;
 
 			mat3_t m, mInv;
 			m.template getRow<0>() = p0.getNormal();
@@ -61,17 +58,14 @@ namespace frea {
 
 			vec_t v(-p0.w, -p1.w, -p2.w);
 			v *= mInv;
-			ret.cross = true;
-			ret.pt = v;
+			ret.second = true;
+			ret.first = v;
 			return ret;
 		}
 		//! 2つの平面が交差する直線を算出
 		static auto CrossLine(const PlaneT& p0, const PlaneT& p1) noexcept {
-			struct {
-				vec_t	pt, dir;
-				bool	cross;
-			} ret;
-			ret.cross = false;
+			std::tuple<vec_t, vec_t, bool> ret;
+			std::get<2>(ret) = false;
 
 			const auto &nml0 = p0.getNormal(),
 						&nml1 = p1.getNormal();
@@ -92,11 +86,11 @@ namespace frea {
 				return ret;
 			}
 
-			ret.cross = true;
+			std::get<2>(ret) = true;
 			vec_t v(-p0.w, -p1.w, 0);
 			v *= mInv;
-			ret.pt = v;
-			ret.dir = nml;
+			std::get<0>(ret) = v;
+			std::get<1>(ret) = nml;
 			return ret;
 		}
 
@@ -153,26 +147,23 @@ namespace frea {
 		}
 		//! 平面との交差点を算出
 		auto crosspoint(const vec_t& v0, const vec_t& v1) const noexcept {
-			struct {
-				vec_t point;
-				bool cross;
-			} res;
+			std::pair<vec_t, bool> res;
 			// 線分が平面をまたぐか
 			const value_t distf = dot(v0);
 			const value_t distb = dot(v1);
 			if(distf * distb >= 0) {
-				res.cross = false;
+				res.second = false;
 				return res;
 			}
-			res.cross = true;
+			res.second = true;
 			const value_t div = std::abs(distf) + std::abs(distb);
 			if(div < 1e-6) {
 				// どちらの頂点ともほぼ面上にあるので交点はその中間ということにする
-				res.point = (v0 + v1) /2;
+				res.first = (v0 + v1) /2;
 			} else {
 				const value_t ratio = std::abs(distf) / div;
 				// 平面と線分の交点 -> tv
-				res.point = (v1 - v0) * ratio + v0;
+				res.first = (v1 - v0) * ratio + v0;
 			}
 			return res;
 		}
