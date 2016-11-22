@@ -998,13 +998,13 @@ namespace frea {
 		VecT luaMulF(const float s) const noexcept {
 			return *this * s;
 		}
-		VecT luaMulM(const MatT_spec<VecT,size,align>& m) const noexcept {
+		VecT luaMulM(const MatT_spec<VecT,size,size>& m) const noexcept {
 			return *this * m;
 		}
-		VecT divF(const float s) const noexcept {
+		VecT luaDivF(const float s) const noexcept {
 			return *this / s;
 		}
-		VecT invert() const noexcept {
+		VecT luaInvert() const noexcept {
 			return -(*this);
 		}
 		bool luaEqual(const VecT& v) const noexcept {

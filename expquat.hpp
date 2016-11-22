@@ -85,6 +85,33 @@ namespace frea {
 		bool luaEqual(const ExpQuat& q) const noexcept {
 			return *this == q;
 		}
+		ExpQuatT luaAddQ(const ExpQuatT& q) const noexcept {
+			return *this + q;
+		}
+		ExpQuatT luaAddF(const value_t& s) const noexcept {
+			return *this + s;
+		}
+		ExpQuatT luaSubQ(const ExpQuatT& q) const noexcept {
+			return *this - q;
+		}
+		ExpQuatT luaSubF(const value_t& s) const noexcept {
+			return *this - s;
+		}
+		ExpQuatT luaMulQ(const ExpQuatT& q) const noexcept {
+			return *this - q;
+		}
+		ExpQuatT luaMulF(const value_t& s) const noexcept {
+			return *this - s;
+		}
+		ExpQuatT luaDivQ(const ExpQuatT& q) const noexcept {
+			return *this - q;
+		}
+		ExpQuatT luaDivF(const value_t& s) const noexcept {
+			return *this - s;
+		}
+		vec_t luaAsVec3() const noexcept {
+			return vec_t(*this);
+		}
 		std::string luaToString() const {
 			return lubee::ToString(*this);
 		}

@@ -406,6 +406,18 @@ namespace frea {
 			return exp_t(*this);
 		}
 		// -------- Luaへのエクスポート用 --------
+		static QuatT Lua_Rotation(const Vec3& axis, const RadF ang) {
+			return Rotation(axis, ang);
+		}
+		static QuatT Lua_RotationFromTo(const Vec3& from, const Vec3& to) {
+			return Rotation(from, to);
+		}
+		QuatT luaRotation(const vec_t& axis, const rad_t ang) noexcept {
+			return Rotation(axis, ang);
+		}
+		QuatT luaRotationFromTo(const vec_t& from, const vec_t& to) noexcept {
+			return Rotation(from, to);
+		}
 		QuatT luaAddQ(const QuatT& q) const noexcept {
 			return *this + q;
 		}

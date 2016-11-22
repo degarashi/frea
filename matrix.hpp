@@ -800,11 +800,6 @@ namespace frea {
 		MatT luaDivF(const float s) const noexcept {
 			return *this / s;
 		}
-		MatT luaInvert() const {
-			MatT ret;
-			inversion(ret);
-			return ret;
-		}
 		std::string luaToString() const {
 			return lubee::ToString(*this);
 		}
@@ -885,6 +880,10 @@ namespace frea {
 			// -------- アダプタ関数群(wrapM) --------
 			spec_t transposition() const noexcept { return this->asInternal().transposition(); }
 			void transpose() noexcept { *this = transposition(); }
+			// -------- Luaへのエクスポート用 --------
+			spec_t luaInvert() const {
+				return inversion();
+			}
 	};
 
 	template <class V, int M, int N>
