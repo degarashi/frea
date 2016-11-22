@@ -24,6 +24,7 @@ namespace frea {
 								dim_n = VW::size,
 								dim_min = lubee::Arithmetic<dim_m, dim_n>::less,
 								bit_width = VW::bit_width;
+			using Chk_SizeM = std::enable_if_t<(dim_m>0)>*;
 			using spec_t = S;
 			using vec_t = VW;
 			using value_t = typename vec_t::value_t;
@@ -523,6 +524,7 @@ namespace frea {
 		constexpr static bool align = base_t::align;
 		using column_t = typename V::template type_cn<dim_m>;
 		using vec_min = typename vec_t::template type_cn<dim_min>;
+		using Chk_SizeM = std::enable_if_t<(dim_m>0)>*;
 		//! 要素数の読み替え
 		template <int M2, int N2>
 		using type_cn = Mat_t<value_t, M2, N2, vec_t::template type_cn<N2>::align>;

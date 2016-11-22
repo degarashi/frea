@@ -59,7 +59,7 @@ namespace frea {
 		using reg_cn = wrap_spec<R2, size>;
 
 		//! コンパイル時チェック: 要素数がレジスタのサイズを超えていないか
-		using Chk_Dummy = std::enable_if_t<(D <= capacity)>*;
+		using Chk_Size = std::enable_if_t<(size<=capacity && size>0)>*;
 
 		//! 実際に値を保持する型
 		reg_t	 m;
@@ -880,6 +880,7 @@ namespace frea {
 		//! 要素数の読み替え
 		template <int N2, bool A2=align>
 		using type_cn = VecT_spec<Wrap_t<reg_t, N2>, typename base_t::template type_cn<N2,A2>, N2>;
+		using Chk_Size = std::enable_if_t<(size>0)>*;
 
 		auto _asInternal(std::false_type) const noexcept {
 			return wrap_t(base_t::m, lubee::BConst<align>());
