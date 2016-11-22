@@ -45,6 +45,8 @@ namespace frea {
 		using reg_t = R;
 		using I = info<R>;
 		using value_t = typename I::value_t;
+		template <bool A>
+		using data_t = Data<value_t, D, A>;
 		constexpr static bool is_integral = std::is_integral<value_t>{};
 		//! 格納する予定の要素数
 		constexpr static int size = D;
@@ -990,25 +992,25 @@ namespace frea {
 		decltype(auto) convertI(const value_t&) const noexcept;
 
 		// -------- Luaへのエクスポート用 --------
-		VecT luaAddV(const VecT& v) const noexcept {
+		spec_t luaAddV(const spec_t& v) const noexcept {
 			return *this + v;
 		}
-		VecT luaSubV(const VecT& v) const noexcept {
+		spec_t luaSubV(const spec_t& v) const noexcept {
 			return *this - v;
 		}
-		VecT luaMulF(const float s) const noexcept {
+		spec_t luaMulF(const float s) const noexcept {
 			return *this * s;
 		}
-		VecT luaMulM(const MatT_spec<VecT,size,size>& m) const noexcept {
+		spec_t luaMulM(const MatT_spec<spec_t,size,size>& m) const noexcept {
 			return *this * m;
 		}
-		VecT luaDivF(const float s) const noexcept {
+		spec_t luaDivF(const float s) const noexcept {
 			return *this / s;
 		}
-		VecT luaInvert() const noexcept {
+		spec_t luaInvert() const noexcept {
 			return -(*this);
 		}
-		bool luaEqual(const VecT& v) const noexcept {
+		bool luaEqual(const spec_t& v) const noexcept {
 			return *this == v;
 		}
 		std::string luaToString() const {
