@@ -387,7 +387,7 @@ namespace frea{
 		template <
 			class... Ts,
 			ENABLE_IF((
-				 lubee::And<std::is_convertible<Ts,value_t>...>{} &&
+				 lubee::meta::And<std::is_convertible<Ts,value_t>...>{} &&
 					sizeof...(Ts)==capacity
 			))
 		>
@@ -713,7 +713,7 @@ namespace frea{
 				}; \
 			}; \
 			Data_spec() = default; \
-			template <class... Ts, ENABLE_IF((lubee::And<std::is_convertible<Ts,T>...>{} && sizeof...(Ts)>1))> \
+			template <class... Ts, ENABLE_IF((lubee::meta::And<std::is_convertible<Ts,T>...>{} && sizeof...(Ts)>1))> \
 			constexpr Data_spec(const Ts&... ts) noexcept: m{static_cast<T>(ts)...} {} \
 		};
 	DEF_DATA(2, x,y)
@@ -763,7 +763,7 @@ namespace frea{
 		value_t& operator [](const int n) noexcept { return this->m[n]; }
 		//! 複数要素での初期化
 		template <class... Ts,
-				 ENABLE_IF((lubee::And<std::is_convertible<Ts,value_t>...>{} && sizeof...(Ts)>1))>
+				 ENABLE_IF((lubee::meta::And<std::is_convertible<Ts,value_t>...>{} && sizeof...(Ts)>1))>
 		constexpr Data(const Ts&... ts) noexcept: base_t{static_cast<value_t>(ts)...} {}
 		//! 1要素での初期化(内部呼び出し用)
 		template <std::size_t... Idx, class T2>
