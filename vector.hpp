@@ -1001,11 +1001,17 @@ namespace frea {
 		spec_t luaMulF(const float s) const noexcept {
 			return *this * s;
 		}
+		spec_t luaMulV(const spec_t& v) const noexcept {
+			return *this * v;
+		}
 		spec_t luaMulM(const MatT_spec<spec_t,size,size>& m) const noexcept {
 			return *this * m;
 		}
 		spec_t luaDivF(const float s) const noexcept {
 			return *this / s;
+		}
+		spec_t luaDivV(const spec_t& v) const noexcept {
+			return *this / v;
 		}
 		spec_t luaInvert() const noexcept {
 			return -(*this);
