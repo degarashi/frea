@@ -807,6 +807,11 @@ namespace frea {
 		}
 	};
 	#undef AsI
+	template <class V, int M, class S>
+	const int MatT<V,M,S>::size;
+	template <class V, int M, class S>
+	const bool MatT<V,M,S>::align;
+
 	template <class V, int M, int N, class S>
 	struct MatT_dspec : MatT<V,M,S> {
 		using base_t = MatT<V,M,S>;

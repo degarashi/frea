@@ -1017,6 +1017,11 @@ namespace frea {
 			return lubee::ToString(*this);
 		}
 	};
+	template <class W, class D, class S>
+	const int VecT<W,D,S>::size;
+	template <class W, class D, class S>
+	const bool VecT<W,D,S>::align;
+
 	template <class W, class D, int N>
 	struct VecT_spec : VecT<W,D, VecT_spec<W,D,N>> {
 		using base_t = VecT<W,D, VecT_spec<W,D,N>>;
