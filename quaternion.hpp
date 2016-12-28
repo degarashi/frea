@@ -412,10 +412,10 @@ namespace frea {
 		static QuatT Lua_RotationFromTo(const Vec3& from, const Vec3& to) {
 			return Rotation(from, to);
 		}
-		QuatT luaRotation(const vec_t& axis, const rad_t ang) noexcept {
+		QuatT luaRotation(const vec_t& axis, const rad_t ang) const noexcept {
 			return Rotation(axis, ang);
 		}
-		QuatT luaRotationFromTo(const vec_t& from, const vec_t& to) noexcept {
+		QuatT luaRotationFromTo(const vec_t& from, const vec_t& to) const noexcept {
 			return Rotation(from, to);
 		}
 		QuatT luaAddQ(const QuatT& q) const noexcept {
