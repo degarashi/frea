@@ -276,3 +276,12 @@ namespace frea {
 		return os << ang.get() << "(" << AngleInfo<TAG>::template name_short<> << ")";
 	}
 }
+namespace std {
+	template <class TAG, class V>
+	struct hash<frea::Angle<TAG,V>> {
+		std::size_t operator()(const frea::Angle<TAG,V>& r) const {
+			const auto a = r.get();
+			return std::hash<std::decay_t<decltype(a)>>()(a);
+		}
+	};
+}
