@@ -802,6 +802,9 @@ namespace frea {
 		MatT luaDivF(const float s) const noexcept {
 			return *this / s;
 		}
+		bool luaEqual(const MatT& m) const noexcept {
+			return *this == m;
+		}
 		std::string luaToString() const {
 			return lubee::ToString(*this);
 		}
