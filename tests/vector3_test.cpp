@@ -14,7 +14,7 @@ namespace frea {
 			USING(vec_t);
 			using quat_t = QuatT<value_t, false>;
 			const auto mtf = this->mt().template getUniformF<value_t>();
-			const auto dir = MakeDir<2, vec_t>(mtf, 0.8);
+			const auto dir = random::GenVecUnitN<2, vec_t>(mtf, 0.8);
 			const auto w0 = dir[0].asInternal(),
 						w1 = dir[1].asInternal();
 			const auto q = random::GenQuat<quat_t>(mtf);

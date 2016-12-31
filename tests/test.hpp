@@ -213,42 +213,6 @@ namespace frea {
 					return ret;
 				}
 		};
-		template <int N, class V, class Gen, class Chk>
-		auto MakeVec(Gen&& gen, Chk&& chk) {
-			static_assert(N>0, "N shoud be greater than 0");
-			std::array<V, N> ret;
-			ret[0] = gen();
-			for(int i=1 ; i<N ; i++) {
-				for(;;) {
-					ret[i] = gen();
-					bool b = true;
-					for(int j=0 ; j<i ; j++) {
-						if(!chk(ret[j], ret[i])) {
-							b = false;
-							break;
-						}
-					}
-					if(b)
-						break;
-				}
-			}
-			return ret;
-		}
-		//! 方向が重ならない単位ベクトルを任意の数、生成
-		template <int N, class V, class RDF>
-		auto MakeDir(RDF&& rdf, const typename V::value_t& th) {
-			return MakeVec<N,V>(
-				[&rdf](){ return random::GenVecUnit<V>(rdf); },
-				[th](const auto& v0, const auto& v1){ return v0.dot(v1) < th; }
-			);
-		}
-		template <int N, class V, class RDF>
-		auto MakePos(RDF&& rdf, const typename V::value_t& th) {
-			return MakeVec<N,V>(
-				[&rdf](){ return random::GenVec<V>(rdf); },
-				[th=th*th](const auto& v0, const auto& v1){ return v0.dist_sq(v1) >= th; }
-			);
-		}
 
 		template <class T, int M, int N>
 		struct ArrayM : Array<Array<T,N>, M> {
