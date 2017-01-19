@@ -273,7 +273,7 @@ namespace frea {
 
 	template <class TAG, class V>
 	inline std::ostream& operator << (std::ostream& os, const Angle<TAG,V>& ang) {
-		return os << ang.get() << "(" << AngleInfo<TAG>::template name_short<> << ")";
+		return os << ang.get() << "(" << AngleInfo<TAG>::template name_short<V> << ")";
 	}
 }
 namespace std {
