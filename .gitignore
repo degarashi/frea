@@ -1,4 +1,5 @@
 .clang
 *.cbp
-*.user
+*.user*
+__pycache__
 freatypes.pyc
