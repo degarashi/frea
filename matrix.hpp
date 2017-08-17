@@ -311,6 +311,7 @@ namespace frea {
 		using base_t::base_t;
 
 		wrapM_spec() = default;
+		wrapM_spec(const base_t& b): base_t(b) {}
 	};
 	#define DEF_FUNC(name, nameC) \
 		void name() noexcept(noexcept(this->nameC())) { \
@@ -367,6 +368,7 @@ namespace frea {
 			using vec_t = typename base_t::vec_t;
 			using base_t::base_t;
 			wrapM_spec() = default;
+			wrapM_spec(const base_t& b): base_t(b) {}
 
 			auto transposition() const& noexcept {
 				const auto idx = std::make_index_sequence<S>();
@@ -819,6 +821,8 @@ namespace frea {
 	struct MatT_dspec : MatT<V,M,S> {
 		using base_t = MatT<V,M,S>;
 		using base_t::base_t;
+		MatT_dspec() = default;
+		MatT_dspec(const base_t& b): base_t(b) {}
 	};
 	// 正方行列のみのメンバ関数を定義
 	template <class V, int N, class S>
@@ -826,6 +830,8 @@ namespace frea {
 		public:
 			using base_t = MatT<V,N,S>;
 			using base_t::base_t;
+			MatT_dspec() = default;
+			MatT_dspec(const base_t& b): base_t(b) {}
 			using spec_t = S;
 			using value_t = typename V::value_t;
 			using this_t = MatT_dspec;
@@ -900,6 +906,8 @@ namespace frea {
 	struct MatT_spec : MatT_dspec<V,M,N, MatT_spec<V,M,N>> {
 		using base_t = MatT_dspec<V,M,N, MatT_spec<V,M,N>>;
 		using base_t::base_t;
+		MatT_spec() = default;
+		MatT_spec(const base_t& b): base_t(b) {}
 	};
 
 	template <class W, ENABLE_IF((is_wrapM<W>{}))>

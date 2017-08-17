@@ -7,6 +7,8 @@ namespace frea {
 	struct wrap_spec<R,4> : wrap<R,4,wrap_spec<R,4>> {
 		using base_t = wrap<R,4,wrap_spec<R,4>>;
 		using base_t::base_t;
+		wrap_spec() = default;
+		wrap_spec(const base_t& b): base_t(b) {}
 
 		auto asVec3Coord() const noexcept {
 			auto tmp = *this;
@@ -18,6 +20,8 @@ namespace frea {
 	struct tup_spec<T,4> : tup<T,4, tup_spec<T,4>> {
 		using base_t = tup<T,4, tup_spec<T,4>>;
 		using base_t::base_t;
+		tup_spec() = default;
+		tup_spec(const base_t& b): base_t(b) {}
 		using this_t = tup_spec;
 		using value_t = typename base_t::value_t;
 

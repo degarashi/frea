@@ -335,12 +335,16 @@ namespace frea {
 	struct wrap_spec : wrap<R,N, wrap_spec<R,N>> {
 		using base_t = wrap<R,N, wrap_spec<R,N>>;
 		using base_t::base_t;
+		wrap_spec() = default;
+		wrap_spec(const base_t& b): base_t(b) {}
 	};
 	// tupクラスに要素数固有の関数などを付加
 	template <class T, int N>
 	struct tup_spec : tup<T,N, tup_spec<T,N>> {
 		using base_t = tup<T,N, tup_spec<T,N>>;
 		using base_t::base_t;
+		tup_spec() = default;
+		tup_spec(const base_t& b): base_t(b) {}
 	};
 }
 #include "include/wrap_d2.hpp"
@@ -367,8 +371,8 @@ namespace frea{
 							capacity = w_capacity * a_size,					//!< このクラスが保持できる最大要素数
 							bit_width = sizeof(value_t)*8;
 		constexpr static bool is_integral = wrap_t::is_integral;
-		constexpr static int Rem0 = N % w_capacity,
-							Rem = (Rem0==0) ? w_capacity : Rem0;
+		constexpr static int Mod = N % w_capacity,
+							Rem = (Mod==0) ? w_capacity : Mod;
 		using wrapTail_t = typename wrap_t::template type_cn<Rem>;
 
 		auto getMaskedTail() const noexcept {

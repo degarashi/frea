@@ -9,6 +9,8 @@ namespace frea {
 		using base_t::base_t;
 		using value_t = typename base_t::value_t;
 		using this_t = wrap_spec;
+		wrap_spec() = default;
+		wrap_spec(const base_t& b): base_t(b) {}
 
 		auto asD2() const noexcept {
 			struct D2 {

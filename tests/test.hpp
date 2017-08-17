@@ -218,6 +218,8 @@ namespace frea {
 		struct ArrayM : Array<Array<T,N>, M> {
 			using base_t = Array<Array<T,N>, M>;
 			using base_t::base_t;
+			ArrayM() = default;
+			ArrayM(const base_t& b): base_t(b) {}
 			template <class V2>
 			auto mul(const V2& v, std::false_type) const {
 				return base_t::operator * (v);

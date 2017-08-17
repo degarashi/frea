@@ -18,6 +18,8 @@ namespace frea {
 	struct wrap_spec<R,3> : wrap<R,3,wrap_spec<R,3>> {
 		using base_t = wrap<R,3,wrap_spec<R,3>>;
 		using base_t::base_t;
+		wrap_spec() = default;
+		wrap_spec(const base_t& b): base_t(b) {}
 		using this_t = wrap_spec;
 		using value_t = typename base_t::value_t;
 
@@ -44,6 +46,8 @@ namespace frea {
 	struct tup_spec<T,3> : tup<T,3, tup_spec<T,3>> {
 		using base_t = tup<T,3, tup_spec<T,3>>;
 		using base_t::base_t;
+		tup_spec() = default;
+		tup_spec(const base_t& b): base_t(b) {}
 		using this_t = tup_spec;
 
 		using base_t::operator *;
