@@ -47,7 +47,7 @@ namespace frea {
 		using value_t = typename I::value_t;
 		template <bool A>
 		using data_t = Data<value_t, D, A>;
-		constexpr static bool is_integral = std::is_integral<value_t>{};
+		constexpr static bool is_integral = static_cast<bool>(std::is_integral<value_t>{});
 		//! 格納する予定の要素数
 		constexpr static int size = D;
 		//! 演算レジスタが格納できる要素数
@@ -740,7 +740,7 @@ namespace frea{
 							capacity = size,
 							bit_width = sizeof(T)*8;
 		constexpr static bool align = A,
-							is_integral = std::is_integral<T>{};
+							is_integral = static_cast<bool>(std::is_integral<T>{});
 		using base_t = Data_spec<T,N>;
 		using value_t = T;
 		using reg_t = Data;
@@ -976,24 +976,27 @@ namespace frea {
 		bool isZero(const value_t& th) const noexcept { return asInternal().isZero(th); }
 
 		// ------------------- サイズ変換 -------------------
-		// 大きいサイズへの変換
 		// 余った要素はゼロで埋める
-		template <int N2,
-				ENABLE_IF((N2>size))>
-		auto convert() const noexcept;
-		// 余った要素はPosの場所を任意の値、他はゼロで埋める
-		template <int N2,
-				 int Pos,
-				 ENABLE_IF((N2>size))>
-		auto convertI(const value_t& vi) const noexcept;
+		template <int N2>
+		decltype(auto) convert() const noexcept {
+			return _convert<N2>(std::integral_constant<bool, (N2>size)>{});
+		}
+		// 大きいサイズへの変換
+		template <int N2>
+		auto _convert(std::true_type) const noexcept;
 		// 小さいサイズへの変換
-		template <int N2,
-				 ENABLE_IF((N2<=size))>
-		decltype(auto) convert() const noexcept;
-		template <int N2,
-				 int Pos,
-				 ENABLE_IF((N2<=size))>
-		decltype(auto) convertI(const value_t&) const noexcept;
+		template <int N2>
+		decltype(auto) _convert(std::false_type) const noexcept;
+
+		// 余った要素はPosの場所を任意の値、他はゼロで埋める
+		template <int N2, int Pos>
+		decltype(auto) convertI(const value_t& vi) const noexcept {
+			return _convertI<N2,Pos>(vi, std::integral_constant<bool, (N2>size)>{});
+		}
+		template <int N2, int Pos>
+		auto _convertI(const value_t& vi, std::true_type) const noexcept;
+		template <int N2, int Pos>
+		decltype(auto) _convertI(const value_t& vi, std::false_type) const noexcept;
 
 		// -------- Luaへのエクスポート用 --------
 		spec_t luaAddV(const spec_t& v) const noexcept {
@@ -1045,30 +1048,25 @@ namespace frea {
 #include "include/vec_d4.hpp"
 namespace frea {
 	template <class W, class D, class S>
-	template <int N2,
-			 ENABLE_IF_I((N2>VecT<W,D,S>::size))>
-	auto VecT<W,D,S>::convert() const noexcept {
+	template <int N2>
+	auto VecT<W,D,S>::_convert(std::true_type) const noexcept {
 		return type_cn<N2>(asInternal().template convert<N2>());
 	}
 	template <class W, class D, class S>
-	template <int N2,
-			 int Pos,
-			 ENABLE_IF_I((N2>VecT<W,D,S>::size))>
-	auto VecT<W,D,S>::convertI(const value_t& vi) const noexcept {
-		return type_cn<N2>(asInternal().template convertI<N2,Pos>(vi));
-	}
-	template <class W, class D, class S>
-	template <int N2,
-			 ENABLE_IF_I((N2<=VecT<W,D,S>::size))>
-	decltype(auto) VecT<W,D,S>::convert() const noexcept {
+	template <int N2>
+	decltype(auto) VecT<W,D,S>::_convert(std::false_type) const noexcept {
 		// そのままポインタ読み替え
 		return reinterpret_cast<const type_cn<N2>&>(*this);
 	}
+
 	template <class W, class D, class S>
-	template <int N2,
-			 int Pos,
-			 ENABLE_IF_I((N2<=VecT<W,D,S>::size))>
-	decltype(auto) VecT<W,D,S>::convertI(const value_t&) const noexcept {
+	template <int N2, int Pos>
+	auto VecT<W,D,S>::_convertI(const value_t& vi, std::true_type) const noexcept {
+		return type_cn<N2>(asInternal().template convertI<N2,Pos>(vi));
+	}
+	template <class W, class D, class S>
+	template <int N2, int Pos>
+	decltype(auto) VecT<W,D,S>::_convertI(const value_t&, std::false_type) const noexcept {
 		// そのままポインタ読み替え
 		return reinterpret_cast<const type_cn<N2>&>(*this);
 	}

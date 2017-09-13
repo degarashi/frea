@@ -45,21 +45,23 @@ namespace frea {
 		template <class T>
 		constexpr static T one_rotation{360};
 		template <class Dummy=void>
-		constexpr static char name[]= {"Degree"},
-							name_short[] = {"Deg"};
+		constexpr static char name[] = {"Degree"};
+		template <class Dummy=void>
+		constexpr static char name_short[] = {"Deg"};
 	};
-	template <class Dummy> const char AngleInfo<Degree_t>::name[];
-	template <class Dummy> const char AngleInfo<Degree_t>::name_short[];
+	template <class Dummy> constexpr char AngleInfo<Degree_t>::name[];
+	template <class Dummy> constexpr char AngleInfo<Degree_t>::name_short[];
 	template <>
 	struct AngleInfo<Radian_t> {
 		template <class T>
 		constexpr static T one_rotation{2*Pi<T>};
 		template <class Dummy=void>
-		constexpr static char name[] = {"Radian"},
-							name_short[] = {"Rad"};
+		constexpr static char name[] = {"Radian"};
+		template <class Dummy=void>
+		constexpr static char name_short[] = {"Rad"};
 	};
-	template <class Dummy> const char AngleInfo<Radian_t>::name[];
-	template <class Dummy> const char AngleInfo<Radian_t>::name_short[];
+	template <class Dummy> constexpr char AngleInfo<Radian_t>::name[];
+	template <class Dummy> constexpr char AngleInfo<Radian_t>::name_short[];
 
 	//! 角度クラス
 	/*! 混同を避けるために数値への変換は明示的

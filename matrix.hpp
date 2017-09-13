@@ -313,8 +313,8 @@ namespace frea {
 		wrapM_spec() = default;
 		wrapM_spec(const base_t& b): base_t(b) {}
 	};
-	#define DEF_FUNC(name, nameC) \
-		void name() noexcept(noexcept(this->nameC())) { \
+	#define DEF_FUNC(cls, name, nameC) \
+		void name() noexcept(noexcept(std::declval<cls>().nameC())) { \
 			*this = nameC(); \
 		}
 
@@ -378,8 +378,8 @@ namespace frea {
 			value_t calcDeterminant() const noexcept { return mat_t(*this).calcDeterminant(); }
 			this_t inversion() const { return mat_t(*this).inversion(); }
 			this_t inversion(const value_t& det) const { return mat_t(*this).inversion(det); }
-			DEF_FUNC(inverse, inversion)
-			DEF_FUNC(transpose, transposition)
+			DEF_FUNC(wrapM_spec, inverse, inversion)
+			DEF_FUNC(wrapM_spec, transpose, transposition)
 	};
 	#undef DEF_FUNC
 
