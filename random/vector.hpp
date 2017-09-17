@@ -11,7 +11,7 @@ namespace frea {
 			\tparam RDF
 		*/
 		template <class V, class RD>
-		auto GenVec(RD&& rd) {
+		V GenVec(RD&& rd) {
 			V ret;
 			for(auto& v : ret.m)
 				v = rd();
@@ -19,7 +19,7 @@ namespace frea {
 		}
 		//! ランダムなベクトル (但し全ての成分の絶対値がそれぞれ基準範囲内)
 		template <class V, class RD>
-		auto GenVec(RD&& rd, const lubee::Range<typename V::value_t>& rTh) {
+		V GenVec(RD&& rd, const lubee::Range<typename V::value_t>& rTh) {
 			V ret;
 			for(auto& v : ret.m)
 				v = rd(rTh);
