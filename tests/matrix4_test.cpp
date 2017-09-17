@@ -15,7 +15,7 @@ namespace frea {
 			constexpr auto range = lubee::Range<value_t>{-1e2, 1e2};
 			const auto mtf = this->mt().template getUniformF<value_t>(range);
 			// {pos, at}
-			const auto pos = random::GenVecN<2, vec3_t>(mtf, 1e-2);
+			const auto pos = random::GenVecN<vec3_t>(mtf, 2, 1e-2);
 			const vec3_t dir = (pos[1]-pos[0]).normalization();
 			vec3_t up;
 			do {

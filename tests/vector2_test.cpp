@@ -13,7 +13,7 @@ namespace frea {
 			USING(vec_t);
 			USING(value_t);
 			const auto mtf = this->mt().template getUniformF<value_t>();
-			const auto dir = random::GenVecUnitN<2, vec_t>(mtf, 0.8);
+			const auto dir = random::GenVecUnitN<vec_t>(mtf, 2, 0.8);
 			const auto w0 = dir[0].asInternal(),
 						w1 = dir[1].asInternal();
 			// cw

@@ -1,6 +1,7 @@
 #pragma once
 #include "lubee/meta/enable_if.hpp"
 #include "../angle.hpp"
+#include <vector>
 
 namespace frea {
 	namespace random {
@@ -48,12 +49,12 @@ namespace frea {
 			};
 		}
 		namespace detail {
-			template <int N, class V, class Gen, class Chk>
-			auto MakeVec(Gen&& gen, Chk&& chk) {
-				static_assert(N>0, "N shoud be greater than 0");
-				std::array<V, N> ret;
+			template <class V, class Gen, class Chk>
+			auto MakeVec(const int n, Gen&& gen, Chk&& chk) {
+				D_Assert(n>0,  "n shoud be greater than 0");
+				std::vector<V> ret(n);
 				ret[0] = gen();
-				for(int i=1 ; i<N ; i++) {
+				for(int i=1 ; i<n ; i++) {
 					for(;;) {
 						ret[i] = gen();
 						bool b = true;
@@ -71,17 +72,19 @@ namespace frea {
 			}
 		}
 		//! 方向が重ならない単位ベクトルを任意の数、生成
-		template <int N, class V, class RDF>
-		auto GenVecUnitN(RDF&& rdf, const typename V::value_t& th) {
-			return detail::MakeVec<N,V>(
+		template <class V, class RDF>
+		std::vector<V> GenVecUnitN(RDF&& rdf, const int n, const typename V::value_t& th) {
+			return detail::MakeVec<V>(
+				n,
 				[&rdf](){ return GenVecUnit<V>(rdf); },
 				[th](const auto& v0, const auto& v1){ return v0.dot(v1) < th; }
 			);
 		}
 		//! 位置が重ならない座標ベクトルを任意の数、生成
-		template <int N, class V, class RDF>
-		auto GenVecN(RDF&& rdf, const typename V::value_t& th) {
-			return detail::MakeVec<N,V>(
+		template <class V, class RDF>
+		std::vector<V> GenVecN(RDF&& rdf, const int n, const typename V::value_t& th) {
+			return detail::MakeVec<V>(
+				n,
 				[&rdf](){ return GenVec<V>(rdf); },
 				[th=th*th](const auto& v0, const auto& v1){ return v0.dist_sq(v1) >= th; }
 			);
