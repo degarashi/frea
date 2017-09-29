@@ -33,12 +33,12 @@ namespace frea {
 			template <int M2, int N2>
 			using type_cn = wrapM_t<typename vec_t::template type_cn<N2>, M2>;
 		private:
-			template <class Vec, class WM, int N>
-			static void _MultipleLine(vec_t&, const Vec&, const WM&, lubee::IConst<N>, lubee::IConst<N>) noexcept {}
-			template <class Vec, class WM, int N, int Z>
-			static void _MultipleLine(vec_t& dst, const Vec& v, const WM& m, lubee::IConst<N>, lubee::IConst<Z>) noexcept {
+			template <class Dst, class Vec, class WM, int N>
+			static void _MultipleLine(Dst&, const Vec&, const WM&, lubee::IConst<N>, lubee::IConst<N>) noexcept {}
+			template <class Dst, class Vec, class WM, int N, int Z>
+			static void _MultipleLine(Dst& dst, const Vec& v, const WM& m, lubee::IConst<N>, lubee::IConst<Z>) noexcept {
 				const auto val = v.template pickAt<N>();
-				const vec_t tv(val);
+				const Dst tv(val);
 				dst += tv * m.v[N];
 				_MultipleLine(dst, v, m, lubee::IConst<N+1>(), lubee::IConst<Z>());
 			}
@@ -90,7 +90,8 @@ namespace frea {
 				static_assert(WM::dim_m == dim_n, "");
 				wrapM_t<VW2, dim_m> ret;
 				for(int i=0 ; i<dim_m ; i++) {
-					_MultipleLine(ret.v[i] = vec_t::Zero(), v[i], m, lubee::IConst<0>(), lubee::IConst<WM::dim_m>());
+					ret.v[i] = VW2::Zero();
+					_MultipleLine(ret.v[i], v[i], m, lubee::IConst<0>(), lubee::IConst<WM::dim_m>());
 				}
 				return ret;
 			}
