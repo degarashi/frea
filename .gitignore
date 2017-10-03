@@ -2,4 +2,5 @@
 *.cbp
 *.user*
 __pycache__
-freatypes.pyc
+*.pyc
+*.kdev4
