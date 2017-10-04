@@ -70,22 +70,25 @@ def MakeTag(align, integral, name, size0=0, size1=0):
 class Vector:
     def __init__(self, val, size=-1):
         self._ar = val["m"]
+        try:
+            self._ar = self._ar["m"]
+        except gdb.error:
+            pass
         self._size = size if size>=0 else int(val["size"])
-        self._index = GetElementIndex(self._size)
         try:
             self._align = bool(val["align"])
         except:
-            self._align = False
+            self._align = True
         self._integral = bool(val["is_integral"])
         self._makeEnt = self._makeIntEntry if self._integral else self._makeFloatEntry
-    def _makeIntEntry(self, key, val):
-        return "%s=%d" % (key, int(val))
-    def _makeFloatEntry(self, key, val):
-        return "%s=%.6f" % (key, float(val))
+    def _makeIntEntry(self, val):
+        return "%d" % (int(val))
+    def _makeFloatEntry(self, val):
+        return "%.5g" % (float(val))
     def _raw_string(self):
         a = []
         for i in range(self._size):
-            a.append(self._makeEnt(self._index[i], self._ar[i]))
+            a.append(self._makeEnt(self._ar[i]))
         return Embrace(", ".join(a))
     def _makeTag(self):
         return MakeTag(self._align, self._integral, "Vec", self._size)
@@ -146,16 +149,17 @@ class Matrix:
     def __init__(self, val, ar_name):
         self._ar = val[ar_name]
         self._width = val["dim_n"]
-        self._height = val["dim_n"]
+        self._height = val["dim_m"]
+        self._integral = bool(val["is_integral"])
         try:
             self._align = bool(val["align"])
-        except:
-            self._align = False
+        except gdb.error:
+            self._align = True
 
     def children(self):
         return self._iterator(self._ar, self._height)
     def to_string(self):
-        return MakeTag(self._align, False, "Mat", self._height, self._width)
+        return MakeTag(self._align, self._integral, "Mat", self._height, self._width)
     def display_hint(self):
         return "array"
 
