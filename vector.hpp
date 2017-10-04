@@ -735,7 +735,7 @@ namespace frea{
 		\tparam A		アラインメント(true=16byte)
 	*/
 	template <class T, int N, bool A>
-	struct alignas(A ? 16 : 0) Data : Data_spec<T,N> {
+	struct alignas(A ? 16 : alignof(T)) Data : Data_spec<T,N> {
 		constexpr static int size = N,
 							capacity = size,
 							bit_width = sizeof(T)*8;
