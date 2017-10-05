@@ -39,7 +39,7 @@ namespace frea {
 			USING(value_t);
 			using M33 = Mat_t<value_t, 3,3, true>;
 			using M44 = Mat_t<value_t, 4,4, true>;
-			const auto mR = M33::RotationAxis(ap.rotation.getAxis(), ap.rotation.angle()).template convertI<4,4,3>(1);
+			const auto mR = M33::RotationAxis(ap.rotation.getAxis(), ap.rotation.angle()).template convertI<4,4>(1);
 			const auto mS = M44::Scaling(ap.scale.template convertI<4,3>(1));
 			const auto mT = M44::Translation(ap.offset.template convertI<4,3>(1));
 			const auto m = mS * mR * mT;

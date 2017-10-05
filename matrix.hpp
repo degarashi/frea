@@ -208,25 +208,26 @@ namespace frea {
 					++dst;
 				}
 			}
-			// 小さいサイズへの変換
+			template <int N2>
+			constexpr static bool same_capacity = type_cn<dim_m, N2>::vec_t::capacity == vec_t::capacity;
+			// そのままポインタの読み変えが出来るケース
 			template <int ToM,
 					 int ToN,
-					 ENABLE_IF((ToM<=dim_m))>
+					 ENABLE_IF((ToM<=dim_m && ToN<=dim_n && same_capacity<ToN>))>
 			decltype(auto) convert() const noexcept {
 				return reinterpret_cast<const type_cn<ToM, ToN>&>(*this);
 			}
 			template <int ToM,
 					 int ToN,
-					 int Pos,
-					 ENABLE_IF((ToM<=dim_m))>
+					 ENABLE_IF((ToM<=dim_m && ToN<=dim_n && same_capacity<ToN>))>
 			decltype(auto) convertI(const value_t&) const noexcept {
-				return reinterpret_cast<const type_cn<ToM, ToN>&>(*this);
+				return convert<ToM, ToN>();
 			}
 			// 大きいサイズへの変換
 			// 隙間をゼロで埋める
 			template <int ToM,
 					 int ToN,
-					 ENABLE_IF((ToM>dim_m))>
+					 ENABLE_IF((ToM>dim_m || ToN>dim_n || !same_capacity<ToN>))>
 			auto convert() const noexcept {
 				using ret_t = type_cn<ToM, ToN>;
 				ret_t ret;
@@ -237,21 +238,15 @@ namespace frea {
 				return ret;
 			}
 			// 大きいサイズへの変換
-			// 隙間をゼロで埋め、指定位置のみ任意の値を書き込む
+			// 隙間をゼロで埋め、対角成分のみ任意の値を書き込む
 			template <int ToM,
 					 int ToN,
-					 int Pos,
-					 ENABLE_IF((ToM>dim_m))>
+					 ENABLE_IF((ToM>dim_m || ToN>dim_n || !same_capacity<ToN>))>
 			auto convertI(const value_t& v) const noexcept {
 				using ret_t = type_cn<ToM, ToN>;
-				ret_t ret;
+				auto ret = ret_t::Diagonal(v);
 				for(int i=0 ; i<dim_m ; i++)
-					ret.v[i] = this->v[i].template convertI<ToN, (Pos<dim_m ? Pos : 0)>(v);
-				for(int i=dim_m ; i<ToM ; i++)
-					ret.v[i] = ret_t::vec_t::Zero();
-				// 指定位置の要素に値をセット
-				if(Pos >= dim_m)
-					ret.v[Pos].template setAt<Pos>(v);
+					ret.v[i] = ret.v[i].template maskL<dim_n-1>() | this->v[i].template convert<ToN>();
 				return ret;
 			}
 			static spec_t Identity() noexcept {
@@ -776,9 +771,9 @@ namespace frea {
 		}
 		//! サイズ変換
 		//! 足りない要素はゼロで埋め、対角線上要素を任意の値で初期化
-		template <int M2, int N2, int Pos>
+		template <int M2, int N2>
 		auto convertI(const value_t& vi) const noexcept {
-			return AsI(*this).template convertI<M2,N2,Pos>(vi);
+			return AsI(*this).template convertI<M2,N2>(vi);
 		}
 		// -------- Luaへのエクスポート用 --------
 		MatT luaAddF(const float s) const noexcept {

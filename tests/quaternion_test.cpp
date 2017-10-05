@@ -117,7 +117,7 @@ namespace frea {
 				USING(mat4_t);
 				// 4x4行列のテスト
 				const array44_t ar1(q.asMat44()),
-								ar0(mat4_t(m.template convertI<4,4,3>(1)));
+								ar0(mat4_t(m.template convertI<4,4>(1)));
 				EXPECT_LT(AbsMax(ar0 - ar1), Th);
 			}
 			// Matrix -> Quaternion -> Matrix の順で変換して前と後で一致するか
