@@ -60,7 +60,7 @@ namespace frea {
 	struct TupleNear {
 		template <class P>
 		bool operator()(const P& t0, const P& t1) const {
-			return EqAbs(t0, t1, lubee::ConstantPow10<T,NPow>());
+			return EqAbs(t0, t1, lubee::ConstantPow<NPow>(T(10)));
 		}
 	};
 }
