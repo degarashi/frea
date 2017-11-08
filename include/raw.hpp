@@ -157,7 +157,7 @@ namespace frea {
 		}
 		static bool IsNaN(const reg_t& r) noexcept {
 			for(int i=0 ; i<capacity ; i++) {
-				if(r.m[i] != r.m[i])
+				if(std::isnan(r.m[i]))
 					return true;
 			}
 			return false;

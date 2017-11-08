@@ -128,15 +128,14 @@ namespace frea {
 			return _mm_andnot_ps(res, One());
 		}
 		static bool IsNaN(const reg_t& r0) noexcept {
-			const auto res = _NaNChk(r0);
-			return SumUp(res) != 0;
+			return std::isnan(SumUp(_NaNChk(r0)));
 		}
 		static bool IsOutstanding(const reg_t& r) noexcept {
 			auto r0 = And(r, AbsMask());
 			const auto r_inf = And(Set1(std::numeric_limits<value_t>::infinity()), AbsMask());
 			r0 = _mm_cmpeq_ps(r0, r_inf);
 			r0 = Or(r0, _NaNChk(r));
-			return SumUp(r0) != 0;
+			return std::isnan(SumUp(r0));
 		}
 		static value_t Reciprocal(const value_t& v) noexcept {
 			const reg_t r = Reciprocal(Set1(v));
@@ -443,8 +442,7 @@ namespace frea {
 			auto res = Or(_mm_cmple_pd(r0, r_zero),
 							_mm_cmpgt_pd(r0, r_zero));
 			res = _mm_andnot_pd(res, One());
-			const value_t f = SumUp(res);
-			return f != 0;
+			return std::isnan(SumUp(res));
 		}
 		static bool IsOutstanding(const reg_t& r) noexcept {
 			const auto f = std::numeric_limits<value_t>::infinity();
@@ -456,7 +454,7 @@ namespace frea {
 
 			r1 = _mm_andnot_pd(r1, One());
 			r0 = Or(r0, r1);
-			return SumUp(r0) != 0;
+			return std::isnan(SumUp(r0));
 		}
 		static value_t Reciprocal(const value_t& v) noexcept {
 			return 1.0 / v;
