@@ -99,13 +99,19 @@ namespace frea {
 			m(I::SetR(ts...))
 		{}
 		// アラインメモリからの読み込み
-		wrap(const value_t* src, std::true_type) noexcept:
-			m(I::Load(src))
-		{}
+		wrap(const value_t* src, std::true_type) noexcept {
+			alignas(16) value_t tmp[size];
+			for(int i=0 ; i<size ; i++)
+				tmp[i] = *src++;
+			m = I::Load(tmp);
+		}
 		// 非アラインメモリからの読み込み
-		wrap(const value_t* src, std::false_type) noexcept:
-			m(I::LoadU(src))
-		{}
+		wrap(const value_t* src, std::false_type) noexcept {
+			value_t tmp[size];
+			for(int i=0 ; i<size ; i++)
+				tmp[i] = *src++;
+			m = I::LoadU(tmp);
+		}
 		// 各種演算定義
 		#define DEF_OP(op, func) \
 			template <class T, ENABLE_IF(HasMethod_asInternal_t<T>{})> \
