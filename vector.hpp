@@ -723,9 +723,10 @@ namespace frea{
 				}; \
 			}; \
 			Data_spec() = default; \
-			template <class... Ts, ENABLE_IF((lubee::meta::And<std::is_convertible<Ts,T>...>{} && sizeof...(Ts)>1))> \
+			template <class... Ts, ENABLE_IF((lubee::meta::And<std::is_convertible<Ts,T>...>{} && sizeof...(Ts)>=1))> \
 			constexpr Data_spec(const Ts&... ts) noexcept: m{static_cast<T>(ts)...} {} \
 		};
+	DEF_DATA(1, x)
 	DEF_DATA(2, x,y)
 	DEF_DATA(3, x,y,z)
 	DEF_DATA(4, x,y,z,w)
