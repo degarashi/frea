@@ -908,6 +908,8 @@ namespace frea {
 			return _asInternal(std::is_same<base_t, wrap_t>());
 		}
 		VecT() = default;
+		template <class TA, ENABLE_IF(size==1 && (std::is_same<TA,value_t>{}))>
+		VecT(const TA& t): base_t(t) {}
 		constexpr VecT(const base_t& b) noexcept: base_t(b) {}
 		template <class V,
 				 ENABLE_IF(is_vector<V>{} && V::size==size)>
