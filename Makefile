@@ -18,7 +18,7 @@ define Options =
 	$(OPT_SSE)
 endef
 
-CMake = mkdir -p $(WORK_DIR); cd $(WORK_DIR); cmake $(PWD) $(Options);
+CMake = mkdir -p $(WORK_DIR); cd $(WORK_DIR); cmake $(PWD) $(Options); python3 $(PWD)/lubee/make_gdbinit.py $(PWD) $(LIB_NAME) $(WORK_DIR)/.gdbinit;
 Make = cd $(WORK_DIR); make -j$(JOBS);
 Clean = cd $(WORK_DIR); make clean; rm -f Makefile CMakeCache.txt;
 
