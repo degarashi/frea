@@ -6,8 +6,8 @@ import re
 import gdb
 
 def buildPrinter(obj):
-    obj.pretty_printers.append(lubee.printer.Lookup)
     obj.pretty_printers.append(Lookup)
+    lubee.printer.buildPrinter(obj)
 
 Re_Frea = re.compile("^frea::(.+)$")
 def Lookup(val):
