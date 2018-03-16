@@ -53,8 +53,6 @@ namespace frea {
 		//! 演算レジスタが格納できる要素数
 		constexpr static int capacity = I::capacity,
 							bit_width = sizeof(value_t)*8;
-		// C++17でコンパイルした際にデバッガからconstexpr bool変数の参照が上手くいかないので応急処置
-		const static bool _dummy_is_integral = is_integral;
 		//! 要素数の読み替え
 		template <int D2>
 		using type_cn = Wrap_t<reg_t, D2>;
@@ -381,8 +379,6 @@ namespace frea{
 		constexpr static bool is_integral = wrap_t::is_integral;
 		constexpr static int Mod = N % w_capacity,
 							Rem = (Mod==0) ? w_capacity : Mod;
-		// C++17でコンパイルした際にデバッガからconstexpr変数の参照が上手くいかないので応急処置
-		const static bool _dummy_is_integral = is_integral;
 		using wrapTail_t = typename wrap_t::template type_cn<Rem>;
 
 		auto getMaskedTail() const noexcept {
@@ -752,9 +748,6 @@ namespace frea{
 							bit_width = sizeof(T)*8;
 		constexpr static bool align = A,
 							is_integral = static_cast<bool>(std::is_integral<T>{});
-		// C++17でコンパイルした際にデバッガからconstexpr変数の参照が上手くいかないので応急処置
-		const static bool _dummy_align = align,
-							_dummy_is_integral = is_integral;
 		using base_t = Data_spec<T,N>;
 		using value_t = T;
 		using reg_t = Data;
@@ -897,8 +890,6 @@ namespace frea {
 
 		constexpr static int size = W::size;
 		constexpr static bool align = D::align;
-		// C++17でコンパイルした際にデバッガからconstexpr変数の参照が上手くいかないので応急処置
-		const static bool _dummy_align = align;
 		//! 要素数の読み替え
 		template <int N2, bool A2=align>
 		using type_cn = VecT_spec<Wrap_t<reg_t, N2>, typename base_t::template type_cn<N2,A2>, N2>;
