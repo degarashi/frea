@@ -79,8 +79,14 @@ class Vector:
             self._align = bool(val["align"])
         except:
             self._align = True
-        self._integral = bool(val["is_integral"])
-        self._makeEnt = self._makeIntEntry if self._integral else self._makeFloatEntry
+
+        code = self._ar[0].type.strip_typedefs().code
+        self._integral = code == gdb.TYPE_CODE_INT
+        if self._integral:
+            self._makeEnt = self._makeIntEntry
+        else:
+            self._makeEnt = self._makeFloatEntry
+
     def _makeIntEntry(self, val):
         return "%d" % (int(val))
     def _makeFloatEntry(self, val):
@@ -94,6 +100,8 @@ class Vector:
         return MakeTag(self._align, self._integral, "Vec", self._size)
     def to_string(self):
         return self._makeTag() + self._raw_string()
+    def isIntegral(self):
+        return self._integral
 
 class TupleVec:
     class _iterator(Iterator):
@@ -117,7 +125,6 @@ class TupleVec:
     def __init__(self, val):
         self._ar = val["data"]
         self._wcap = int(val["w_capacity"])
-        self._bInt = bool(val["is_integral"])
         self._size = int(val["size"])
         self._numChild = int(self._size / self._wcap)
         self._modChild = self._size % self._wcap
@@ -150,7 +157,7 @@ class Matrix:
         self._ar = val[ar_name]
         self._width = val["dim_n"]
         self._height = val["dim_m"]
-        self._integral = bool(val["is_integral"])
+        self._integral = Vector(self._ar[0]).isIntegral()
         try:
             self._align = bool(val["align"])
         except gdb.error:
