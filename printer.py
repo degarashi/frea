@@ -168,7 +168,8 @@ class Quat(Vector, object):
         super(Quat, self).__init__(val)
     def to_string(self):
         ar = self._ar
-        s_theta = math.sqrt(1.0 - float(ar[3])*float(ar[3]))
+        ar3 = float(ar[3])
+        s_theta = math.sqrt(1.0 - min(1.0, ar3*ar3))
         if s_theta < 1e-6:
             # 無回転クォータニオンとして扱う
             axis = [0,0,0]
