@@ -523,9 +523,9 @@ namespace frea {
 		using column_t = typename V::template type_cn<dim_m>;
 		using vec_min = typename vec_t::template type_cn<dim_min>;
 		using Chk_SizeM = std::enable_if_t<(dim_m>0)>*;
-		//! 要素数の読み替え
-		template <int M2, int N2>
-		using type_cn = Mat_t<value_t, M2, N2, vec_t::template type_cn<N2>::align>;
+		//! 要素数, アラインメントの読み替え
+		template <int M2, int N2, bool A=align>
+		using type_cn = Mat_t<value_t, M2, N2, A>;
 
 		MatT() = default;
 		constexpr MatT(const base_t& b) noexcept: base_t(b) {}

@@ -752,9 +752,9 @@ namespace frea{
 		using value_t = T;
 		using reg_t = Data;
 		using I = info<Data>;
-		//! 要素数の読み替え
+		//! 要素数, アラインメントの読み替え
 		template <int N2, bool A2=align>
-		using type_cn = Data<T,N2,A2>;
+		using type_cn = Data<value_t,N2,A2>;
 
 		// --- iterator interface ---
 		value_t* begin() noexcept { return this->m; }
