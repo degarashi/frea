@@ -18,19 +18,21 @@ namespace frea {
 	template <class R>
 	struct info;
 
-	// レジスタが要素数を内包できればそれを、そうでなければTupleに収める
-	template <class R,
-			 int N,
-			 ENABLE_IF((info<R>::capacity < N))>
-	auto DetectTup(const R&, lubee::IConst<N>) -> tup_spec<wrap_spec<R,info<R>::capacity>, N>;
-	template <class R,
-			 int N,
-			 ENABLE_IF((info<R>::capacity >= N))>
-	auto DetectTup(const R&, lubee::IConst<N>) -> wrap_spec<R,N>;
-	template <class T, int N, bool A, int N2>
-	auto DetectTup(const Data<T,N,A>&, lubee::IConst<N2>) -> wrap_spec<Data<T,N2,A>,N2>;
+	namespace detail {
+		// レジスタが要素数を内包できればそれを、そうでなければTupleに収める
+		template <class R,
+				 int N,
+				 ENABLE_IF((info<R>::capacity < N))>
+		auto DetectTup(const R&, lubee::IConst<N>) -> tup_spec<wrap_spec<R,info<R>::capacity>, N>;
+		template <class R,
+				 int N,
+				 ENABLE_IF((info<R>::capacity >= N))>
+		auto DetectTup(const R&, lubee::IConst<N>) -> wrap_spec<R,N>;
+		template <class T, int N, bool A, int N2>
+		auto DetectTup(const Data<T,N,A>&, lubee::IConst<N2>) -> wrap_spec<Data<T,N2,A>,N2>;
+	}
 	template <class R, int N>
-	using Wrap_t = decltype(DetectTup(std::declval<R>(), lubee::IConst<N>()));
+	using Wrap_t = decltype(detail::DetectTup(std::declval<R>(), lubee::IConst<N>()));
 
 	//! 演算レジスタラッパー
 	/*!
