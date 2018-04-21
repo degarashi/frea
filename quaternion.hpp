@@ -22,7 +22,7 @@ namespace frea {
 		using exp_t = ExpQuatT<value_t, A>;
 
 		constexpr static T ZeroLen_Th = lubee::ThresholdF<value_t>(0.2),
-							Theta_Th = lubee::ThresholdF<value_t>(0.8);
+							Theta_Th = lubee::ThresholdF<value_t>(0.56);
 		QuatT() = default;
 		operator const base_t&() = delete;
 		// 違う要素Quatからの変換
