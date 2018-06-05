@@ -12,10 +12,11 @@ namespace frea {
 		wrap_spec() = default;
 		wrap_spec(const base_t& b): base_t(b) {}
 
-		auto asD2() const noexcept {
-			struct D2 {
-				value_t x,y;
-			} ret;
+		struct D2 {
+			value_t x,y;
+		};
+		D2 asD2() const noexcept {
+			D2 ret;
 			this->template store<false>(reinterpret_cast<value_t*>(&ret), lubee::IConst<1>());
 			return ret;
 		}

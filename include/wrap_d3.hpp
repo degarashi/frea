@@ -26,7 +26,9 @@ namespace frea {
 		using base_t::operator *;
 		template <class Q,
 				 ENABLE_IF(is_quaternion<Q>{})>
-		auto operator * (const Q& q) const noexcept {
+		auto operator * (const Q& q) const noexcept ->
+			std::decay_t<decltype(std::declval<QuatT<typename Q::value_t, true>>().getVector())>
+		{
 			QuatT<typename Q::value_t, true> q0;
 			this->template store<true>((typename Q::value_t*)&q0, lubee::IConst<2>());
 			q0.w = 0;
@@ -53,7 +55,9 @@ namespace frea {
 		using base_t::operator *;
 		template <class Q,
 				 ENABLE_IF(is_quaternion<Q>{})>
-		auto operator * (const Q& q) const noexcept {
+		auto operator * (const Q& q) const noexcept ->
+			std::decay_t<decltype(std::declval<QuatT<typename Q::value_t, true>>().getVector())>
+		{
 			QuatT<typename Q::value_t, true> q0;
 			this->template store<true>(reinterpret_cast<typename Q::value_t*>(&q0), lubee::IConst<2>());
 			q0.w = 0;
