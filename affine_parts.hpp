@@ -20,7 +20,7 @@ namespace frea {
 		}
 		//! アフィン成分分解
 		template <class M, ENABLE_IF((is_matrix<M>{} || is_wrapM<M>{}) && (M::dim_m==4 && M::dim_n>=3))>
-		static auto Decomp(const M& m) noexcept {
+		static AffineParts<T> Decomp(const M& m) noexcept {
 			AffineParts<T> ap;
 			Mat_t<T, 3, 3, true> tm;
 			// オフセットは4行目をそのまま抽出
