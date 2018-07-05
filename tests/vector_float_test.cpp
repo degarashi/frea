@@ -1,4 +1,5 @@
 #include "test.hpp"
+#include "../interpolation.hpp"
 
 namespace frea {
 	namespace test {
@@ -164,13 +165,25 @@ namespace frea {
 			const array_t a0(v0),
 						a1(v1);
 			const value_t t = this->mt().template getUniform<value_t>({0,1});
+			// v2 = Vec::l_intp()にて計算
+			// v3 = Vec::Internal::l_intp()にて計算
 			const vec_t v2 = v0.l_intp(v1, t),
 						v3 = v0.asInternal().l_intp(v1, t);
+			// a2 = Arrayにて計算
 			const array_t a2 = a0 + (a1 - a0) * t;
+			// l2 = Lerp(Iterator)にて計算
+			array_t l2;
+			Lerp(l2.m, reinterpret_cast<const value_t*>(v0.m),
+					reinterpret_cast<const value_t*>(v0.m + vec_t::size),
+					reinterpret_cast<const value_t*>(v1.m), t);
 
 			constexpr auto Th = lubee::ThresholdF<value_t>(0.7);
+			// v2とv3の計算結果は同じ
 			ASSERT_LT(AbsMax(vec_t(v3 - v2)), Th);
+			// v2とa2も同じ
 			ASSERT_LT(AbsMax(a2 - v2), Th);
+			// l2とv2も同じ
+			ASSERT_LT(AbsMax(l2 - v2), Th);
 		}
 		TYPED_TEST(FloatVector, MulDiv) {
 			USING(value_t);
