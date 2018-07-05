@@ -187,8 +187,14 @@ namespace frea {
 		}
 		TYPED_TEST(FloatVector, MulDiv) {
 			USING(value_t);
+			USING(vec_t);
 			constexpr auto threshold = lubee::ThresholdF<value_t>(0.7);
-			const auto v0 = this->makeRVec(DefaultRange<value_t>);
+			auto v0 = this->makeRVec(DefaultRange<value_t>);
+			for(std::size_t i=0 ; i<vec_t::size ; i++) {
+				// ゼロは除外
+				if(v0[i] == 0)
+					v0[i] = 1;
+			}
 			const int n = this->mt().template getUniform<int>({1,8});
 			auto mul = v0 * n;
 			auto sum = v0;
