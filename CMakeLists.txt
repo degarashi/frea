@@ -2,9 +2,10 @@ cmake_minimum_required(VERSION 2.8)
 project(frea)
 include(aux.cmake)
 
-set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -O0 -ggdb3 -DDEBUG")
-set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_C_FLAGS_DEBUG} -O3")
-set(CMAKE_CXX_FLAGS "${CMAKE_C_FLAGS} -std=c++17 -Wall -Wextra -ftemplate-depth=1024")
+include(lubee/cxx_options.cmake)
+string(CONCAT CMAKE_CXX_FLAGS " -Wno-gnu-anonymous-struct")
+string(CONCAT CMAKE_CXX_FLAGS " -Wno-nested-anon-types")
+
 add_definitions(-DSSE=${SSE})
 include_directories(
 	.
