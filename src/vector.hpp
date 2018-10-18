@@ -1,15 +1,15 @@
 #pragma once
-#include "lubee/error.hpp"
-#include "lubee/meta/enable_if.hpp"
+#include "lubee/src/error.hpp"
+#include "lubee/src/meta/enable_if.hpp"
 #include "detect_type.hpp"
-#include "lubee/meta/index_sequence.hpp"
+#include "lubee/src/meta/index_sequence.hpp"
 #include <type_traits>
 #include <algorithm>
-#include "lubee/meta/check_macro.hpp"
-#include "lubee/meta/boolean.hpp"
-#include "lubee/meta/compare.hpp"
-#include "lubee/operators.hpp"
-#include "lubee/tostring.hpp"
+#include "lubee/src/meta/check_macro.hpp"
+#include "lubee/src/meta/boolean.hpp"
+#include "lubee/src/meta/compare.hpp"
+#include "lubee/src/operators.hpp"
+#include "lubee/src/tostring.hpp"
 
 DEF_HASMETHOD(asInternal)
 

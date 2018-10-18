@@ -1,8 +1,8 @@
 #pragma once
 #include "vector.hpp"
 #include "angle.hpp"
-#include "lubee/meta/compare.hpp"
-#include "lubee/ieee754.hpp"
+#include "lubee/src/meta/compare.hpp"
+#include "lubee/src/ieee754.hpp"
 #include "exception.hpp"
 
 namespace frea {

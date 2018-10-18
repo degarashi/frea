@@ -1,9 +1,9 @@
 #pragma once
 #include "constant.hpp"
-#include "lubee/meta/enable_if.hpp"
-#include "lubee/meta/check_macro.hpp"
-#include "lubee/range.hpp"
-#include "lubee/tostring.hpp"
+#include "lubee/src/meta/enable_if.hpp"
+#include "lubee/src/meta/check_macro.hpp"
+#include "lubee/src/range.hpp"
+#include "lubee/src/tostring.hpp"
 #include <cmath>
 
 namespace frea {

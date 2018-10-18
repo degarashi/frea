@@ -1,10 +1,10 @@
 #pragma once
 #include "matrix.hpp"
-#include "lubee/error.hpp"
+#include "lubee/src/error.hpp"
 #include "compare.hpp"
-#include "lubee/ieee754.hpp"
+#include "lubee/src/ieee754.hpp"
 #include "exception.hpp"
-#include "lubee/compare.hpp"
+#include "lubee/src/compare.hpp"
 #include "fwd.hpp"
 
 namespace frea {

@@ -1,6 +1,6 @@
 #include "test.hpp"
 #include "../ulps.hpp"
-#include "lubee/compiler_macro.hpp"
+#include "lubee/src/compiler_macro.hpp"
 
 namespace frea {
 	namespace test {

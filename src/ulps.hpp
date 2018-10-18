@@ -1,11 +1,11 @@
 #pragma once
 #include <algorithm>
-#include "lubee/error.hpp"
-#include "lubee/meta/enable_if.hpp"
-#include "lubee/meta/check_macro.hpp"
-#include "lubee/meta/mask.hpp"
+#include "lubee/src/error.hpp"
+#include "lubee/src/meta/enable_if.hpp"
+#include "lubee/src/meta/check_macro.hpp"
+#include "lubee/src/meta/mask.hpp"
 #include "compare.hpp"
-#include "lubee/ieee754.hpp"
+#include "lubee/src/ieee754.hpp"
 
 namespace frea {
 	namespace ulps {

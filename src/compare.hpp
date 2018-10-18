@@ -1,6 +1,6 @@
 #pragma once
-#include "lubee/meta/enable_if.hpp"
-#include "lubee/meta/constant.hpp"
+#include "lubee/src/meta/enable_if.hpp"
+#include "lubee/src/meta/constant.hpp"
 #include <limits>
 #include <cmath>
 
