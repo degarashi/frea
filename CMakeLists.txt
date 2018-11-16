@@ -2,6 +2,7 @@ cmake_minimum_required(VERSION 2.8)
 project(frea)
 include(aux.cmake)
 
+set(CXX_VERSION 17)
 include(lubee/cxx_options.cmake)
 string(CONCAT CMAKE_CXX_FLAGS " -Wno-gnu-anonymous-struct")
 string(CONCAT CMAKE_CXX_FLAGS " -Wno-nested-anon-types")
