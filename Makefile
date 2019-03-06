@@ -1,7 +1,7 @@
 LIB_NAME			:= frea
-COMMON_MAKE_PATH	:= lubee
 MAKE_GDBINIT		:= YES
 SSE					?= 2
+MAKE_COMPILECOMMANDS_LINK	:= YES
 
 OPT_SSE					= -DSSE=$(SSE)
 
