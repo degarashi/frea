@@ -1,9 +1,11 @@
 cmake_minimum_required(VERSION 2.8)
 project(frea)
-include(aux.cmake)
 
+set(COMMON_COMPILE lubee/common_compile)
 set(CXX_VERSION 17)
-include(lubee/cxx_options.cmake)
+include(${COMMON_COMPILE}/cxx_options.cmake)
+include(${COMMON_COMPILE}/compile_commands.cmake)
+include(${COMMON_COMPILE}/aux.cmake)
 string(CONCAT CMAKE_CXX_FLAGS " -Wno-gnu-anonymous-struct")
 string(CONCAT CMAKE_CXX_FLAGS " -Wno-nested-anon-types")
 
@@ -14,13 +16,12 @@ include_directories(
 
 if(NOT without-test)
 	enable_testing()
-	find_package(Threads REQUIRED)
-	find_package(GTest REQUIRED)
-	include_directories(${GTEST_INCLUDE_DIRS})
 	# testsディレクトリ以下のソースが対象
 	aux_source_directory(src/tests TEST_SRC)
+	LoadGTestLibs(LIBS)
 	# matrix, vector関連の物は個別にexeを作成
-	MakeSeparationTest("matrix;vector" TEST_SRC)
+	MakeSeparationTest(${PROJECT_NAME} "matrix;vector" TEST_SRC "${LIBS}")
 	# 他はotherとしてまとめる
-	AddTest(other "${TEST_SRC}")
+	AddTest(${PROJECT_NAME} other "${TEST_SRC}" "${LIBS}")
+	DefineCompDB(TEST_SRC)
 endif()

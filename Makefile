@@ -1,9 +1,8 @@
 LIB_NAME			:= frea
 MAKE_GDBINIT		:= YES
 SSE					?= 2
-MAKE_COMPILECOMMANDS_LINK	:= YES
 
 OPT_SSE					= -DSSE=$(SSE)
 
 ADDITIONAL_CMAKE_OPTION	:= $(OPT_SSE)
-include lubee/common.make
+include lubee/common_compile/common.make
