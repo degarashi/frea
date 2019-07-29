@@ -6,7 +6,7 @@ namespace frea {
 		template <class T>
 		using VectorD_4 = RVector<T>;
 		using TypesD_4 = ToTestTypes_t<types::VectorRangeD_t<types::Float_t, 4>>;
-		TYPED_TEST_CASE(VectorD_4, TypesD_4);
+		TYPED_TEST_SUITE(VectorD_4, TypesD_4);
 
 		namespace {
 			template <class V, class RD, class T>

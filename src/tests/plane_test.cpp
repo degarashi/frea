@@ -78,7 +78,7 @@ namespace frea {
 		template <class T>
 		constexpr lubee::Range<typename Plane<T>::value_t> Plane<T>::DefaultRange;
 
-		TYPED_TEST_CASE(Plane, types::PTypes);
+		TYPED_TEST_SUITE(Plane, types::PTypes);
 
 		TYPED_TEST(Plane, Compare) {
 			const auto p0 = this->makePlane();

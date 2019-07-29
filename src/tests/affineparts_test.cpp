@@ -30,7 +30,7 @@ namespace frea {
 			}
 		};
 		using Types = ToTestTypes_t<types::Float_t>;
-		TYPED_TEST_CASE(AffineParts, Types);
+		TYPED_TEST_SUITE(AffineParts, Types);
 
 		TYPED_TEST(AffineParts, Test) {
 			// 行列をDecompAffineした結果を再度合成して同じかどうかチェック

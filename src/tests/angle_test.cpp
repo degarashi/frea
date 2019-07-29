@@ -32,7 +32,7 @@ namespace frea {
 				}
 		};
 		using Types = ToTestTypes_t<types::Float_t>;
-		TYPED_TEST_CASE(Angle, Types);
+		TYPED_TEST_SUITE(Angle, Types);
 
 		// ループ毎にsingleした値と独自にwhileで求めた値を比べる
 		TYPED_TEST(Angle, Single) {

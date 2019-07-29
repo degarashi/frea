@@ -13,7 +13,7 @@ namespace frea {
 			>
 		>;
 		using SqTypes = ToTestTypes_t<SqTypes_t>;
-		TYPED_TEST_CASE(SMatrix, SqTypes);
+		TYPED_TEST_SUITE(SMatrix, SqTypes);
 		TYPED_TEST(SMatrix, Transpose) {
 			USING(value_t);
 			USING(array_t);

@@ -9,7 +9,7 @@ namespace frea {
 			using value_t = T;
 		};
 		using Types = ToTestTypes_t<types::Float_t>;
-		TYPED_TEST_CASE(YawPitchDist, Types);
+		TYPED_TEST_SUITE(YawPitchDist, Types);
 
 		TYPED_TEST(YawPitchDist, FromPos_Random) {
 			USING(value_t);

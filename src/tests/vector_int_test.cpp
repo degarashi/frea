@@ -6,7 +6,7 @@ namespace frea {
 		template <class T>
 		using IntVector = RVector<T>;
 		using ITypes = ToTestTypes_t<types::VectorRange_t<types::Int_t>>;
-		TYPED_TEST_CASE(IntVector, ITypes);
+		TYPED_TEST_SUITE(IntVector, ITypes);
 
 		// 整数の積算、除算に関するチェック
 		TYPED_TEST(IntVector, MulDiv) {

@@ -5,7 +5,7 @@ namespace frea {
 		template <class T>
 		using MatrixD_3 = RMatrix<T>;
 		using TypesD_3 = ToTestTypes_t<types::SMatrixRange_t<types::Float_t, 3,4>>;
-		TYPED_TEST_CASE(MatrixD_3, TypesD_3);
+		TYPED_TEST_SUITE(MatrixD_3, TypesD_3);
 
 		TYPED_TEST(MatrixD_3, Rotation) {
 			USING(mat_t);

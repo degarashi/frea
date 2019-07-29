@@ -50,7 +50,7 @@ namespace frea {
 		template <class T>
 		constexpr lubee::Range<typename Quaternion<T>::value_t> Quaternion<T>::DefaultRange;
 
-		TYPED_TEST_CASE(Quaternion, types::QTypes);
+		TYPED_TEST_SUITE(Quaternion, types::QTypes);
 
 		TYPED_TEST(Quaternion, Identity) {
 			USING(quat_t);

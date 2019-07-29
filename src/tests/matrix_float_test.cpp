@@ -6,7 +6,7 @@ namespace frea {
 		using FMatrix = RMatrix<T>;
 		using Types_t = types::MatrixRange_t<types::Float_t, 3,5, 3,5>;
 		using Types = ToTestTypes_t<Types_t>;
-		TYPED_TEST_CASE(FMatrix, Types);
+		TYPED_TEST_SUITE(FMatrix, Types);
 
 		TYPED_TEST(FMatrix, LinearNormalize) {
 			USING(value_t);

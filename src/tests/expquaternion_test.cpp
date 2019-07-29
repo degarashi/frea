@@ -34,7 +34,7 @@ namespace frea {
 					return ret;
 				}
 		};
-		TYPED_TEST_CASE(ExpQuaternion, types::QTypes);
+		TYPED_TEST_SUITE(ExpQuaternion, types::QTypes);
 
 		TYPED_TEST(ExpQuaternion, QuaternionConvert) {
 			USING(eq_t);

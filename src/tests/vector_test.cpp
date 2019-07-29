@@ -8,7 +8,7 @@ namespace frea {
 		template <class T>
 		using Vector = RVector<T>;
 		using Types = ToTestTypes_t<types::VectorRange_t<types::Value_t>>;
-		TYPED_TEST_CASE(Vector, Types);
+		TYPED_TEST_SUITE(Vector, Types);
 
 		namespace {
 			template <class T>

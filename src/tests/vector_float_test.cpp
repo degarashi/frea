@@ -7,7 +7,7 @@ namespace frea {
 		template <class T>
 		using FloatVector = RVector<T>;
 		using FTypes = ToTestTypes_t<types::VectorRange_t<types::Float_t>>;
-		TYPED_TEST_CASE(FloatVector, FTypes);
+		TYPED_TEST_SUITE(FloatVector, FTypes);
 
 		namespace {
 			template <class T>

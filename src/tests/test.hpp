@@ -370,6 +370,6 @@ namespace frea {
 		using Matrix = RMatrix<T>;
 		using MTypes_t = types::MatrixRange_t<types::Value_t, 3,5, 3,5>;
 		using MTypes = ToTestTypes_t<MTypes_t>;
-		TYPED_TEST_CASE(Matrix, MTypes);
+		TYPED_TEST_SUITE(Matrix, MTypes);
 	}
 }

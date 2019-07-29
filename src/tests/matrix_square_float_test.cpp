@@ -6,7 +6,7 @@ namespace frea {
 		using FSMatrix = RMatrix<T>;
 		using FSTypes_t = types::SMatrixRange_t<types::Float_t, 2,5>;
 		using FSTypes = ToTestTypes_t<FSTypes_t>;
-		TYPED_TEST_CASE(FSMatrix, FSTypes);
+		TYPED_TEST_SUITE(FSMatrix, FSTypes);
 		namespace {
 			template <class M>
 			bool IsNormalMatrix(const M& m, const typename M::value_t& th) {

@@ -7,7 +7,7 @@ namespace frea {
 		template <class T>
 		struct ULPs : Random {};
 		using UTypes = ToTestTypes_t<types::Float_t>;
-		TYPED_TEST_CASE(ULPs, UTypes);
+		TYPED_TEST_SUITE(ULPs, UTypes);
 
 		TYPED_TEST(ULPs, Value) {
 			using value_t = TypeParam;
